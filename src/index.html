@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=252, height=252, initial-scale=1.0">
+  <title>Sweetie</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght@8..144,100..1000&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles/variables.css">
+  <link rel="stylesheet" href="styles/main.css">
+</head>
+<body>
+  <!-- Debug panel for glucose and trend testing -->
+  <div class="debug-panel">
+    <button class="debug-toggle" aria-label="Toggle debug controls">
+      <span class="toggle-icon">⚙</span>
+    </button>
+    <div class="debug-controls">
+      <input type="range" id="glucose-slider" min="2" max="15" step="0.1" value="6.5">
+      <span class="glucose-value">6,5</span>
+      <button class="trend-arrow-btn" aria-label="Change trend direction">
+        <svg width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M0 6.5L1.14562 7.64562L5.6875 3.11187L5.6875 13L7.3125 13L7.3125 3.11187L11.8462 7.65375L13 6.5L6.5 0L0 6.5Z" fill="#6DC027"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="watch-container">
+    <div class="watch-display">
+      <!-- Page 1: Glucose (Home) -->
+      <div class="screen active" data-screen="home">
+        <!-- Circular navigation path (222x222 centered at 126,126) -->
+        <svg class="nav-circle" viewBox="0 0 252 252" width="252" height="252">
+          <defs>
+            <!--
+              All elements on same circle: center (126,126), radius 111
+              Top arc: from ~150° to ~30° (10 o'clock to 2 o'clock), clockwise
+              Bottom arc: from ~210° to ~330° (8 o'clock to 4 o'clock), counter-clockwise
+            -->
+            <path id="circlePathTop" d="M 29.9,70.5 A 111,111 0 0,1 222.1,70.5" fill="none"/>
+            <path id="circlePathBottom" d="M 29.9,181.5 A 111,111 0 0,0 222.1,181.5" fill="none"/>
+          </defs>
+
+          <!-- Time on top arc (centered at 12 o'clock) -->
+          <text class="nav-time" dy="12">
+            <textPath href="#circlePathTop" startOffset="50%" text-anchor="middle">09:30</textPath>
+          </text>
+
+          <!-- Page dots on right side of circle (at -5°, 0°, +5° on the 111px radius) -->
+          <circle class="nav-dot active" cx="236.6" cy="116.3" r="3"/>
+          <circle class="nav-dot" cx="237" cy="126" r="3"/>
+          <circle class="nav-dot" cx="236.6" cy="135.7" r="3"/>
+
+          <!-- Glucose value on bottom arc (centered at 6 o'clock) -->
+          <text class="nav-glucose">
+            <textPath href="#circlePathBottom" startOffset="50%" text-anchor="middle">6,5</textPath>
+          </text>
+
+          <!-- Trend arrow icon (positioned on circle, next to glucose value) -->
+          <g class="nav-arrow" transform="translate(140, 217)">
+            <path d="M0 6.5L1.14562 7.64562L5.6875 3.11187L5.6875 13L7.3125 13L7.3125 3.11187L11.8462 7.65375L13 6.5L6.5 0L0 6.5Z" fill="#6DC027" stroke="#6DC027" stroke-width="0.5" stroke-linejoin="round"/>
+          </g>
+        </svg>
+
+        <button class="add-context-btn" aria-label="Add context">
+          <svg class="plus-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M11 13H6C5.71667 13 5.475 12.9083 5.275 12.725C5.09167 12.525 5 12.2833 5 12C5 11.7167 5.09167 11.4833 5.275 11.3C5.475 11.1 5.71667 11 6 11H11V6C11 5.71667 11.0917 5.48333 11.275 5.3C11.475 5.1 11.7167 5 12 5C12.2833 5 12.5167 5.1 12.7 5.3C12.9 5.48333 13 5.71667 13 6V11H18C18.2833 11 18.5167 11.1 18.7 11.3C18.9 11.4833 19 11.7167 19 12C19 12.2833 18.9 12.525 18.7 12.725C18.5167 12.9083 18.2833 13 18 13H13V18C13 18.2833 12.9 18.525 12.7 18.725C12.5167 18.9083 12.2833 19 12 19C11.7167 19 11.475 18.9083 11.275 18.725C11.0917 18.525 11 18.2833 11 18V13Z" fill="white"/>
+          </svg>
+        </button>
+
+        <!-- Context menu for adding context (meal, insulin, activity, med) -->
+        <div class="context-menu">
+          <button class="context-btn" data-action="meal">Obrok</button>
+          <button class="context-btn" data-action="insulin">Inzulin</button>
+          <button class="context-btn" data-action="activity">Aktivnost</button>
+          <button class="context-btn" data-action="med">Med</button>
+        </div>
+
+        <!-- Glucose blob will be injected by JavaScript -->
+
+        <!-- Glucose graph (shown when blob is clicked) -->
+        <div class="glucose-graph hidden">
+          <svg class="graph-svg" viewBox="0 0 252 252" width="252" height="252">
+            <defs>
+              <clipPath id="segment-clip">
+                <rect class="segment-clip-rect" x="182" y="96" width="27" height="60"/>
+              </clipPath>
+            </defs>
+
+            <!-- Upper boundary line (glucose = 10) -->
+            <line class="graph-boundary" x1="46" y1="96" x2="222" y2="96"/>
+            <!-- Lower boundary line (glucose = 4) -->
+            <line class="graph-boundary" x1="46" y1="156" x2="222" y2="156"/>
+
+            <!-- Vertical dashed line at "now" - avoids time/glucose when in their area -->
+            <line class="graph-now-line" x1="206" y1="0" x2="206" y2="252" stroke-dasharray="4,4"/>
+
+            <!-- Time label background (covers dashed line where text goes) -->
+            <rect class="graph-time-bg" x="191" y="161" width="30" height="18"/>
+
+            <!-- Base graph line (always white) -->
+            <path class="graph-line-base" d="M0,72 C40,72 55,72 75,85 C95,98 110,140 125,165 C140,185 155,185 165,178 C175,171 182,162 185,156 C192,144 200,130 206,126" fill="none"/>
+
+            <!-- Highlight overlay (clipped to current segment + zone) -->
+            <path class="graph-line-highlight" d="M0,72 C40,72 55,72 75,85 C95,98 110,140 125,165 C140,185 155,185 165,178 C175,171 182,162 185,156 C192,144 200,130 206,126" fill="none" clip-path="url(#segment-clip)"/>
+
+            <!-- Invisible wider hitbox for slider interaction -->
+            <line class="graph-slider-hitbox" x1="206" y1="0" x2="206" y2="252" stroke="transparent" stroke-width="20"/>
+
+            <!-- Current position dot -->
+            <circle class="graph-now-dot" cx="206" cy="126" r="3.5"/>
+
+            <!-- Time label (on top of everything) -->
+            <text class="graph-now-text" x="206" y="172">
+              <tspan class="graph-time-line1" x="206" dy="0">now</tspan>
+              <tspan class="graph-time-line2" x="206" dy="12"></tspan>
+            </text>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Insulin Input Screen -->
+      <div class="screen" data-screen="insulin-input">
+        <div class="insulin-input-content">
+          <!-- Insulin type tabs -->
+          <div class="insulin-tabs">
+            <button class="insulin-tab active" data-type="brzi">Brzi</button>
+            <button class="insulin-tab" data-type="dnevni">Dnevni</button>
+          </div>
+
+          <!-- Number picker -->
+          <div class="number-picker">
+            <div class="picker-items">
+              <!-- Numbers will be generated by JS -->
+            </div>
+            <div class="picker-highlight"></div>
+          </div>
+
+          <!-- Confirm button -->
+          <button class="confirm-btn" aria-label="Potvrdi">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="currentColor"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Honey (Med) Input Screen -->
+      <div class="screen" data-screen="med-input">
+        <div class="med-input-content">
+          <!-- Title -->
+          <div class="med-title">Med</div>
+
+          <!-- Number picker -->
+          <div class="number-picker med-picker">
+            <div class="picker-items">
+              <!-- Numbers will be generated by JS -->
+            </div>
+            <div class="picker-highlight"></div>
+          </div>
+
+          <!-- Confirm button -->
+          <button class="confirm-btn" aria-label="Potvrdi">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="currentColor"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Insulin Confirmation Screen -->
+      <div class="screen" data-screen="insulin-confirm">
+        <svg class="nav-circle" viewBox="0 0 252 252" width="252" height="252">
+          <defs>
+            <path id="confirmArcTop" d="M 29.9,70.5 A 111,111 0 0,1 222.1,70.5" fill="none"/>
+            <path id="confirmArcBottom" d="M 29.9,181.5 A 111,111 0 0,0 222.1,181.5" fill="none"/>
+          </defs>
+
+          <text class="nav-time" dy="12">
+            <textPath href="#confirmArcTop" startOffset="50%" text-anchor="middle">09:30</textPath>
+          </text>
+
+          <text class="confirm-text">
+            <textPath href="#confirmArcBottom" startOffset="50%" text-anchor="middle">
+              <tspan class="confirm-amount">5 jedinica</tspan> <tspan class="confirm-type">dnevnog</tspan>
+            </textPath>
+          </text>
+        </svg>
+
+        <div class="confirm-blob">
+          <svg width="80" height="80" viewBox="0 0 24 24" fill="none">
+            <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z" fill="var(--color-background)"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Page 2: AI Assistant -->
+      <div class="screen" data-screen="assistant">
+        <div class="time">09:30</div>
+        <div class="assistant-content">
+          <p>AI Assistant</p>
+          <p class="faded">Coming soon</p>
+        </div>
+      </div>
+
+      <!-- Page 3: Insulin & Sensor Tracking -->
+      <div class="screen" data-screen="tracking">
+        <div class="time">09:30</div>
+        <div class="tracking-content">
+          <p>Tracking</p>
+          <p class="faded">Coming soon</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/utils/spring.js"></script>
+  <script src="js/components/blob.js"></script>
+  <script src="js/components/graph-slider.js"></script>
+  <script src="js/components/context-menu.js"></script>
+  <script src="js/components/insulin-input.js"></script>
+  <script src="js/components/med-input.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

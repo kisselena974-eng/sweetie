@@ -1,0 +1,35 @@
+:root {
+  /* Colors - Status */
+  --color-accent-panic: #ce4544;    /* Glucose critical/low */
+  --color-accent-good: #6dc027;     /* Glucose normal/good */
+  --color-accent-warning: #d9c508;  /* Glucose warning */
+
+  /* Colors - Base */
+  --color-background: #000000;      /* Main background */
+  --color-text-color: #ffffff;      /* Primary text */
+  --color-faded-text: #cccccc;      /* Secondary text */
+  --color-faded-bc: #2c2c2c;        /* Faded background/cards */
+
+  /* Colors - Components */
+  --button-bg: #2c2c2c;             /* Button default */
+  --button-bg-pressed: #000000;     /* Button pressed state */
+  --graph-color: #ffffff;           /* Graph line */
+  --badge-bg: #2c2c2c;              /* Badge background */
+  --bagde-text-color: #8d8d8d;      /* Badge text */
+
+  /* Typography */
+  --text-font-size-xl: 30px;        /* Large glucose reading */
+  --text-font-size-l: 18px;         /* Time and sugar display */
+  --text-font-size-m: 16px;         /* Body text */
+  --text-font-size-s: 13px;         /* Small text */
+  --text-font-size-xs: 11px;        /* Fuzzy time and keys */
+  --time-and-sugar: 18px;
+  --fuzzy-time-and-keys: 11px;
+
+  /* Spacing */
+  --spacing-padding-s: 6px;
+  --spacing-padding-m: 8px;
+  --spacing-padding-l: 12px;
+  --button-sides-spacing: 8px;
+  --button-updown-spacing: 12px;
+}

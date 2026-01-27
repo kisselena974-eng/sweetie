@@ -1,0 +1,863 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--browser-bg);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: 'Roboto Flex', sans-serif;
+}
+
+/* Watch container - centers the display */
+.watch-container {
+  width: var(--display-size);
+  height: var(--display-size);
+}
+
+/* Circular display */
+.watch-display {
+  width: var(--display-size);
+  height: var(--display-size);
+  background: var(--color-background);
+  border-radius: 50%;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Screen base styles */
+.screen {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: var(--color-text-color);
+  background: var(--color-background);
+  /* Isolation for proper blend mode compositing */
+  isolation: isolate;
+
+  /* Page transition animations */
+  opacity: 0;
+  transform: translateY(100%);
+  pointer-events: none;
+  transition:
+    opacity var(--duration-long) var(--motion-effects),
+    transform var(--duration-long) var(--motion-spatial);
+}
+
+.screen.active {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.screen.exit-up {
+  opacity: 0;
+  transform: translateY(-30%);
+}
+
+.screen.exit-down {
+  opacity: 0;
+  transform: translateY(30%);
+}
+
+.screen.enter-from-top {
+  transform: translateY(-100%);
+}
+
+.screen.enter-from-bottom {
+  transform: translateY(100%);
+}
+
+/* ===========================================
+   CIRCULAR NAVIGATION (SVG text on path)
+   222x222 circle centered in 252x252 display
+   =========================================== */
+
+.nav-circle {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 10;
+  /* Knockout effect - text color changes when blob passes over */
+  mix-blend-mode: difference;
+}
+
+/* Time on top arc */
+.nav-time {
+  font-family: 'Roboto Flex', sans-serif;
+  font-size: var(--text-font-size-l);
+  font-weight: 600;
+  fill: #CCCCCC;
+  letter-spacing: 0.74px;
+}
+
+/* Page indicator dots on right arc - see below for full styling */
+
+/* Glucose reading on bottom arc */
+.nav-glucose {
+  font-family: 'Roboto Flex', sans-serif;
+  font-size: var(--text-font-size-l);
+  font-weight: 600;
+  fill: var(--color-accent-good);
+  letter-spacing: 1.5px;
+}
+
+/* Legacy time display (for other screens) */
+.time {
+  position: absolute;
+  top: 28px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: var(--text-font-size-l);
+  color: var(--color-text-color);
+  letter-spacing: 1px;
+}
+
+/* Home screen - Add context button */
+.add-context-btn {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+  height: 44px;
+  padding: 4px;
+  border-radius: 50%;
+  background: var(--color-surface-container);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  /* Black outline creates visual margin from other elements */
+  box-shadow: 0 0 0 6px var(--color-background);
+  transition:
+    transform var(--duration-short) var(--motion-spatial),
+    background-color var(--duration-short) var(--motion-effects);
+  /* Knockout effect - button changes when blob passes over */
+  mix-blend-mode: difference;
+}
+
+/* Remove knockout effect when graph is visible */
+.screen:has(.glucose-graph.visible) .add-context-btn {
+  mix-blend-mode: normal;
+}
+
+.add-context-btn:hover {
+  background: var(--button-bg-hover);
+}
+
+.add-context-btn:active {
+  background: var(--button-bg-pressed);
+  transform: translateY(-50%) scale(0.92);
+}
+
+.add-context-btn .plus-icon {
+  transition: transform 0.2s ease-out;
+}
+
+.add-context-btn .plus-icon.rotated {
+  transform: rotate(45deg);
+}
+
+/* ===========================================
+   CONTEXT MENU - Add context overlay
+   =========================================== */
+
+.context-menu {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.context-menu.open {
+  pointer-events: auto;
+}
+
+.context-btn {
+  position: absolute;
+  padding: 8px 14px;
+  border-radius: 20px;
+  background: var(--color-surface-container);
+  border: none;
+  color: var(--color-text-color);
+  font-family: 'Roboto Flex', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  opacity: 0;
+  transform: scale(0.8);
+  pointer-events: none;
+  transition:
+    background-color var(--duration-short) var(--motion-effects);
+}
+
+.context-menu.open .context-btn {
+  pointer-events: auto;
+}
+
+.context-btn:hover {
+  background: var(--button-bg-hover);
+}
+
+.context-btn:active {
+  background: var(--button-bg-pressed);
+  transform: scale(0.95);
+}
+
+/* Button positions (matching design home-5.png) */
+.context-btn[data-action="meal"] {
+  top: 82px;
+  left: 34px;
+}
+
+.context-btn[data-action="insulin"] {
+  top: 66px;
+  right: 38px;
+}
+
+.context-btn[data-action="activity"] {
+  top: 160px;
+  left: 42px;
+}
+
+.context-btn[data-action="med"] {
+  top: 134px;
+  right: 44px;
+}
+
+/* Glucose blob indicator - positioned and animated via JavaScript */
+.glucose-blob {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+}
+
+/* Glucose text color transition */
+.nav-glucose {
+  transition: fill var(--duration-medium) var(--motion-effects);
+}
+
+.nav-arrow {
+  transition: transform var(--duration-short) var(--motion-spatial);
+}
+
+.nav-arrow path {
+  transition: fill var(--duration-medium) var(--motion-effects);
+}
+
+/* Page indicator dots - right side (legacy for non-home screens) */
+.page-indicator {
+  position: absolute;
+  right: 22px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.page-indicator .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-outline);
+  transition:
+    background-color var(--duration-short) var(--motion-effects),
+    transform var(--duration-short) var(--motion-spatial);
+}
+
+.page-indicator .dot.active {
+  background: var(--color-accent-good);
+  transform: scale(1.2);
+}
+
+/* Nav dots (SVG) - page indicators on right side */
+.nav-dot {
+  fill: var(--color-faded-bc);
+  transition:
+    fill var(--duration-short) var(--motion-effects),
+    r var(--duration-short) var(--motion-spatial);
+}
+
+.nav-dot.active {
+  fill: var(--color-text-color);
+}
+
+/* Glucose reading - bottom center (legacy for non-home screens) */
+.glucose-reading {
+  position: absolute;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--color-accent-good);
+  font-size: var(--text-font-size-l);
+  font-weight: 500;
+}
+
+.glucose-trend {
+  font-size: var(--text-font-size-l);
+}
+
+/* Placeholder content for other screens */
+.assistant-content,
+.tracking-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+}
+
+.faded {
+  color: var(--color-faded-text);
+  font-size: var(--text-font-size-s);
+  margin-top: var(--spacing-padding-m);
+}
+
+/* ===========================================
+   DEBUG PANEL - Glucose Slider
+   =========================================== */
+
+.debug-panel {
+  position: fixed;
+  left: calc(50% + 146px);
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 1000;
+}
+
+.debug-toggle {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #2c2c2c;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    transform var(--duration-short) var(--motion-spatial),
+    background-color var(--duration-short) var(--motion-effects);
+}
+
+.debug-toggle:hover {
+  background: #3c3c3c;
+}
+
+.debug-toggle:active {
+  transform: scale(0.92);
+}
+
+.toggle-icon {
+  font-size: 24px;
+  color: #888;
+  transition: transform var(--duration-medium) var(--motion-spatial);
+}
+
+.debug-panel.open .toggle-icon {
+  transform: rotate(90deg);
+  color: #fff;
+}
+
+.debug-controls {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  background: #2c2c2c;
+  padding: 16px 12px;
+  border-radius: var(--shape-medium);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateX(10px);
+  transition:
+    opacity var(--duration-medium) var(--motion-effects),
+    visibility var(--duration-medium) var(--motion-effects),
+    transform var(--duration-medium) var(--motion-spatial);
+}
+
+.debug-panel.open .debug-controls {
+  opacity: 1;
+  visibility: visible;
+  transform: translateX(0);
+}
+
+#glucose-slider {
+  writing-mode: vertical-lr;
+  direction: rtl;
+  width: 8px;
+  height: 150px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: #444;
+  border-radius: 4px;
+  outline: none;
+}
+
+#glucose-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--slider-thumb-color, var(--color-accent-good));
+  cursor: pointer;
+  border: 2px solid #fff;
+  transition: background-color var(--duration-medium) var(--motion-effects);
+}
+
+#glucose-slider::-moz-range-thumb {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--slider-thumb-color, var(--color-accent-good));
+  cursor: pointer;
+  border: 2px solid #fff;
+  transition: background-color var(--duration-medium) var(--motion-effects);
+}
+
+.glucose-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-accent-good);
+  min-width: 32px;
+  text-align: center;
+  transition: color var(--duration-medium) var(--motion-effects);
+}
+
+/* Trend arrow button */
+.trend-arrow-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #444;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition:
+    transform var(--duration-short) var(--motion-spatial),
+    background-color var(--duration-short) var(--motion-effects);
+}
+
+.trend-arrow-btn:hover {
+  background: #555;
+}
+
+.trend-arrow-btn:active {
+  transform: scale(0.92);
+}
+
+.trend-arrow-btn svg {
+  transition: transform var(--duration-medium) var(--motion-spatial);
+}
+
+/* ===========================================
+   GLUCOSE GRAPH
+   =========================================== */
+
+.glucose-graph {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 2;
+  cursor: pointer;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity var(--duration-long) var(--motion-effects),
+    visibility var(--duration-long) var(--motion-effects);
+}
+
+.glucose-graph.visible {
+  opacity: 1;
+  visibility: visible;
+}
+
+.glucose-graph.hidden {
+  display: none;
+}
+
+/* Blob squish class - animation handled by JavaScript spring physics */
+.glucose-blob.twitch {
+  will-change: transform;
+}
+
+/* Blob fade out */
+.glucose-blob.fade-out {
+  opacity: 0;
+  transition: opacity var(--duration-long) var(--motion-effects);
+}
+
+.graph-svg {
+  width: 100%;
+  height: 100%;
+}
+
+/* Horizontal boundary lines (dark gray) */
+.graph-boundary {
+  stroke: #444;
+  stroke-width: 0.5;
+}
+
+/* Base graph line (always white) */
+.graph-line-base {
+  stroke: #fff;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Highlight overlay (colored segment by zone) */
+.graph-line-highlight {
+  stroke: var(--color-accent-good);
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: stroke var(--duration-medium) var(--motion-effects);
+}
+
+/* Current position dot - position animated via JS for smooth curve following */
+.graph-now-dot {
+  fill: var(--color-accent-good);
+  cursor: grab;
+  transition: fill var(--duration-medium) var(--motion-effects);
+  /* cx/cy animated via JavaScript for smooth path following */
+}
+
+.graph-now-dot:active {
+  cursor: grabbing;
+}
+
+/* Invisible hitbox for slider */
+.graph-slider-hitbox {
+  cursor: grab;
+}
+
+.graph-slider-hitbox:active {
+  cursor: grabbing;
+}
+
+/* Vertical dashed line at "now" */
+.graph-now-line {
+  stroke: var(--color-accent-good);
+  stroke-width: 0.5;
+  pointer-events: none;
+  transition: stroke var(--duration-medium) var(--motion-effects);
+}
+
+/* Time label background (cuts the dashed line) */
+.graph-time-bg {
+  fill: var(--color-background);
+}
+
+/* Time label (can be multi-line) */
+.graph-now-text {
+  font-family: 'Roboto Flex', sans-serif;
+  font-size: 11px;
+  fill: var(--color-accent-good);
+  text-anchor: middle;
+  pointer-events: none;
+  transition: fill var(--duration-medium) var(--motion-effects);
+}
+
+.graph-time-line1,
+.graph-time-line2 {
+  fill: inherit;
+}
+
+
+/* Hide blob when graph is visible */
+.glucose-graph:not(.hidden) ~ .glucose-blob {
+  display: none;
+}
+
+/* ===========================================
+   INSULIN INPUT SCREEN
+   =========================================== */
+
+.insulin-input-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 20px;
+  margin-top: -35px;
+}
+
+/* Insulin type tabs */
+.insulin-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 3px;
+  margin-top: 40px;
+}
+
+.insulin-tab {
+  background: none;
+  border: none;
+  color: var(--color-faded-text);
+  font-family: 'Roboto Flex', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  padding: 4px 8px;
+  transition:
+    color var(--duration-short) var(--motion-effects),
+    font-size var(--duration-short) var(--motion-spatial),
+    font-weight var(--duration-short) var(--motion-effects);
+}
+
+.insulin-tab.active {
+  color: var(--color-text-color);
+  font-size: 18px;
+  font-weight: 500;
+}
+
+/* Number picker */
+.number-picker {
+  position: relative;
+  height: 160px;
+  width: 100px;
+  overflow: hidden;
+  margin: 0;
+  margin-top: -14px;
+  /* Fade edges with gradient mask */
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 6%,
+    rgba(0,0,0,0.5) 25%,
+    rgba(0,0,0,1) 42%,
+    rgba(0,0,0,1) 58%,
+    rgba(0,0,0,0.5) 75%,
+    transparent 94%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 6%,
+    rgba(0,0,0,0.5) 25%,
+    rgba(0,0,0,1) 42%,
+    rgba(0,0,0,1) 58%,
+    rgba(0,0,0,0.5) 75%,
+    transparent 94%
+  );
+}
+
+.picker-items {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* Transform handled by spring animation in JS */
+}
+
+.picker-item {
+  font-family: 'Roboto Flex', sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+  color: var(--color-text-color);
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* M3 Expressive: smooth transitions for scale/opacity changes */
+  transition:
+    transform var(--duration-short) var(--motion-spatial),
+    opacity var(--duration-short) var(--motion-effects),
+    font-size var(--duration-short) var(--motion-spatial);
+  will-change: transform, opacity;
+}
+
+.picker-label {
+  font-family: 'Roboto Flex', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-color);
+  letter-spacing: 0.5px;
+  margin-top: 4px;
+}
+
+/* Confirm button */
+.confirm-btn {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 44px;
+  height: 44px;
+  padding: 4px;
+  border-radius: 50%;
+  background: var(--color-surface-container);
+  border: none;
+  color: var(--color-text-color);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 0 6px var(--color-background);
+  transition:
+    transform var(--duration-short) var(--motion-spatial),
+    background-color var(--duration-short) var(--motion-effects);
+}
+
+.confirm-btn svg {
+  width: 28px;
+  height: 28px;
+}
+
+.confirm-btn:active {
+  transform: translateX(-50%) scale(0.92);
+}
+
+.confirm-btn.morphing {
+  z-index: 100;
+  border-radius: 42%;
+}
+
+/* ===========================================
+   INSULIN CONFIRMATION SCREEN
+   =========================================== */
+
+.confirm-blob {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 85px;
+  height: 85px;
+  background: var(--color-text-color);
+  border-radius: 42%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Slight organic blob shape */
+  animation: blob-float 6s ease-in-out infinite;
+}
+
+@keyframes blob-float {
+  0%, 100% { border-radius: 42% 58% 45% 55% / 55% 45% 55% 45%; }
+  25% { border-radius: 55% 45% 58% 42% / 45% 55% 42% 58%; }
+  50% { border-radius: 45% 55% 42% 58% / 58% 42% 55% 45%; }
+  75% { border-radius: 58% 42% 55% 45% / 42% 58% 45% 55%; }
+}
+
+.confirm-blob svg {
+  width: 36px;
+  height: 36px;
+}
+
+.confirm-text {
+  font-family: 'Roboto Flex', sans-serif;
+  font-size: var(--text-font-size-l);
+  font-weight: 600;
+  fill: var(--color-text-color);
+  letter-spacing: 1px;
+}
+
+/* Context button active state (no background) */
+.context-btn.active {
+  background: transparent;
+}
+
+/* Insulin screens use fast fade transition */
+[data-screen="insulin-input"],
+[data-screen="insulin-confirm"] {
+  transform: none;
+  opacity: 0;
+  z-index: 20; /* Above context menu and home screen */
+  background: var(--color-background);
+  transition: opacity 0.15s ease-out;
+}
+
+[data-screen="insulin-input"].active,
+[data-screen="insulin-confirm"].active {
+  transform: none;
+  opacity: 1;
+}
+
+/* ===========================================
+   MED (HONEY) INPUT SCREEN
+   =========================================== */
+
+[data-screen="med-input"] {
+  transform: none;
+  opacity: 0;
+  z-index: 20;
+  background: var(--color-background);
+  transition: opacity 0.15s ease-out;
+}
+
+[data-screen="med-input"].active {
+  transform: none;
+  opacity: 1;
+}
+
+.med-input-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 20px;
+  margin-top: -35px;
+}
+
+.med-title {
+  font-family: 'Roboto Flex', sans-serif;
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--color-text-color);
+  letter-spacing: 0.5px;
+  margin-bottom: 3px;
+  margin-top: 40px;
+}
+
+.med-picker {
+  /* Same styling as insulin picker */
+}
+
+/* ===========================================
+   REDUCED MOTION - Accessibility
+   =========================================== */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

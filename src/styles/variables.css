@@ -1,0 +1,68 @@
+:root {
+  /* === MATERIAL 3 EXPRESSIVE MOTION === */
+  /* Spatial easing - for position, size, rotation (can overshoot) */
+  --motion-spatial: cubic-bezier(0.2, 0.0, 0.0, 1.0);
+  /* Effects easing - for color, opacity (no overshoot) */
+  --motion-effects: cubic-bezier(0.3, 0.0, 0.0, 1.0);
+
+  /* Durations (30% shorter than mobile for Wear OS) */
+  --duration-short: 140ms;
+  --duration-medium: 210ms;
+  --duration-long: 350ms;
+
+  /* === COLORS - STATUS === */
+  --color-accent-panic: #FF4444;    /* Glucose dangerous (<4.0 or >10.0 mmol/L) */
+  --color-accent-good: #7ED321;     /* Glucose safe (4.5-9.0 mmol/L) */
+  --color-accent-warning: #FFD700;  /* Glucose borderline (4.0-4.5 or 9.0-10.0 mmol/L) */
+
+  /* === COLORS - BASE === */
+  --color-background: #000000;      /* Main background - ALWAYS BLACK for OLED */
+  --color-surface: #1C1C1E;         /* Cards, elevated surfaces */
+  --color-surface-container: #2C2C2E;
+  --color-text-color: #E6E1E5;      /* Primary text (on-surface) */
+  --color-faded-text: #CAC4CF;      /* Secondary text (on-surface-variant) */
+  --color-faded-bc: #2c2c2c;        /* Faded background/cards */
+  --color-outline: #938F99;
+
+  /* === COLORS - COMPONENTS === */
+  --button-bg: #2c2c2c;             /* Button default */
+  --button-bg-pressed: #000000;     /* Button pressed state */
+  --graph-color: #ffffff;           /* Graph line */
+  --badge-bg: #2c2c2c;              /* Badge background */
+  --badge-text-color: #8d8d8d;      /* Badge text */
+
+  /* === TYPOGRAPHY === */
+  --text-font-size-xl: 30px;        /* Large glucose reading */
+  --text-font-size-l: 18px;         /* Time and sugar display */
+  --text-font-size-m: 16px;         /* Body text */
+  --text-font-size-s: 13px;         /* Small text */
+  --text-font-size-xs: 11px;        /* Fuzzy time and keys */
+
+  /* === SPACING === */
+  --spacing-xs: 4px;
+  --spacing-sm: 8px;
+  --spacing-md: 12px;
+  --spacing-lg: 16px;
+  --spacing-xl: 24px;
+  --spacing-padding-s: 6px;
+  --spacing-padding-m: 8px;
+  --spacing-padding-l: 12px;
+  --button-sides-spacing: 8px;
+  --button-updown-spacing: 12px;
+
+  /* === SHAPES === */
+  --shape-small: 8px;
+  --shape-medium: 12px;
+  --shape-large: 16px;
+  --shape-full: 9999px;
+
+  /* === TOUCH TARGETS === */
+  --touch-target-min: 48px;
+
+  /* === DISPLAY === */
+  --display-size: 252px;
+
+  /* === BROWSER PRESENTATION (not part of watch UI) === */
+  --browser-bg: #1a1a1a;
+  --button-bg-hover: #3c3c3c;
+}
