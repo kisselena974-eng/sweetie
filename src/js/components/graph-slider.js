@@ -141,7 +141,17 @@ class GraphSlider {
     const isHigh = y < this.upperBoundaryY;
     const isDanger = isLow || isHigh;
 
-    this.updateColors(x, y, isDanger, isLow);
+    // At "now" position, let app.js handle all accent colors via glucoseColorChange event
+    // This ensures all colors (text, graph, arrow) transition together with CSS
+    const isAtNow = Math.abs(x - this.maxX) < 5;
+    if (!isAtNow) {
+      // Only update colors when viewing historical positions
+      this.updateColors(x, y, isDanger, isLow);
+    } else {
+      // Still update clip-path at "now" position for proper segment display
+      this.updateClipPath(x, y);
+    }
+
     this.updateGlucoseDisplay(glucose, isDanger);
   }
 
@@ -608,6 +618,88 @@ class GraphSlider {
   }
 
   /**
+   * Update only the clip-path (without changing colors)
+   * Used at "now" position where colors are handled by app.js
+   */
+  updateClipPath(x, y) {
+    const currentSegment = this.getSegmentForX(x);
+
+    // Zone boundaries for clip
+    const DANGER_HIGH_Y = 96;
+    const WARNING_HIGH_Y = 106;
+    const WARNING_LOW_Y = 151;
+    const DANGER_LOW_Y = 156;
+
+    let clipY, clipHeight;
+    if (y < DANGER_HIGH_Y) {
+      clipY = 0; clipHeight = DANGER_HIGH_Y;
+    } else if (y < WARNING_HIGH_Y) {
+      clipY = DANGER_HIGH_Y; clipHeight = WARNING_HIGH_Y - DANGER_HIGH_Y;
+    } else if (y < WARNING_LOW_Y) {
+      clipY = WARNING_HIGH_Y; clipHeight = WARNING_LOW_Y - WARNING_HIGH_Y;
+    } else if (y < DANGER_LOW_Y) {
+      clipY = WARNING_LOW_Y; clipHeight = DANGER_LOW_Y - WARNING_LOW_Y;
+    } else {
+      clipY = DANGER_LOW_Y; clipHeight = 252 - DANGER_LOW_Y;
+    }
+
+    if (this.segmentClipRect && currentSegment) {
+      const startX = Math.floor(currentSegment.startX) - 2;
+      const endX = Math.ceil(currentSegment.endX) + 3;
+      this.segmentClipRect.setAttribute('x', startX);
+      this.segmentClipRect.setAttribute('y', clipY);
+      this.segmentClipRect.setAttribute('width', endX - startX);
+      this.segmentClipRect.setAttribute('height', clipHeight);
+    }
+  }
+
+  /**
+   * Update colors with a specific color (used when at "now" position to match blob)
+   */
+  updateColorsWithColor(x, y, color) {
+    // Update slider elements with provided color
+    this.sliderDot.style.fill = color;
+    this.sliderLine.style.stroke = color;
+    this.timeLabel.style.fill = color;
+
+    // Update highlight color
+    if (this.graphLineHighlight) {
+      this.graphLineHighlight.style.stroke = color;
+    }
+
+    // Still need to update clip-path based on position
+    const currentSegment = this.getSegmentForX(x);
+
+    // Zone boundaries for clip
+    const DANGER_HIGH_Y = 96;
+    const WARNING_HIGH_Y = 106;
+    const WARNING_LOW_Y = 151;
+    const DANGER_LOW_Y = 156;
+
+    let clipY, clipHeight;
+    if (y < DANGER_HIGH_Y) {
+      clipY = 0; clipHeight = DANGER_HIGH_Y;
+    } else if (y < WARNING_HIGH_Y) {
+      clipY = DANGER_HIGH_Y; clipHeight = WARNING_HIGH_Y - DANGER_HIGH_Y;
+    } else if (y < WARNING_LOW_Y) {
+      clipY = WARNING_HIGH_Y; clipHeight = WARNING_LOW_Y - WARNING_HIGH_Y;
+    } else if (y < DANGER_LOW_Y) {
+      clipY = WARNING_LOW_Y; clipHeight = DANGER_LOW_Y - WARNING_LOW_Y;
+    } else {
+      clipY = DANGER_LOW_Y; clipHeight = 252 - DANGER_LOW_Y;
+    }
+
+    if (this.segmentClipRect && currentSegment) {
+      const startX = Math.floor(currentSegment.startX) - 2;
+      const endX = Math.ceil(currentSegment.endX) + 3;
+      this.segmentClipRect.setAttribute('x', startX);
+      this.segmentClipRect.setAttribute('y', clipY);
+      this.segmentClipRect.setAttribute('width', endX - startX);
+      this.segmentClipRect.setAttribute('height', clipHeight);
+    }
+  }
+
+  /**
    * Update colors based on slider position
    * Each zone (safe/warning/danger) has its own color, clip shows only current zone segment
    */
@@ -720,27 +812,44 @@ class GraphSlider {
   }
 
   /**
+   * Get discrete color for glucose value (no blending, instant change at thresholds)
+   * > 10: red, 10-9: yellow, 9-4.5: green, 4.5-4: yellow, < 4: red
+   */
+  getDiscreteColorForGlucose(glucose) {
+    if (glucose < 4.0 || glucose > 10.0) {
+      return '#FF4444'; // Danger red
+    }
+    if (glucose < 4.5 || glucose > 9.0) {
+      return '#FFD700'; // Warning yellow
+    }
+    return '#7ED321'; // Safe green
+  }
+
+  /**
    * Update the glucose value display at the bottom
    */
   updateGlucoseDisplay(glucose, isDanger) {
-    const glucoseText = document.querySelector('.nav-glucose textPath');
-    const glucoseArrow = document.querySelector('.nav-arrow path');
-    const glucoseTextElement = document.querySelector('.nav-glucose');
-    const arrow = document.querySelector('.nav-arrow');
+    const glucoseText = document.querySelector('.nav-circle-base .nav-glucose textPath');
+    const glucoseArrow = document.querySelector('.nav-circle-base .nav-arrow path');
+    const glucoseTextElement = document.querySelector('.nav-circle-base .nav-glucose');
+    const arrow = document.querySelector('.nav-circle-base .nav-arrow');
 
-    // Get Y position for this glucose to calculate color with transitions
-    const y = this.glucoseToY(glucose);
-    const color = this.getColorForY(y);
+    // Use discrete colors for glucose text and arrow (no transition)
+    const discreteColor = this.getDiscreteColorForGlucose(glucose);
+
+    if (glucoseTextElement) {
+      glucoseTextElement.style.fill = discreteColor;
+    }
+
+    if (glucoseArrow) {
+      glucoseArrow.style.fill = discreteColor;
+      glucoseArrow.style.stroke = discreteColor;
+    }
+
     const displayValue = glucose.toFixed(1).replace('.', ',');
 
     if (glucoseText) {
       glucoseText.textContent = displayValue;
-      glucoseTextElement.style.fill = color;
-    }
-
-    if (glucoseArrow) {
-      glucoseArrow.style.fill = color;
-      glucoseArrow.style.stroke = color;
     }
 
     // Calculate trend angle from graph slope at current position

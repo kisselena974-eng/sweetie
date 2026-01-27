@@ -90,9 +90,9 @@ function navigateTo(screenName, direction = 'up') {
  * Update navigation dots to reflect current screen
  */
 function updateNavDots(index) {
-  // Update base layer dots
-  const navDots = document.querySelectorAll('.nav-circle-base .nav-dot');
-  navDots.forEach((dot, i) => {
+  // Fixed page dots outside screens
+  const pageDots = document.querySelectorAll('.page-dots .page-dot');
+  pageDots.forEach((dot, i) => {
     if (i === index) {
       dot.classList.add('active');
       dot.setAttribute('r', '3.5');
@@ -100,12 +100,6 @@ function updateNavDots(index) {
       dot.classList.remove('active');
       dot.setAttribute('r', '3');
     }
-  });
-
-  // Update knockout layer dots (for AAA contrast knockout effect)
-  const knockoutDots = document.querySelectorAll('.nav-circle-knockout .nav-dot-knockout');
-  knockoutDots.forEach((dot, i) => {
-    dot.setAttribute('r', i === index ? '3.5' : '3');
   });
 }
 
@@ -168,6 +162,27 @@ function handleDragEnd() {
 }
 
 /**
+ * Update all time displays with current time
+ */
+function updateTime() {
+  const now = new Date();
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  const timeString = `${hours}:${minutes}`;
+
+  // Update fixed time elements (base and knockout)
+  const fixedTime = document.querySelector('.fixed-time-text textPath');
+  const fixedTimeKnockout = document.querySelector('.fixed-time-text-knockout textPath');
+
+  if (fixedTime) {
+    fixedTime.textContent = timeString;
+  }
+  if (fixedTimeKnockout) {
+    fixedTimeKnockout.textContent = timeString;
+  }
+}
+
+/**
  * Initialize the app
  */
 function init() {
@@ -181,6 +196,10 @@ function init() {
 
   // Prevent text selection while dragging
   display.addEventListener('selectstart', e => e.preventDefault());
+
+  // Initialize time display and update every minute
+  updateTime();
+  setInterval(updateTime, 1000); // Update every second for accuracy
 
   console.log('Sweetie app initialized');
 }
@@ -211,13 +230,25 @@ function initHomeScreen() {
     // Expose globally for transitions
     window.glucoseBlob = glucoseBlob;
 
-    // Listen for color changes to update glucose text
+    // Listen for color changes to update graph elements
     homeScreen.addEventListener('glucoseColorChange', (e) => {
       updateGlucoseTextColor(e.detail.color);
     });
 
-    // Set initial color
-    updateGlucoseTextColor(glucoseBlob.getColor());
+    // Set initial colors
+    updateGlucoseTextColor(glucoseBlob.getColor()); // Graph elements (smooth)
+
+    // Set initial discrete color for glucose text and arrow
+    const discreteColor = getColorForGlucose(initialGlucose);
+    const glucoseTextElement = document.querySelector('.nav-circle-base .nav-glucose');
+    const glucoseArrow = document.querySelector('.nav-circle-base .nav-arrow path');
+    if (glucoseTextElement) {
+      glucoseTextElement.style.fill = discreteColor;
+    }
+    if (glucoseArrow) {
+      glucoseArrow.style.fill = discreteColor;
+      glucoseArrow.style.stroke = discreteColor;
+    }
 
     // Set initial arrow position and trend
     updateArrowPosition();
@@ -243,19 +274,27 @@ function initHomeScreen() {
 }
 
 /**
- * Update glucose text and arrow color
+ * Update graph elements color (follows blob's smooth color)
+ * Note: Glucose text and arrow use discrete colors set in setGlucoseValue()
  */
 function updateGlucoseTextColor(color) {
-  // Update base layer
-  const glucoseText = document.querySelector('.nav-circle-base .nav-glucose');
-  const glucoseArrow = document.querySelector('.nav-circle-base .nav-arrow path');
+  // Update graph elements to match blob color
+  const graphHighlight = document.querySelector('.graph-line-highlight');
+  const graphDot = document.querySelector('.graph-now-dot');
+  const graphLine = document.querySelector('.graph-now-line');
+  const graphText = document.querySelector('.graph-now-text');
 
-  if (glucoseText) {
-    glucoseText.style.fill = color;
+  if (graphHighlight) {
+    graphHighlight.style.stroke = color;
   }
-  if (glucoseArrow) {
-    glucoseArrow.style.fill = color;
-    glucoseArrow.style.stroke = color;
+  if (graphDot) {
+    graphDot.style.fill = color;
+  }
+  if (graphLine) {
+    graphLine.style.stroke = color;
+  }
+  if (graphText) {
+    graphText.style.fill = color;
   }
 
   // Update debug trend arrow color too
@@ -286,6 +325,19 @@ function setGlucoseValue(value) {
   const glucoseTextKnockout = document.querySelector('.nav-circle-knockout .nav-glucose-knockout textPath');
   if (glucoseTextKnockout) {
     glucoseTextKnockout.textContent = formattedValue;
+  }
+
+  // Set discrete color for glucose text and arrow (no transition, instant change at thresholds)
+  const discreteColor = getColorForGlucose(value);
+  const glucoseTextElement = document.querySelector('.nav-circle-base .nav-glucose');
+  const glucoseArrow = document.querySelector('.nav-circle-base .nav-arrow path');
+
+  if (glucoseTextElement) {
+    glucoseTextElement.style.fill = discreteColor;
+  }
+  if (glucoseArrow) {
+    glucoseArrow.style.fill = discreteColor;
+    glucoseArrow.style.stroke = discreteColor;
   }
 
   // Update arrow position based on text width
@@ -416,6 +468,11 @@ function toggleGraphView() {
               const slider = window.initGraphSlider();
               slider.updateSliderPosition(slider.currentX);
             }
+
+            // Ensure graph colors match blob's color (single source of truth)
+            if (glucoseBlob) {
+              updateGlucoseTextColor(glucoseBlob.getColor());
+            }
           }, DURATION_LONG);
         });
       } else {
@@ -429,6 +486,11 @@ function toggleGraphView() {
           blobContainer.style.display = 'none';
           blobContainer.classList.remove('fade-out');
           isAnimating = false;
+
+          // Ensure graph colors match blob's color
+          if (glucoseBlob) {
+            updateGlucoseTextColor(glucoseBlob.getColor());
+          }
         }, DURATION_LONG);
       }
     }
@@ -507,9 +569,9 @@ window.resetToHomeView = resetToHomeView;
  * Initialize graph toggle via nav dot click
  */
 function initGraphToggle() {
-  // Click on first nav dot to return to blob when graph is visible
-  const navDots = document.querySelectorAll('.nav-circle-base .nav-dot');
-  const firstDot = navDots[0];
+  // Click on first page dot to return to blob when graph is visible
+  const pageDots = document.querySelectorAll('.page-dots .page-dot');
+  const firstDot = pageDots[0];
 
   if (firstDot) {
     firstDot.style.cursor = 'pointer';

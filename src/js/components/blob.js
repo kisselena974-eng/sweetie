@@ -150,13 +150,13 @@ class GlucoseBlob {
     this.svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     this.svg.classList.add('glucose-blob');
     this.svg.setAttribute('viewBox', '0 0 100 100');
+    // Apply initial scale to match currentScale (so clip path and blob size match on load)
+    const initialSize = this.options.baseSize * this.currentScale;
     this.svg.style.cssText = `
       position: absolute;
-      width: ${this.options.baseSize}px;
-      height: ${this.options.baseSize}px;
+      width: ${initialSize}px;
+      height: ${initialSize}px;
       transform: translate(-50%, -50%);
-      transition: width var(--duration-medium, 210ms) var(--motion-spatial, cubic-bezier(0.2, 0.0, 0.0, 1.0)),
-                  height var(--duration-medium, 210ms) var(--motion-spatial, cubic-bezier(0.2, 0.0, 0.0, 1.0));
       pointer-events: auto;
       cursor: grab;
       overflow: visible;
@@ -726,7 +726,11 @@ class GlucoseBlob {
 
     const tx = this.posX * 252;
     const ty = this.posY * 252;
-    const scale = (this.options.baseSize * this.currentScale) / 100;
+
+    // Use actual rendered size of blob SVG (follows CSS transition)
+    // instead of currentScale (which changes immediately)
+    const actualWidth = parseFloat(getComputedStyle(this.svg).width);
+    const scale = actualWidth / 100;
 
     clipPath.setAttribute('transform',
       `translate(${tx}, ${ty}) scale(${scale}) translate(-50, -50)`

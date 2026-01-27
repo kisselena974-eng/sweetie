@@ -43,10 +43,7 @@
             <textPath href="#circlePathTop" startOffset="50%" text-anchor="middle">09:30</textPath>
           </text>
 
-          <!-- Page dots -->
-          <circle class="nav-dot active" cx="236.6" cy="116.3" r="3"/>
-          <circle class="nav-dot" cx="237" cy="126" r="3"/>
-          <circle class="nav-dot" cx="236.6" cy="135.7" r="3"/>
+          <!-- Page dots are in knockout layer (above blob) -->
 
           <!-- Glucose value -->
           <text class="nav-glucose">
@@ -71,13 +68,16 @@
             </clipPath>
           </defs>
 
+          <!-- Page dots - ABOVE blob, not clipped -->
+          <circle class="nav-dot active" cx="236.6" cy="116.3" r="3"/>
+          <circle class="nav-dot" cx="237" cy="126" r="3"/>
+          <circle class="nav-dot" cx="236.6" cy="135.7" r="3"/>
+
+          <!-- Clipped knockout text -->
           <g clip-path="url(#blobClip)">
             <text class="nav-time-knockout" dy="12">
               <textPath href="#circlePathTopKO" startOffset="50%" text-anchor="middle">09:30</textPath>
             </text>
-            <circle class="nav-dot-knockout" cx="236.6" cy="116.3" r="3"/>
-            <circle class="nav-dot-knockout" cx="237" cy="126" r="3"/>
-            <circle class="nav-dot-knockout" cx="236.6" cy="135.7" r="3"/>
             <text class="nav-glucose-knockout">
               <textPath href="#circlePathBottomKO" startOffset="50%" text-anchor="middle">6,5</textPath>
             </text>
@@ -234,6 +234,33 @@
           <p class="faded">Coming soon</p>
         </div>
       </div>
+
+      <!-- Fixed page indicator dots (outside screens, always visible) -->
+      <svg class="page-dots" viewBox="0 0 252 252" width="252" height="252">
+        <circle class="page-dot active" cx="236.6" cy="116.3" r="3"/>
+        <circle class="page-dot" cx="237" cy="126" r="3"/>
+        <circle class="page-dot" cx="236.6" cy="135.7" r="3"/>
+      </svg>
+
+      <!-- Fixed time display (outside screens, always visible) -->
+      <svg class="fixed-time" viewBox="0 0 252 252" width="252" height="252">
+        <defs>
+          <path id="fixedTimeArc" d="M 29.9,70.5 A 111,111 0 0,1 222.1,70.5" fill="none"/>
+        </defs>
+        <text class="fixed-time-text" dy="12">
+          <textPath href="#fixedTimeArc" startOffset="50%" text-anchor="middle">09:30</textPath>
+        </text>
+      </svg>
+
+      <!-- Fixed time knockout layer (black text visible inside blob) -->
+      <svg class="fixed-time-knockout" viewBox="0 0 252 252" width="252" height="252">
+        <defs>
+          <path id="fixedTimeArcKO" d="M 29.9,70.5 A 111,111 0 0,1 222.1,70.5" fill="none"/>
+        </defs>
+        <text class="fixed-time-text-knockout" dy="12" clip-path="url(#blobClip)">
+          <textPath href="#fixedTimeArcKO" startOffset="50%" text-anchor="middle">09:30</textPath>
+        </text>
+      </svg>
     </div>
   </div>
 
