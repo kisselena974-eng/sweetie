@@ -246,6 +246,12 @@ class InsulinInputController {
   show() {
     if (!this.screen) return;
 
+    // Hide clock
+    const fixedTime = document.querySelector('.fixed-time');
+    const fixedTimeKnockout = document.querySelector('.fixed-time-knockout');
+    if (fixedTime) fixedTime.style.opacity = '0';
+    if (fixedTimeKnockout) fixedTimeKnockout.style.opacity = '0';
+
     // Reset to defaults
     this.selectedUnits = 10;
     this.selectedType = 'brzi';
@@ -384,6 +390,12 @@ class InsulinInputController {
         homeBlob.style.transition = '';
         homeBlob.style.opacity = '';
       }
+
+      // Show clock again
+      const fixedTime = document.querySelector('.fixed-time');
+      const fixedTimeKnockout = document.querySelector('.fixed-time-knockout');
+      if (fixedTime) fixedTime.style.opacity = '';
+      if (fixedTimeKnockout) fixedTimeKnockout.style.opacity = '';
 
       // Unlock glucose blob from center - smooth ease out
       if (blobInstance && blobInstance.unlockFromCenter) {

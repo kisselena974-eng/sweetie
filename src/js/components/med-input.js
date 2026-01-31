@@ -222,6 +222,12 @@ class MedInputController {
   show() {
     if (!this.screen) return;
 
+    // Hide clock
+    const fixedTime = document.querySelector('.fixed-time');
+    const fixedTimeKnockout = document.querySelector('.fixed-time-knockout');
+    if (fixedTime) fixedTime.style.opacity = '0';
+    if (fixedTimeKnockout) fixedTimeKnockout.style.opacity = '0';
+
     // Reset to defaults
     this.selectedUnits = 1;
 
@@ -368,6 +374,12 @@ class MedInputController {
         homeBlob.style.transition = '';
         homeBlob.style.opacity = '';
       }
+
+      // Show clock again
+      const fixedTime = document.querySelector('.fixed-time');
+      const fixedTimeKnockout = document.querySelector('.fixed-time-knockout');
+      if (fixedTime) fixedTime.style.opacity = '';
+      if (fixedTimeKnockout) fixedTimeKnockout.style.opacity = '';
 
       // Unlock glucose blob from center
       if (blobInstance && blobInstance.unlockFromCenter) {
