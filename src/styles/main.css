@@ -5,7 +5,7 @@
 }
 
 body {
-  background: var(--browser-bg);
+  background: var(--color-background);
   min-height: 100vh;
   display: flex;
   justify-content: center;
@@ -54,6 +54,34 @@ body {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.watch-glow img {
+  position: absolute;
+  pointer-events: none;
+}
+
+/* Top-left highlight */
+.watch-glow img:nth-child(1) {
+  top: 0;
+  left: 0;
+  width: 85%;
+}
+
+/* Top-right highlight */
+.watch-glow img:nth-child(2) {
+  top: 0;
+  right: 0;
+  width: 70%;
+}
+
+/* Bottom-right highlight */
+.watch-glow img:nth-child(3) {
+  bottom: 0;
+  right: 0;
+  width: 75%;
 }
 
 
