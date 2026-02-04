@@ -668,21 +668,32 @@ body {
   height: 100%;
   pointer-events: none;
   z-index: 5;
+  background: var(--color-background);
+  opacity: 0;
+  transition: opacity var(--duration-medium) var(--motion-effects);
 }
 
 .assistant-context-menu.open {
   pointer-events: auto;
+  opacity: 1;
+}
+
+/* Override shared .context-btn styles for assistant */
+.assistant-ctx-btn {
+  font-size: 12px;
+  font-weight: 400;
+  max-width: 140px;
 }
 
 /* Positions matching design home2-27.png */
 .assistant-ctx-btn[data-ctx="0"] {
-  top: 72px;
+  top: 80px;
   right: 30px;
   transition-delay: 0ms;
 }
 
 .assistant-ctx-btn[data-ctx="1"] {
-  bottom: 100px;
+  bottom: 90px;
   left: 30px;
   transition-delay: 60ms;
 }

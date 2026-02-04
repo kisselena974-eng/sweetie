@@ -848,9 +848,11 @@ function initAssistantContext() {
     if (isOpen) {
       ctxMenu.classList.add('open');
       if (plusIcon) plusIcon.classList.add('rotated');
+      addBtn.style.backgroundColor = '#000';
     } else {
       ctxMenu.classList.remove('open');
       if (plusIcon) plusIcon.classList.remove('rotated');
+      addBtn.style.backgroundColor = '';
     }
   }
 
@@ -859,6 +861,7 @@ function initAssistantContext() {
     isOpen = false;
     ctxMenu.classList.remove('open');
     if (plusIcon) plusIcon.classList.remove('rotated');
+    addBtn.style.backgroundColor = '';
   }
 
   // + button toggle
