@@ -721,75 +721,74 @@ function initAssistantMic() {
   if (!mic || !content || !speechEl) return;
 
   const speechData = [
-    { q: 'Koliko da inzulina uzmem? Pojeo sam srednju pizzu i sok od jabuke.', ans: { main: '{12 jedinica} je optimalno.', detail: 'Prošli put poslije pizze si uzeo 14 i bio je prenizak.' }, ctx: [
-      { q: 'Koliko je prošlo od obroka?', reply: 'Oko 2 sata.', ans: { main: '{10 jedinica} je dovoljno.', detail: 'Nakon 2 sata pizza je već djelomično apsorbirana, treba manje inzulina.' } },
-      { q: 'Neka aktivnost ubrzo nakon?', reply: 'Ne, mirujem.', ans: { main: '{12 jedinica} je optimalno.', detail: 'Bez aktivnosti treba puna doza. Prošli put s pizzom si uzeo 14 i bio prenizak.' } }
+    { q: 'Koliko da inzulina uzmem? Pojeo sam srednju pizzu i sok od jabuke.', ans: { main: '{12 jedinica} je optimalno.', detail: 'Vidim da ti je šećer 7.8 i stabilan. Prošli put s pizzom si dao 14 i bio prenizak.' }, ctx: [
+      { q: 'Planiraš li neku aktivnost?', reply: 'Idem prošetati za pola sata.', ans: { main: '{10 jedinica} je dovoljno.', detail: 'Šetnja će pomoći s apsorpcijom. Smanjujem dozu jer ćeš potrošiti dio glukoze.' } },
+      { q: 'Je li pizza bila masna?', reply: 'Da, dosta sira i ulja.', ans: { main: '{12 jedinica} ali split doza.', detail: 'Masna pizza usporava apsorpciju. Daj 7 sad i 5 za 45 min da pokriješ kasni porast.' } }
     ] },
-    { q: 'Zašto mi šećer stalno raste poslije doručka?', ans: { main: 'Vjerojatno previše ugljikohidrata ujutro.', detail: 'Probaj zamijeniti žitarice jajima ili avokadnom — proteini usporavaju apsorpciju.' }, ctx: [
-      { q: 'Što obično jedeš za doručak?', reply: 'Žitarice s mlijekom.', ans: { main: 'Žitarice su problem.', detail: 'Imaju puno brzih UH. Zamijeni ih jajima ili yogurtom s orasima — šećer će biti stabilniji.' } }
+    { q: 'Zašto mi šećer stalno raste poslije doručka?', ans: { main: 'Zadnja 3 doručka šećer ti skoči za 5+.', detail: 'Vidim da uzimaš inzulin sa jelom — probaj 15 min ranije za bolji učinak.' }, ctx: [
+      { q: 'Što obično jedeš za doručak?', reply: 'Žitarice s mlijekom i banana.', ans: { main: 'To je oko 70g brzih UH.', detail: 'Žitarice + banana + mlijeko su brzi šećeri. Zamijeni jajima i avokadnom — tvoj šećer poslije je stabilniji s proteinima.' } }
     ] },
-    { q: 'Mogu li pojesti komad torte ako si dam inzulin?', ans: { main: 'Da, uz {8 jedinica} unaprijed.', detail: 'Čokoladna torta ima oko 45g UH po komadu. Daj inzulin 15 min prije.' }, ctx: [
-      { q: 'Koliki je komad?', reply: 'Veliki komad.', ans: { main: 'Za veliki komad treba {11 jedinica.}', detail: 'Veliki komad torte ima oko 65g UH. Daj inzulin 20 min prije.' } },
-      { q: 'Kakva je torta?', reply: 'Čokoladna.', ans: { main: 'Za čokoladnu daj {9 jedinica.}', detail: 'Čokoladna torta ima više masti koja usporava apsorpciju. Razmisli o split dozi.' } }
+    { q: 'Mogu li pojesti komad torte ako si dam inzulin?', ans: { main: 'Da, uz {8 jedinica} unaprijed.', detail: 'Šećer ti je trenutno 6.2, imaš prostora. Daj 15 min prije prvog zalogaja.' }, ctx: [
+      { q: 'Koliko torte planiraš?', reply: 'Oko 150 grama.', ans: { main: 'Za 150g treba {10 jedinica.}', detail: 'To je oko 55g UH. Šećer ti je 6.2 pa imaš prostora, ali daj inzulin 15 min ranije.' } },
+      { q: 'Kakva je torta?', reply: 'Čokoladna s ganacheom.', ans: { main: 'Za čokoladnu daj {9 jedinica.}', detail: 'Ganache ima puno masti — usporava apsorpciju. Razmisli o split dozi za bolju kontrolu.' } }
     ] },
-    { q: 'Koliko jedinica za tanjur tjestenine s umakom?', ans: { main: 'Preporučam {10 jedinica.}', detail: 'Srednji tanjur tjestenine ima oko 60g UH. Umak dodaje još 5-10g.' }, ctx: [
-      { q: 'Koliko je velik tanjur?', reply: 'Pun tanjur.', ans: { main: 'Za pun tanjur treba {13 jedinica.}', detail: 'Pun tanjur ima oko 80g UH. Daj split dozu — pola prije, pola za 30 min.' } }
+    { q: 'Koliko jedinica za tanjur tjestenine s umakom?', ans: { main: 'Preporučam {10 jedinica.}', detail: 'Srednji tanjur je oko 60g UH. Tvoj šećer je stabilan pa je dobar trenutak.' }, ctx: [
+      { q: 'Koliko tjestenine planiraš?', reply: 'Oko 200 grama kuhane.', ans: { main: 'Za 200g treba {12 jedinica.}', detail: '200g kuhane tjestenine je oko 56g UH plus umak. Daj inzulin 10 min prije.' } }
     ] },
-    { q: 'Šećer mi je visok već dva sata, što da napravim?', ans: { main: 'Daj korekciju od {3 jedinice.}', detail: 'Ako za sat ne padne, provjeri ketone i pij dosta vode.' }, ctx: [
-      { q: 'Jesi li dao korekciju?', reply: 'Jesam, prije sat vremena.', ans: { main: 'Pričekaj još 30 minuta.', detail: 'Korekcija treba do 2 sata da potpuno djeluje. Pij vodu i izbjegavaj hranu.' } },
-      { q: 'Što si pojeo prije?', reply: 'Pizzu s puno sira.', ans: { main: 'Daj dodatnih {2 jedinice.}', detail: 'Masna hrana usporava apsorpciju i produžuje rast šećera. Ukupno ti treba 5 jedinica.' } }
+    { q: 'Šećer mi je visok, što da napravim?', ans: { main: 'Daj korekciju od {3 jedinice.}', detail: 'Vidim da ti je 13.4 i polako raste. Zadnja korekcija je bila prije 4 sata.' }, ctx: [
+      { q: 'Imaš li simptome?', reply: 'Malo me boli glava.', ans: { main: 'Daj {3 jedinice} i pij vodu.', detail: 'Glavobolja može biti od visokog šećera. Pij 2-3 čaše vode u sljedećih sat vremena.' } },
+      { q: 'Jesi li nešto jeo nedavno?', reply: 'Sendvič prije sat vremena.', ans: { main: 'Daj još {2 jedinice} korekcije.', detail: 'Vidim da si za sendvič dao 6 jedinica — izgleda da je trebalo više. Dodaj korekciju.' } }
     ] },
-    { q: 'Je li normalno da mi šećer padne nakon trčanja?', ans: { main: 'Da, to je normalno.', detail: 'Mišići troše glukozu tijekom vježbanja. Pojedi nešto prije ili smanji bazal.' }, ctx: [
-      { q: 'Koliko dugo si trčao?', reply: 'Sat vremena.', ans: { main: 'Za sat trčanja smanji bazal {50%.}', detail: 'Duže trčanje troši više glukoze. Smanji bazal 30 min prije i pojedi 15g UH.' } }
+    { q: 'Je li normalno da mi šećer padne nakon trčanja?', ans: { main: 'Da, potpuno normalno.', detail: 'Vidim da ti šećer padne prosječno 3.5 mmol/L nakon aktivnosti. Smanji bazal prije treninga.' }, ctx: [
+      { q: 'Planiraš li još trenirati?', reply: 'Da, sutra ujutro opet.', ans: { main: 'Smanji sutra bazal za {40%} sat prije.', detail: 'Prema tvojoj povijesti, šećer ti pada za 3-4 nakon trčanja. Smanji bazal i pojedi 15g UH prije.' } }
     ] },
-    { q: 'Koliko inzulina za dva peciva i čašu mlijeka?', ans: { main: 'Za to ti treba {7 jedinica.}', detail: 'Dva peciva su oko 40g UH, čaša mlijeka dodaje još 12g.' }, ctx: [
-      { q: 'Kakvo je mlijeko?', reply: 'Obično, puno masno.', ans: { main: 'Za to ti treba {7 jedinica.}', detail: 'Punomasno mlijeko ima isti šećer kao obično. 40g UH peciva + 12g mlijeka.' } },
-      { q: 'Kakva su peciva?', reply: 'Bijela, iz pekare.', ans: { main: 'Za bijela peciva treba {8 jedinica.}', detail: 'Bijela peciva imaju viši GI od integralnih — šećer brže raste. Daj inzulin 15 min prije.' } }
+    { q: 'Koliko inzulina za dva peciva i čašu mlijeka?', ans: { main: 'Za to ti treba {7 jedinica.}', detail: 'Dva peciva ~40g UH, mlijeko ~12g. Šećer ti je sad 6.8 — dobar trenutak.' }, ctx: [
+      { q: 'Jesu li peciva integralna?', reply: 'Ne, obična bijela.', ans: { main: 'Za bijela peciva daj {8 jedinica.}', detail: 'Bijela peciva imaju viši GI. Daj inzulin 15 min prije jer šećer brže raste.' } },
+      { q: 'Planiraš li još nešto jesti?', reply: 'Možda malo sira.', ans: { main: 'Ostani na {7 jedinica.}', detail: 'Sir nema značajnih UH, ali usporava apsorpciju. Ne treba dodatni inzulin.' } }
     ] },
-    { q: 'Šećer mi je nizak, što da pojedem da ga brzo podignem?', ans: { main: 'Pojedi 15g brzih ugljikohidrata.', detail: 'Sok od jabuke, tablete glukoze ili 3-4 bombona. Provjeri za 15 min.' }, ctx: [
-      { q: 'Što imaš blizu slatkoga?', reply: 'Sok od jabuke.', ans: { main: 'Popij pola čaše soka.', detail: 'To je oko 15g brzih UH — podignut će šećer za 10 minuta. Provjeri nakon 15 min.' } }
+    { q: 'Šećer mi je nizak, što da pojedem?', ans: { main: 'Pojedi 15g brzih UH odmah.', detail: 'Vidim da ti je 3.8 i pada. Sok, tablete glukoze ili 3-4 bombona — provjeri za 15 min.' }, ctx: [
+      { q: 'Što imaš pri ruci?', reply: 'Imam sok od jabuke.', ans: { main: 'Popij pola čaše soka odmah.', detail: 'To je oko 15g brzih UH. S obzirom da ti je 3.8, to bi trebalo biti dovoljno. Provjeri za 15 min.' } }
     ] },
-    { q: 'Zašto mi je šećer visok ako nisam ništa jeo?', ans: { main: 'Stres podiže šećer.', detail: 'Kortizol i adrenalin potiču jetru da otpusti glukozu. Probaj se opustiti.' }, ctx: [
-      { q: 'Jesi li pod stresom?', reply: 'Da, imam ispit.', ans: { main: 'Stres od ispita diže šećer.', detail: 'Kortizol potiče jetru na otpuštanje glukoze. Probaj duboko disanje ili kratku šetnju.' } },
-      { q: 'Kad si zadnje jeo?', reply: 'Prije 5 sati.', ans: { main: 'Možda ti bazal nije dovoljan.', detail: 'Ako ne jedeš 5 sati a šećer raste, bazalna doza je preniska. Konzultiraj doktora.' } }
+    { q: 'Zašto mi je šećer visok ako nisam ništa jeo?', ans: { main: 'Vidim da nemaš unosa već 6 sati.', detail: 'Moguć je stres ili dawn fenomen. Tvoj bazal možda nije dovoljan za ovo doba dana.' }, ctx: [
+      { q: 'Jesi li pod stresom?', reply: 'Da, imam deadline na poslu.', ans: { main: 'Stres ti diže šećer.', detail: 'Kortizol potiče jetru da otpusti glukozu. Daj malu korekciju od {2 jedinice} i probaj se opustiti.' } },
+      { q: 'Je li ovo čest obrazac?', reply: 'Da, zadnjih par dana.', ans: { main: 'Trebalo bi povećati bazal.', detail: 'Vidim da ti šećer raste u ovo doba već 3 dana. Povećaj bazal za {15%} od 14-18h.' } }
     ] },
-    { q: 'Hoće li mi kava podići šećer ujutro?', ans: { main: 'Kava sama minimalno utječe.', detail: 'Ali mlijeko i šećer dodaju UH. Crna kava je sigurna opcija.' }, ctx: [
-      { q: 'Piješ li s mlijekom?', reply: 'Da, s mlijekom i šećerom.', ans: { main: 'Mlijeko i šećer dodaju {2 jedinice.}', detail: 'Sama kava ne utječe, ali mlijeko + šećer su oko 15g UH. Daj malu dozu uz kavu.' } }
+    { q: 'Hoće li mi kava podići šećer ujutro?', ans: { main: 'Crna kava minimalno utječe.', detail: 'Ali vidim da ti šećer nakon kave obično skoči za 1.5 — piješ li ju s nečim?' }, ctx: [
+      { q: 'Piješ li ju s nečim?', reply: 'S mlijekom i žlicom šećera.', ans: { main: 'Mlijeko i šećer dodaju {2 jedinice.}', detail: 'To je oko 15g UH. Tvoja povijest pokazuje skok od 1.5 nakon kave — ovo je razlog.' } }
     ] },
-    { q: 'Mogu li jesti voće bez da mi šećer skače?', ans: { main: 'Da, uz prave količine.', detail: 'Bobičasto voće ima najmanji utjecaj. Izbjegavaj grožđe i banane u većim količinama.' }, ctx: [
-      { q: 'Koje voće?', reply: 'Jagode i borovnice.', ans: { main: 'Odličan izbor!', detail: 'Bobičasto voće ima nizak GI. Šalica jagoda ima samo 11g UH — sigurno za šećer.' } },
-      { q: 'Koliko komada?', reply: 'Jednu bananu.', ans: { main: 'Jedna banana je OK uz {2 jedinice.}', detail: 'Srednja banana ima 27g UH. S malom dozom inzulina neće previše dići šećer.' } }
+    { q: 'Mogu li jesti voće bez da mi šećer skače?', ans: { main: 'Da, ali ovisi o vrsti.', detail: 'Prema tvojoj povijesti, bobičasto voće ti ne diže šećer značajno, a banana da.' }, ctx: [
+      { q: 'Koje voće planiraš?', reply: 'Jagode, oko 200g.', ans: { main: '200g jagoda je sigurno.', detail: 'To je samo 14g UH. Prema tvojoj povijesti, jagode ti minimalno utječu na šećer.' } },
+      { q: 'Planiraš li ga jesti samo?', reply: 'S jogurtom i medom.', ans: { main: 'Za med dodaj {2 jedinice.}', detail: 'Voće je OK, ali žlica meda ima 17g UH. Jogurt bez šećera ne zahtijeva dodatni inzulin.' } }
     ] },
-    { q: 'Planiram ići na trening, trebam li smanjiti inzulin?', ans: { main: 'Smanji bazal za {30%.}', detail: 'Za sat vremena kardia, smanji 30 min prije. Ponesi brze UH za svaki slučaj.' }, ctx: [
-      { q: 'Kakav trening?', reply: 'Dizanje utega.', ans: { main: 'Smanji bazal za {20%.}', detail: 'Utezi dižu šećer kratkoročno ali troše glukozu nakon. Smanji bazal i prati šećer 2h poslije.' } },
-      { q: 'Koliko dugo?', reply: 'Oko sat i pol.', ans: { main: 'Smanji bazal za {40%.}', detail: 'Za 90 min treninga treba veće smanjenje. Ponesi tablete glukoze za svaki slučaj.' } }
+    { q: 'Planiram ići na trening, trebam li smanjiti inzulin?', ans: { main: 'Smanji bazal za {30%.}', detail: 'Vidim da ti šećer prosječno padne 2.8 nakon treninga. Smanji 30 min prije.' }, ctx: [
+      { q: 'Kakav trening planiraš?', reply: 'Dizanje utega, sat vremena.', ans: { main: 'Smanji bazal za {20%.}', detail: 'Utezi manje snizuju šećer od kardia. Tvoja povijest pokazuje pad od 1.5 nakon utega.' } },
+      { q: 'Koliko dugo planiraš?', reply: 'Sat i pol kardia.', ans: { main: 'Smanji bazal za {40%.}', detail: '90 min kardia značajno troši glukozu. Ponesi tablete glukoze i provjeri šećer svakih 30 min.' } }
     ] },
-    { q: 'Šećer mi je 4.2, trebam li nešto pojesti prije spavanja?', ans: { main: 'Da, pojedi lagani obrok.', detail: 'Kreker s kikiriki maslacem — proteini i masti drže šećer stabilnim preko noći.' }, ctx: [
-      { q: 'Imaš li aktivan inzulin?', reply: 'Da, dao sam prije sat.', ans: { main: 'Pojedi 20g ugljikohidrata odmah.', detail: 'Aktivan inzulin će dodatno sniziti šećer. Pojedi kreker + mlijeko i provjeri za 30 min.' } }
+    { q: 'Trebam li nešto pojesti prije spavanja?', ans: { main: 'Da, pojedi lagani obrok.', detail: 'Šećer ti je 4.8 i lagano pada. Proteini + masti drže šećer stabilnim preko noći.' }, ctx: [
+      { q: 'Što imaš za pojesti?', reply: 'Kreker i kikiriki maslac.', ans: { main: 'Savršen izbor.', detail: 'Kreker daje brze UH da te podigne, kikiriki maslac usporava i drži stabilnim do jutra.' } }
     ] },
-    { q: 'Koliko inzulina za kebab i pomfrit?', ans: { main: 'Trebat će ti {14 jedinica.}', detail: 'Kebab tortilla je ~50g UH, pomfrit dodaje još 40g. Daj split dozu.' }, ctx: [
-      { q: 'Koja veličina porcije?', reply: 'Veliki meni.', ans: { main: 'Za veliki meni treba {17 jedinica.}', detail: 'Veliki kebab + veliki pomfrit su oko 110g UH. Obavezno split doza — pola sad, pola za 45 min.' } }
+    { q: 'Koliko inzulina za kebab i pomfrit?', ans: { main: 'Trebat će ti {14 jedinica.}', detail: 'Kebab tortilla ~50g UH, pomfrit ~40g. Masna hrana pa preporučam split dozu.' }, ctx: [
+      { q: 'Koliko pomfrita?', reply: 'Veliku porciju, oko 250g.', ans: { main: 'Za to treba {17 jedinica.}', detail: '250g pomfrita je ~65g UH. Plus kebab ukupno ~115g UH. Split doza — 10 sad, 7 za 45 min.' } }
     ] },
-    { q: 'Što da radim kad mi šećer naglo padne?', ans: { main: 'Odmah pojedi 15g šećera.', detail: 'Ako padne ispod 3.0, koristi glukagon. Nemoj čekati — reagiraj odmah.' }, ctx: [
-      { q: 'Imaš li glukagon?', reply: 'Da, imam.', ans: { main: 'Drži ga pri ruci.', detail: 'Ako padne ispod 3.0 ili se ne osjećaš dobro, koristi glukagon. Za sada pojedi 15g brzih UH.' } },
-      { q: 'Koliko brzo pada?', reply: 'Jako brzo, strelica dolje.', ans: { main: 'Pojedi 20g šećera odmah.', detail: 'Brzi pad zahtijeva više. Sok + bombone. Ako ne stane za 15 min, koristi glukagon.' } }
+    { q: 'Što da radim, šećer mi naglo pada?', ans: { main: 'Pojedi 15g šećera odmah.', detail: 'Vidim pad od 2.1 u zadnjih 30 min. Brzo reagiraj — sok ili tablete glukoze.' }, ctx: [
+      { q: 'Imaš li glukagon pri ruci?', reply: 'Da, u torbi.', ans: { main: 'Drži ga blizu sebe.', detail: 'Za sada pojedi 20g brzih UH jer pad je brz. Ako se ne stabilizira za 15 min, koristi glukagon.' } }
     ] },
-    { q: 'Je li bolje dati inzulin prije ili poslije jela?', ans: { main: '15 minuta prije jela.', detail: 'To daje inzulinu vremena da počne djelovati kad hrana digne šećer.' }, ctx: [
-      { q: 'Koji tip inzulina?', reply: 'Brzi, Novorapid.', ans: { main: '15 minuta prije jela.', detail: 'Novorapid počne djelovati za 10-15 min. Daj ga neposredno prije obroka za najbolji učinak.' } }
+    { q: 'Je li bolje dati inzulin prije ili poslije jela?', ans: { main: '15 minuta prije jela.', detail: 'Tvoja povijest pokazuje da pre-bolus od 15 min daje najbolje rezultate.' }, ctx: [
+      { q: 'A kad mi je šećer nizak?', reply: 'Sad mi je 4.5.', ans: { main: 'Kod 4.5 daj inzulin s jelom.', detail: 'Ne čekaj 15 min jer bi mogao pasti prenisko. Pojedi i daj inzulin istovremeno.' } }
     ] },
-    { q: 'Zašto mi šećer raste tijekom noći?', ans: { main: 'To je dawn fenomen.', detail: 'Tijelo otpušta hormone između 4-8h. Probaj povećati bazal za to vrijeme.' }, ctx: [
-      { q: 'U koliko sati počne rasti?', reply: 'Oko 5 ujutro.', ans: { main: 'Povećaj bazal od 4h za {20%.}', detail: 'Dawn fenomen tipično počinje oko 4-5h. Postavi povećani bazal od 4:00 do 8:00.' } }
+    { q: 'Zašto mi šećer raste tijekom noći?', ans: { main: 'To je dawn fenomen.', detail: 'Vidim porast od prosječno 2.3 između 4-7h zadnjih tjedan dana.' }, ctx: [
+      { q: 'Može li se to riješiti?', reply: 'Da, kako?', ans: { main: 'Povećaj bazal od 3h za {20%.}', detail: 'Tvoj porast počinje oko 4h. Postavi povećani bazal od 3:00 da preduhitri dawn fenomen.' } }
     ] },
-    { q: 'Koliko ugljikohidrata ima u banani?', ans: { main: 'Srednja banana ima 27g UH.', detail: 'Mala banana oko 20g, velika do 35g. Kombinacija s proteinima usporava apsorpciju.' }, ctx: [
-      { q: 'Koliko je velika?', reply: 'Velika banana.', ans: { main: 'Velika banana ima oko 35g UH.', detail: 'Za veliku bananu daj {3 jedinice.} Kombinacija s kikiriki maslacem usporava apsorpciju.' } }
+    { q: 'Koliko ugljikohidrata ima u banani?', ans: { main: 'Srednja banana ima 27g UH.', detail: 'Prema tvojoj povijesti, banana ti podiže šećer za oko 3.0 bez inzulina.' }, ctx: [
+      { q: 'Trebam li inzulin za nju?', reply: 'Da, koliko?', ans: { main: 'Daj {2 jedinice} za bananu.', detail: 'S obzirom na tvoj omjer (1 jedinica = 12g UH), 2 jedinice su točno za 27g.' } }
     ] },
-    { q: 'Mogu li piti sok od naranče kad imam nizak šećer?', ans: { main: 'Da, to je odličan izbor.', detail: 'Čaša soka ima ~25g brzih UH. Podignut će šećer za 10-15 min.' }, ctx: [
-      { q: 'Koliko je nizak?', reply: 'Šećer je 3.2.', ans: { main: 'Popij punu čašu soka odmah.', detail: 'Kod 3.2 treba brza reakcija. Puna čaša soka ima 25g UH. Provjeri za 15 min.' } },
-      { q: 'Koliko ima šećera?', reply: '100% narančin sok.', ans: { main: 'Popij pola čaše.', detail: '100% sok ima oko 25g UH po čaši. Pola čaše je dovoljno za umjeren pad.' } }
+    { q: 'Mogu li piti sok od naranče?', ans: { main: 'Da, ali pazi na količinu.', detail: 'Šećer ti je trenutno 5.4 i stabilan. Čaša soka ima ~25g brzih UH.' }, ctx: [
+      { q: 'Koliko soka planiraš?', reply: 'Malu čašu, 150ml.', ans: { main: '150ml je sigurno bez inzulina.', detail: 'To je oko 15g UH. S obzirom da ti je šećer 5.4, podignut će ga na oko 7 — sasvim OK.' } },
+      { q: 'Želiš li ga uz obrok?', reply: 'Da, uz doručak.', ans: { main: 'Dodaj {2 jedinice} na dozu za doručak.', detail: 'Sok uz obrok brže diže šećer. Dodaj ga u izračun UH za doručak.' } }
     ] },
     { q: 'Pojeo sam sladoled, koliko da si dam inzulina?', ans: { main: 'Za to daj {6 jedinica.}', detail: 'Dvije kuglice su oko 30g UH. Mast usporava apsorpciju pa daj split dozu.' }, ctx: [
-      { q: 'Koja vrsta sladoleda?', reply: 'Čokoladni.', ans: { main: 'Za čokoladni daj {7 jedinica.}', detail: 'Čokoladni sladoled ima više šećera i masti. Split doza — pola sad, pola za 30 min.' } },
-      { q: 'Koliko kuglica?', reply: 'Tri kuglice.', ans: { main: 'Za tri kuglice treba {9 jedinica.}', detail: 'Tri kuglice su oko 45g UH. Mast usporava, daj split dozu za bolju kontrolu.' } }
+      { q: 'Koliko si točno pojeo?', reply: 'Tri kuglice, oko 180g.', ans: { main: 'Za 180g treba {9 jedinica.}', detail: 'To je oko 45g UH. Daj 5 sad i 4 za 30 min jer mast usporava apsorpciju.' } },
+      { q: 'Kakav sladoled?', reply: 'Domaći, s puno čokolade.', ans: { main: 'Za čokoladni daj {7 jedinica.}', detail: 'Domaći čokoladni ima više masti i šećera. Split doza je obavezna za bolju kontrolu.' } }
     ] },
   ];
   let lastQuestionIndex = -1;
