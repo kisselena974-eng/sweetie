@@ -555,8 +555,9 @@ body {
 .assistant-mic {
   color: var(--color-accent-good);
   cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
   transition:
-    transform var(--duration-short) var(--motion-spatial),
+    transform var(--duration-medium) var(--motion-spatial),
     color var(--duration-medium) var(--motion-effects);
 }
 
@@ -571,6 +572,56 @@ body {
   color: #707070;
   margin-top: 10px;
   letter-spacing: 0.3px;
+  transition: opacity var(--duration-medium) var(--motion-effects);
+}
+
+/* Speech text (word-by-word) */
+.assistant-speech {
+  font-family: 'Roboto Flex', sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--color-text-color);
+  margin-top: 6px;
+  letter-spacing: 0.3px;
+  line-height: 1.4;
+  max-width: 170px;
+  opacity: 0;
+  transition: opacity var(--duration-medium) var(--motion-effects);
+}
+
+/* Listening state: mic shrinks & moves up, text hides, speech appears */
+.assistant-content.listening .assistant-mic {
+  transform: scale(0.7);
+}
+
+.assistant-content.listening .assistant-text {
+  opacity: 0;
+  height: 0;
+  margin: 0;
+  overflow: hidden;
+}
+
+.assistant-content.listening .assistant-speech {
+  opacity: 1;
+}
+
+/* Confirm button on assistant screen (hidden by default) */
+.assistant-confirm-btn {
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity var(--duration-medium) var(--motion-effects),
+    transform var(--duration-short) var(--motion-spatial);
+}
+
+.assistant-confirm-btn.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Prevent :active scale when in listening state */
+.assistant-content.listening .assistant-mic:active {
+  transform: scale(0.7);
 }
 
 /* Assistant glucose display (bottom arc) */
@@ -582,6 +633,7 @@ body {
   height: 100%;
   pointer-events: none;
   z-index: 1;
+  transition: opacity var(--duration-medium) var(--motion-effects);
 }
 
 .assistant-glucose-text {

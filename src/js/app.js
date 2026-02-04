@@ -361,6 +361,9 @@ function initHomeScreen() {
 
   // Initialize graph toggle
   initGraphToggle();
+
+  // Initialize assistant mic interaction
+  initAssistantMic();
 }
 
 /**
@@ -700,6 +703,89 @@ function resetToHomeView() {
 
 // Izloži globalno
 window.resetToHomeView = resetToHomeView;
+
+/**
+ * Initialize assistant mic hold-to-talk interaction
+ */
+function initAssistantMic() {
+  const mic = document.querySelector('.assistant-mic');
+  const content = document.querySelector('.assistant-content');
+  const speechEl = document.querySelector('.assistant-speech');
+  const confirmBtn = document.querySelector('.assistant-confirm-btn');
+  const assistantNav = document.querySelector('.assistant-nav');
+
+  if (!mic || !content || !speechEl) return;
+
+  const speechText = 'Koliko da inzulina uzmem? Pojeo sam srednju pizzu i sok od jabuke.';
+  let wordTimers = [];
+  let isListening = false;
+
+  function startListening() {
+    if (isListening) return;
+    isListening = true;
+
+    // Enter listening state
+    content.classList.add('listening');
+    speechEl.textContent = '';
+
+    // Hide glucose nav
+    if (assistantNav) assistantNav.style.opacity = '0';
+
+    // Animate words one by one
+    const words = speechText.split(' ');
+    let currentText = '';
+
+    words.forEach((word, i) => {
+      const timer = setTimeout(() => {
+        currentText += (i === 0 ? '' : ' ') + word;
+        speechEl.textContent = currentText;
+      }, i * 150);
+      wordTimers.push(timer);
+    });
+
+    // Show confirm button after all words
+    const confirmTimer = setTimeout(() => {
+      if (confirmBtn) confirmBtn.classList.add('visible');
+    }, words.length * 150 + 200);
+    wordTimers.push(confirmTimer);
+  }
+
+  function resetListening() {
+    isListening = false;
+    wordTimers.forEach(t => clearTimeout(t));
+    wordTimers = [];
+
+    content.classList.remove('listening');
+    speechEl.textContent = '';
+    if (confirmBtn) confirmBtn.classList.remove('visible');
+    if (assistantNav) assistantNav.style.opacity = '';
+  }
+
+  // Touch events (mobile)
+  mic.addEventListener('touchstart', (e) => {
+    e.stopPropagation();
+    startListening();
+  }, { passive: true });
+
+  // Click (desktop) — toggle on/off
+  mic.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (isListening) {
+      resetListening();
+    } else {
+      startListening();
+    }
+  });
+
+  // Confirm button resets back to initial state
+  if (confirmBtn) {
+    confirmBtn.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: true });
+    confirmBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      resetListening();
+    });
+  }
+}
 
 /**
  * Initialize page dot navigation (tap any dot to go to that page)
