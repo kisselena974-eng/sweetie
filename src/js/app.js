@@ -721,31 +721,37 @@ function initAssistantMic() {
   if (!mic || !content || !speechEl) return;
 
   const speechData = [
-    { q: 'Koliko da inzulina uzmem? Pojeo sam srednju pizzu i sok od jabuke.', ctx: ['Koliko je prošlo od obroka?', 'Neka aktivnost ubrzo nakon?'] },
-    { q: 'Zašto mi šećer stalno raste poslije doručka?', ctx: ['Što obično jedeš za doručak?'] },
-    { q: 'Mogu li pojesti komad torte ako si dam inzulin?', ctx: ['Koliki je komad?', 'Kakva je torta?'] },
-    { q: 'Koliko jedinica za tanjur tjestenine s umakom?', ctx: ['Koliko je velik tanjur?'] },
-    { q: 'Šećer mi je visok već dva sata, što da napravim?', ctx: ['Jesi li dao korekciju?', 'Što si pojeo prije?'] },
-    { q: 'Je li normalno da mi šećer padne nakon trčanja?', ctx: ['Koliko dugo si trčao?'] },
-    { q: 'Koliko inzulina za dva peciva i čašu mlijeka?', ctx: ['Kakvo je mlijeko?', 'Kakva su peciva?'] },
-    { q: 'Šećer mi je nizak, što da pojedem da ga brzo podignem?', ctx: ['Što imaš blizu slatkoga?'] },
-    { q: 'Zašto mi je šećer visok ako nisam ništa jeo?', ctx: ['Jesi li pod stresom?', 'Kad si zadnje jeo?'] },
-    { q: 'Hoće li mi kava podići šećer ujutro?', ctx: ['Piješ li s mlijekom?'] },
-    { q: 'Mogu li jesti voće bez da mi šećer skače?', ctx: ['Koje voće?', 'Koliko komada?'] },
-    { q: 'Planiram ići na trening, trebam li smanjiti inzulin?', ctx: ['Kakav trening?', 'Koliko dugo?'] },
-    { q: 'Šećer mi je 4.2, trebam li nešto pojesti prije spavanja?', ctx: ['Imaš li aktivan inzulin?'] },
-    { q: 'Koliko inzulina za kebab i pomfrit?', ctx: ['Koja veličina porcije?'] },
-    { q: 'Što da radim kad mi šećer naglo padne?', ctx: ['Imaš li glukagon?', 'Koliko brzo pada?'] },
-    { q: 'Je li bolje dati inzulin prije ili poslije jela?', ctx: ['Koji tip inzulina?'] },
-    { q: 'Zašto mi šećer raste tijekom noći?', ctx: ['U koliko sati počne rasti?'] },
-    { q: 'Koliko ugljikohidrata ima u banani?', ctx: ['Koliko je velika?'] },
-    { q: 'Mogu li piti sok od naranče kad imam nizak šećer?', ctx: ['Koliko je nizak?', 'Koliko ima šećera?'] },
-    { q: 'Pojeo sam sladoled, koliko da si dam inzulina?', ctx: ['Koja vrsta sladoleda?', 'Koliko kuglica?'] },
+    { q: 'Koliko da inzulina uzmem? Pojeo sam srednju pizzu i sok od jabuke.', ctx: ['Koliko je prošlo od obroka?', 'Neka aktivnost ubrzo nakon?'], ans: { main: '{12 jedinica} je optimalno.', detail: 'Prošli put poslije pizze si uzeo 14 i bio je prenizak.' } },
+    { q: 'Zašto mi šećer stalno raste poslije doručka?', ctx: ['Što obično jedeš za doručak?'], ans: { main: 'Vjerojatno previše ugljikohidrata ujutro.', detail: 'Probaj zamijeniti žitarice jajima ili avokadnom — proteini usporavaju apsorpciju.' } },
+    { q: 'Mogu li pojesti komad torte ako si dam inzulin?', ctx: ['Koliki je komad?', 'Kakva je torta?'], ans: { main: 'Da, uz {8 jedinica} unaprijed.', detail: 'Čokoladna torta ima oko 45g UH po komadu. Daj inzulin 15 min prije.' } },
+    { q: 'Koliko jedinica za tanjur tjestenine s umakom?', ctx: ['Koliko je velik tanjur?'], ans: { main: 'Preporučam {10 jedinica}.', detail: 'Srednji tanjur tjestenine ima oko 60g UH. Umak dodaje još 5-10g.' } },
+    { q: 'Šećer mi je visok već dva sata, što da napravim?', ctx: ['Jesi li dao korekciju?', 'Što si pojeo prije?'], ans: { main: 'Daj korekciju od {3 jedinice}.', detail: 'Ako za sat ne padne, provjeri ketone i pij dosta vode.' } },
+    { q: 'Je li normalno da mi šećer padne nakon trčanja?', ctx: ['Koliko dugo si trčao?'], ans: { main: 'Da, to je normalno.', detail: 'Mišići troše glukozu tijekom vježbanja. Pojedi nešto prije ili smanji bazal.' } },
+    { q: 'Koliko inzulina za dva peciva i čašu mlijeka?', ctx: ['Kakvo je mlijeko?', 'Kakva su peciva?'], ans: { main: 'Za to ti treba {7 jedinica}.', detail: 'Dva peciva su oko 40g UH, čaša mlijeka dodaje još 12g.' } },
+    { q: 'Šećer mi je nizak, što da pojedem da ga brzo podignem?', ctx: ['Što imaš blizu slatkoga?'], ans: { main: 'Pojedi 15g brzih ugljikohidrata.', detail: 'Sok od jabuke, tablete glukoze ili 3-4 bombona. Provjeri za 15 min.' } },
+    { q: 'Zašto mi je šećer visok ako nisam ništa jeo?', ctx: ['Jesi li pod stresom?', 'Kad si zadnje jeo?'], ans: { main: 'Stres podiže šećer.', detail: 'Kortizol i adrenalin potiču jetru da otpusti glukozu. Probaj se opustiti.' } },
+    { q: 'Hoće li mi kava podići šećer ujutro?', ctx: ['Piješ li s mlijekom?'], ans: { main: 'Kava sama minimalno utječe.', detail: 'Ali mlijeko i šećer dodaju UH. Crna kava je sigurna opcija.' } },
+    { q: 'Mogu li jesti voće bez da mi šećer skače?', ctx: ['Koje voće?', 'Koliko komada?'], ans: { main: 'Da, uz prave količine.', detail: 'Bobičasto voće ima najmanji utjecaj. Izbjegavaj grožđe i banane u većim količinama.' } },
+    { q: 'Planiram ići na trening, trebam li smanjiti inzulin?', ctx: ['Kakav trening?', 'Koliko dugo?'], ans: { main: 'Smanji bazal za {30%}.', detail: 'Za sat vremena kardia, smanji 30 min prije. Ponesi brze UH za svaki slučaj.' } },
+    { q: 'Šećer mi je 4.2, trebam li nešto pojesti prije spavanja?', ctx: ['Imaš li aktivan inzulin?'], ans: { main: 'Da, pojedi lagani obrok.', detail: 'Kreker s kikiriki maslacem — proteini i masti drže šećer stabilnim preko noći.' } },
+    { q: 'Koliko inzulina za kebab i pomfrit?', ctx: ['Koja veličina porcije?'], ans: { main: 'Trebat će ti {14 jedinica}.', detail: 'Kebab tortilla je ~50g UH, pomfrit dodaje još 40g. Daj split dozu.' } },
+    { q: 'Što da radim kad mi šećer naglo padne?', ctx: ['Imaš li glukagon?', 'Koliko brzo pada?'], ans: { main: 'Odmah pojedi 15g šećera.', detail: 'Ako padne ispod 3.0, koristi glukagon. Nemoj čekati — reagiraj odmah.' } },
+    { q: 'Je li bolje dati inzulin prije ili poslije jela?', ctx: ['Koji tip inzulina?'], ans: { main: '15 minuta prije jela.', detail: 'To daje inzulinu vremena da počne djelovati kad hrana digne šećer.' } },
+    { q: 'Zašto mi šećer raste tijekom noći?', ctx: ['U koliko sati počne rasti?'], ans: { main: 'To je dawn fenomen.', detail: 'Tijelo otpušta hormone između 4-8h. Probaj povećati bazal za to vrijeme.' } },
+    { q: 'Koliko ugljikohidrata ima u banani?', ctx: ['Koliko je velika?'], ans: { main: 'Srednja banana ima 27g UH.', detail: 'Mala banana oko 20g, velika do 35g. Kombinacija s proteinima usporava apsorpciju.' } },
+    { q: 'Mogu li piti sok od naranče kad imam nizak šećer?', ctx: ['Koliko je nizak?', 'Koliko ima šećera?'], ans: { main: 'Da, to je odličan izbor.', detail: 'Čaša soka ima ~25g brzih UH. Podignut će šećer za 10-15 min.' } },
+    { q: 'Pojeo sam sladoled, koliko da si dam inzulina?', ctx: ['Koja vrsta sladoleda?', 'Koliko kuglica?'], ans: { main: 'Za to daj {6 jedinica}.', detail: 'Dvije kuglice su oko 30g UH. Mast usporava apsorpciju pa daj split dozu.' } },
   ];
   let lastQuestionIndex = -1;
   let currentCtx = [];
+  let currentAnswer = null;
   let wordTimers = [];
   let isListening = false;
+
+  const answerEl = document.querySelector('.assistant-answer');
+  const answerMain = document.querySelector('.answer-main');
+  const answerDetail = document.querySelector('.answer-detail');
+  const micBtn = document.querySelector('.assistant-mic-btn');
 
   function getRandomQuestion() {
     let index;
@@ -754,6 +760,7 @@ function initAssistantMic() {
     } while (index === lastQuestionIndex);
     lastQuestionIndex = index;
     currentCtx = speechData[index].ctx;
+    currentAnswer = speechData[index].ans;
 
     // Update context menu buttons
     const ctxBtns = document.querySelectorAll('.assistant-ctx-btn');
@@ -806,11 +813,47 @@ function initAssistantMic() {
     wordTimers.push(confirmTimer);
   }
 
-  function resetListening() {
+  function showAnswer() {
+    if (!currentAnswer || !answerEl) return;
+
+    // Hide listening state
+    wordTimers.forEach(t => clearTimeout(t));
+    wordTimers = [];
+    content.classList.remove('listening');
+    content.style.display = 'none';
+    speechEl.textContent = '';
+    if (confirmBtn) confirmBtn.classList.remove('visible');
+    if (addBtn) addBtn.classList.remove('visible');
+
+    // Close context menu if open
+    const ctxMenu = document.querySelector('.assistant-context-menu');
+    if (ctxMenu) ctxMenu.classList.remove('open');
+
+    // Build main text with accent spans for {bracketed} parts
+    const mainHtml = currentAnswer.main.replace(
+      /\{(.+?)\}/g,
+      '<span class="accent">$1</span>'
+    );
+    answerMain.innerHTML = mainHtml;
+    if (answerDetail) answerDetail.textContent = currentAnswer.detail;
+
+    // Show answer and mic button, show glucose nav
+    answerEl.classList.add('visible');
+    if (micBtn) micBtn.classList.add('visible');
+    if (assistantNav) assistantNav.style.opacity = '';
+  }
+
+  function resetToInitial() {
     isListening = false;
     wordTimers.forEach(t => clearTimeout(t));
     wordTimers = [];
 
+    // Hide answer
+    if (answerEl) answerEl.classList.remove('visible');
+    if (micBtn) micBtn.classList.remove('visible');
+
+    // Reset listening/content state
+    content.style.display = '';
     content.classList.remove('listening');
     speechEl.textContent = '';
     if (confirmBtn) confirmBtn.classList.remove('visible');
@@ -836,18 +879,27 @@ function initAssistantMic() {
   mic.addEventListener('click', (e) => {
     e.stopPropagation();
     if (isListening) {
-      resetListening();
+      resetToInitial();
     } else {
       startListening();
     }
   });
 
-  // Confirm button resets back to initial state
+  // Confirm button shows answer
   if (confirmBtn) {
     confirmBtn.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: true });
     confirmBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      resetListening();
+      showAnswer();
+    });
+  }
+
+  // Mic button returns to initial state
+  if (micBtn) {
+    micBtn.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: true });
+    micBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      resetToInitial();
     });
   }
 }

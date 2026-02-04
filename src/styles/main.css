@@ -630,6 +630,65 @@ body {
   transform: scale(0.7);
 }
 
+/* Answer view (shown after confirm) */
+.assistant-answer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0 30px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--duration-medium) var(--motion-effects);
+  z-index: 3;
+}
+
+.assistant-answer.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.answer-main {
+  font-family: 'Roboto Flex', sans-serif;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-text-color);
+  line-height: 1.3;
+  margin-bottom: 8px;
+}
+
+.answer-main .accent {
+  color: var(--color-accent-good);
+}
+
+.answer-detail {
+  font-family: 'Roboto Flex', sans-serif;
+  font-size: 11px;
+  font-weight: 400;
+  color: #707070;
+  line-height: 1.4;
+  max-width: 160px;
+}
+
+/* Mic button (returns to initial state from answer view) */
+.assistant-mic-btn {
+  z-index: 10;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity var(--duration-medium) var(--motion-effects);
+}
+
+.assistant-mic-btn.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
 /* Assistant glucose display (bottom arc) */
 .assistant-nav {
   position: absolute;
