@@ -147,6 +147,10 @@ function prevScreen() {
  * Handle mouse/touch start
  */
 function handleDragStart(e) {
+  // Don't interfere with button clicks (same check as touch handler)
+  if (e.target.closest('button') || e.target.closest('.context-btn')) {
+    return;
+  }
   isDragging = true;
   startY = e.clientY || e.touches?.[0]?.clientY || 0;
   currentY = startY;
@@ -324,12 +328,24 @@ function initHomeScreen() {
     setTimeout(() => {
       const blobElement = homeScreen.querySelector('.glucose-blob');
       if (blobElement) {
+        // Desktop: click event
         blobElement.addEventListener('click', () => {
-          // Don't toggle graph if blob was just dragged
           if (glucoseBlob && glucoseBlob.wasRecentlyDragged()) {
             return;
           }
           toggleGraphView();
+        });
+
+        // Mobile: touchend (because blob's touchstart preventDefault blocks click)
+        blobElement.addEventListener('touchend', (e) => {
+          if (glucoseBlob && glucoseBlob.wasRecentlyDragged()) {
+            return;
+          }
+          // Only toggle if finger didn't move (tap, not drag)
+          if (glucoseBlob && !glucoseBlob.hasMoved) {
+            e.preventDefault(); // Prevent synthetic click
+            toggleGraphView();
+          }
         });
       }
     }, 100);

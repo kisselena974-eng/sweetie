@@ -38,9 +38,10 @@ body {
   pointer-events: none;
   z-index: 0;
   filter: brightness(0.7);
-    /* Fine-tune position if circle doesn't align perfectly */
-  top: var(--mockup-offset-y, 0);
-  left: var(--mockup-offset-x, 0);
+  /* Center mockup on display */
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) translate(var(--mockup-offset-x, 0px), var(--mockup-offset-y, 0px));
 }
 
 /* Glass glow overlay (Material Design radial highlights) */

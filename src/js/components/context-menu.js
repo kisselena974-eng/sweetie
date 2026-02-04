@@ -8,9 +8,10 @@ class ContextMenuController {
     this.isOpen = false;
     this.isAnimating = false;
 
-    // DOM elements
-    this.addBtn = document.querySelector('.add-context-btn');
-    this.plusIcon = document.querySelector('.add-context-btn .plus-icon');
+    // DOM elements (scope to home screen only)
+    const homeScreen = document.querySelector('[data-screen="home"]');
+    this.addBtn = homeScreen ? homeScreen.querySelector('.add-context-btn') : null;
+    this.plusIcon = this.addBtn ? this.addBtn.querySelector('.plus-icon') : null;
     this.contextMenu = document.querySelector('.context-menu');
     this.contextBtns = document.querySelectorAll('.context-btn');
     this.graph = document.querySelector('.glucose-graph');
