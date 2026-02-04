@@ -591,8 +591,8 @@ body {
 
 /* Listening state: mic shrinks & moves up, text hides, speech appears */
 .assistant-content.listening {
-  justify-content: flex-start;
-  padding-top: 50px;
+  justify-content: flex-end;
+  padding-top: 0;
   padding-bottom: 80px;
 }
 
