@@ -47,6 +47,7 @@ let isDragging = false;
 let startY = 0;
 let currentY = 0;
 const SWIPE_THRESHOLD = 50;
+let lastTouchTime = 0; // Prevents synthetic mouse events after touch
 
 /**
  * Navigate to a screen by name with animated transitions
@@ -147,7 +148,10 @@ function prevScreen() {
  * Handle mouse/touch start
  */
 function handleDragStart(e) {
-  // Don't interfere with button clicks (same check as touch handler)
+  // Ignore synthetic mouse events fired after touch (300ms delay causes bugs)
+  if (Date.now() - lastTouchTime < 500) return;
+
+  // Don't interfere with button clicks
   if (e.target.closest('button') || e.target.closest('.context-btn')) {
     return;
   }
@@ -161,6 +165,7 @@ function handleDragStart(e) {
  */
 function handleDragMove(e) {
   if (!isDragging) return;
+  if (Date.now() - lastTouchTime < 500) return;
   currentY = e.clientY || e.touches?.[0]?.clientY || 0;
 }
 
@@ -169,6 +174,7 @@ function handleDragMove(e) {
  */
 function handleDragEnd() {
   if (!isDragging) return;
+  if (Date.now() - lastTouchTime < 500) { isDragging = false; return; }
   isDragging = false;
 
   // Don't change page if blob is being dragged
@@ -191,6 +197,8 @@ function handleDragEnd() {
  * Handle touch start (mobile)
  */
 function handleTouchStart(e) {
+  lastTouchTime = Date.now();
+
   // Don't interfere with button clicks
   if (e.target.closest('button') || e.target.closest('.context-btn')) {
     return;
