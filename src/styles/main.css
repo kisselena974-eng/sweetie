@@ -1,7 +1,11 @@
-* {
+*, *::before, *::after {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+}
+
+html {
+  background: #000;
 }
 
 body {
@@ -330,18 +334,20 @@ body {
   z-index: 10;
   /* Black outline creates visual margin from other elements */
   box-shadow: 0 0 0 6px var(--color-background);
-  transition:
-    transform var(--duration-short) var(--motion-spatial),
-    background-color var(--duration-short) var(--motion-effects);
+  /* No CSS transition - spring animation handles position and bg */
+  -webkit-tap-highlight-color: transparent;
 }
 
 .add-context-btn:hover {
   background: var(--button-bg-hover);
 }
 
-.add-context-btn:active {
-  background: var(--button-bg-pressed);
-  transform: translateY(-50%) scale(0.92);
+/* Only apply :active on non-touch (hover-capable) devices */
+@media (hover: hover) {
+  .add-context-btn:active {
+    background: var(--button-bg-pressed);
+    transform: translateY(-50%) scale(0.92);
+  }
 }
 
 .add-context-btn .plus-icon {

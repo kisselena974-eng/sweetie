@@ -66,6 +66,11 @@ class ContextMenuController {
   init() {
     if (!this.addBtn) return;
 
+    // Stop all touch events from bubbling to display (prevents swipe/drag interference)
+    this.addBtn.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: true });
+    this.addBtn.addEventListener('touchmove', (e) => e.stopPropagation(), { passive: true });
+    this.addBtn.addEventListener('touchend', (e) => e.stopPropagation(), { passive: true });
+
     // Override the default click handler
     this.addBtn.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -74,6 +79,8 @@ class ContextMenuController {
 
     // Context button handlers
     this.contextBtns.forEach(btn => {
+      btn.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: true });
+      btn.addEventListener('touchend', (e) => e.stopPropagation(), { passive: true });
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
         const action = btn.dataset.action;
