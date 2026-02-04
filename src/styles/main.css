@@ -391,21 +391,38 @@ body {
   opacity: 0;
   transform: scale(0.8);
   pointer-events: none;
+  -webkit-tap-highlight-color: transparent;
+  /* CSS transition handles show/hide (replaces spring on mobile) */
   transition:
-    background-color var(--duration-short) var(--motion-effects);
+    opacity var(--duration-medium) var(--motion-effects),
+    transform var(--duration-medium) var(--motion-spatial);
 }
 
+/* Stagger delays for each button */
+.context-btn[data-action="meal"] { transition-delay: 0ms; }
+.context-btn[data-action="insulin"] { transition-delay: 40ms; }
+.context-btn[data-action="med"] { transition-delay: 80ms; }
+.context-btn[data-action="activity"] { transition-delay: 120ms; }
+
 .context-menu.open .context-btn {
+  opacity: 1;
+  transform: scale(1);
   pointer-events: auto;
 }
 
-.context-btn:hover {
-  background: var(--button-bg-hover);
-}
+/* Reverse stagger on close */
+.context-menu:not(.open) .context-btn[data-action="meal"] { transition-delay: 90ms; }
+.context-menu:not(.open) .context-btn[data-action="insulin"] { transition-delay: 60ms; }
+.context-menu:not(.open) .context-btn[data-action="med"] { transition-delay: 30ms; }
+.context-menu:not(.open) .context-btn[data-action="activity"] { transition-delay: 0ms; }
 
-.context-btn:active {
-  background: var(--button-bg-pressed);
-  transform: scale(0.95);
+@media (hover: hover) {
+  .context-btn:hover {
+    background: var(--button-bg-hover);
+  }
+  .context-btn:active {
+    background: var(--button-bg-pressed);
+  }
 }
 
 /* Button positions (matching design home-5.png) */

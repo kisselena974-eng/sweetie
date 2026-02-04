@@ -17,8 +17,7 @@ class ContextMenuController {
     this.graph = document.querySelector('.glucose-graph');
     this.blob = null; // Will be set after blob is created
 
-    // Spring instances for coordinated animation
-    // Button position: 10 → 104 (center minus half button width: 126 - 22 = 104)
+    // Spring instances for + button and graph (not menu buttons - CSS handles those)
     this.buttonPositionSpring = new Spring({
       stiffness: 300,
       damping: 22,
@@ -27,9 +26,6 @@ class ContextMenuController {
       onUpdate: (value) => this.updateButtonPosition(value)
     });
 
-    // Icon rotation handled by CSS transition (simpler, more reliable)
-
-    // Graph offset: 0 → 280px (slides right and fully out of view)
     this.graphOffsetSpring = new Spring({
       stiffness: 250,
       damping: 20,
@@ -38,20 +34,6 @@ class ContextMenuController {
       onUpdate: (value) => this.updateGraphOffset(value)
     });
 
-    // Menu button springs (for staggered animation)
-    this.menuButtonSprings = [];
-    this.contextBtns.forEach((btn, index) => {
-      const spring = new Spring({
-        stiffness: 400,
-        damping: 28,
-        mass: 0.5,
-        initialValue: 0,
-        onUpdate: (value) => this.updateMenuButton(btn, value)
-      });
-      this.menuButtonSprings.push(spring);
-    });
-
-    // Button background: gray (0) → black (1)
     this.buttonBgSpring = new Spring({
       stiffness: 300,
       damping: 25,
@@ -110,10 +92,16 @@ class ContextMenuController {
     this.isAnimating = true;
     this.isOpen = true;
 
-    // Add open class for pointer events
+    // Clear any inline styles on context buttons (let CSS take over)
+    this.contextBtns.forEach(btn => {
+      btn.style.opacity = '';
+      btn.style.transform = '';
+    });
+
+    // Add open class - CSS transitions handle button show/hide with stagger
     this.contextMenu.classList.add('open');
 
-    // Animate button to center
+    // Animate + button to center
     this.buttonPositionSpring.setTarget(104);
 
     // Rotate icon to X (45°) via CSS
@@ -124,14 +112,6 @@ class ContextMenuController {
 
     // Slide graph to the right (fully out of view)
     this.graphOffsetSpring.setTarget(280);
-
-    // Staggered animation for menu buttons
-    const staggerDelay = 40; // ms between each button
-    this.contextBtns.forEach((btn, index) => {
-      setTimeout(() => {
-        this.menuButtonSprings[index].setTarget(1);
-      }, index * staggerDelay);
-    });
 
     // Animation complete
     setTimeout(() => {
@@ -145,7 +125,10 @@ class ContextMenuController {
     this.isAnimating = true;
     this.isOpen = false;
 
-    // Animate button back to left
+    // Remove open class - CSS transitions handle button hide with reverse stagger
+    this.contextMenu.classList.remove('open');
+
+    // Animate + button back to left
     this.buttonPositionSpring.setTarget(10);
 
     // Rotate icon back to +
@@ -157,19 +140,8 @@ class ContextMenuController {
     // Slide graph back
     this.graphOffsetSpring.setTarget(0);
 
-    // Reverse staggered animation for menu buttons
-    const staggerDelay = 30;
-    const reversedButtons = [...this.contextBtns].reverse();
-    reversedButtons.forEach((btn, index) => {
-      const originalIndex = this.contextBtns.length - 1 - index;
-      setTimeout(() => {
-        this.menuButtonSprings[originalIndex].setTarget(0);
-      }, index * staggerDelay);
-    });
-
     // Animation complete
     setTimeout(() => {
-      this.contextMenu.classList.remove('open');
       this.isAnimating = false;
     }, 400);
   }
@@ -179,9 +151,7 @@ class ContextMenuController {
     this.addBtn.style.left = `${x}px`;
   }
 
-
   updateGraphOffset(offset) {
-    // Apply offset to graph SVG content
     if (this.graph) {
       const svg = this.graph.querySelector('.graph-svg');
       if (svg) {
@@ -189,10 +159,7 @@ class ContextMenuController {
       }
     }
 
-    // Also offset the blob if visible
     if (this.blob && !this.blob.classList.contains('fade-out')) {
-      // Blob uses translate(-50%, -50%), so we need to adjust
-      const currentTransform = this.blob.style.transform || 'translate(-50%, -50%)';
       if (offset > 0) {
         this.blob.style.transform = `translate(calc(-50% + ${offset}px), -50%)`;
       } else {
@@ -201,15 +168,8 @@ class ContextMenuController {
     }
   }
 
-  updateMenuButton(btn, progress) {
-    // progress: 0 = hidden, 1 = visible
-    btn.style.opacity = progress;
-    btn.style.transform = `scale(${0.8 + progress * 0.2})`;
-  }
-
   updateButtonBackground(progress) {
     if (!this.addBtn) return;
-    // Interpolate from gray (#2C2C2C / rgb 44,44,44) to black (#000000)
     const gray = 44;
     const value = Math.round(gray * (1 - progress));
     this.addBtn.style.backgroundColor = `rgb(${value}, ${value}, ${value})`;
@@ -218,13 +178,11 @@ class ContextMenuController {
   handleContextAction(action) {
     console.log(`Context action: ${action}`);
 
-    // Find the clicked button and add active state (transparent background)
     const clickedBtn = this.contextMenu.querySelector(`[data-action="${action}"]`);
     if (clickedBtn) {
       clickedBtn.classList.add('active');
     }
 
-    // Emit event for app to handle
     const event = new CustomEvent('contextMenuAction', {
       detail: { action }
     });
@@ -238,22 +196,21 @@ class ContextMenuController {
     this.isOpen = false;
     this.isAnimating = false;
 
-    // Reset button states
+    // Reset context buttons (clear inline styles, let CSS defaults apply)
     this.contextBtns.forEach((btn) => {
-      btn.style.opacity = '0';
-      btn.style.transform = 'scale(0.8)';
+      btn.style.opacity = '';
+      btn.style.transform = '';
       btn.classList.remove('active');
     });
 
-    // Reset button position and rotation
+    // Reset + button position and rotation
     this.addBtn.style.left = '10px';
     this.addBtn.style.backgroundColor = '';
     if (this.plusIcon) this.plusIcon.classList.remove('rotated');
 
-    // Reset springs to initial values
+    // Reset springs
     this.buttonPositionSpring.setValue(10);
     this.buttonBgSpring.setValue(0);
-    this.menuButtonSprings.forEach(s => s.setValue(0));
     this.graphOffsetSpring.setValue(0);
 
     // Reset graph/blob transforms
@@ -269,13 +226,9 @@ class ContextMenuController {
     this.contextMenu.classList.remove('open');
   }
 
-  /**
-   * Check if menu is currently open
-   */
   isMenuOpen() {
     return this.isOpen;
   }
 }
 
-// Export for use in app.js
 window.ContextMenuController = ContextMenuController;
