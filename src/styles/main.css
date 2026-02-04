@@ -665,6 +665,7 @@ body {
 
 .answer-main .accent {
   color: var(--color-accent-good);
+  white-space: nowrap;
 }
 
 .answer-detail {
