@@ -737,16 +737,22 @@ function initAssistantMic() {
 
     words.forEach((word, i) => {
       const timer = setTimeout(() => {
-        currentText += (i === 0 ? '' : ' ') + word;
-        speechEl.textContent = currentText;
-      }, i * 150);
+        const span = document.createElement('span');
+        span.textContent = (i === 0 ? '' : ' ') + word;
+        span.style.opacity = '0';
+        span.style.transition = 'opacity 0.4s ease';
+        speechEl.appendChild(span);
+        // Trigger reflow then fade in
+        span.offsetHeight;
+        span.style.opacity = '1';
+      }, i * 300);
       wordTimers.push(timer);
     });
 
     // Show confirm button after all words
     const confirmTimer = setTimeout(() => {
       if (confirmBtn) confirmBtn.classList.add('visible');
-    }, words.length * 150 + 200);
+    }, words.length * 300 + 400);
     wordTimers.push(confirmTimer);
   }
 
