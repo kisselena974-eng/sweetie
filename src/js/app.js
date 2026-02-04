@@ -84,6 +84,28 @@ function navigateTo(screenName, direction = 'up') {
 
   // Update nav dots
   updateNavDots(newIndex);
+
+  // Show/hide blob knockout layers based on screen
+  const timeKnockout = document.querySelector('.fixed-time-knockout');
+  const blobKnockout = document.querySelector('.nav-circle-knockout');
+  if (screenName === 'home') {
+    if (timeKnockout) timeKnockout.style.display = '';
+    if (blobKnockout) blobKnockout.style.display = '';
+  } else {
+    if (timeKnockout) timeKnockout.style.display = 'none';
+    if (blobKnockout) blobKnockout.style.display = 'none';
+  }
+
+  // Sync assistant glucose display when navigating to it
+  if (screenName === 'assistant') {
+    const homeGlucose = document.querySelector('.nav-circle-base .nav-glucose textPath');
+    const assistantGlucose = document.querySelector('.assistant-glucose-text textPath');
+    if (homeGlucose && assistantGlucose) {
+      assistantGlucose.textContent = homeGlucose.textContent;
+    }
+    // Update arrow position after value sync
+    setTimeout(() => updateAssistantArrowPosition(), 50);
+  }
 }
 
 /**
@@ -370,6 +392,12 @@ function setGlucoseValue(value) {
     glucoseTextKnockout.textContent = formattedValue;
   }
 
+  // Update assistant screen glucose text
+  const assistantGlucose = document.querySelector('.assistant-glucose-text textPath');
+  if (assistantGlucose) {
+    assistantGlucose.textContent = formattedValue;
+  }
+
   // Use blob's color for glucose text and arrow (matches blob exactly)
   const blobColor = glucoseBlob ? glucoseBlob.getColor() : getColorForGlucose(value);
   const glucoseTextElement = document.querySelector('.nav-circle-base .nav-glucose');
@@ -381,6 +409,21 @@ function setGlucoseValue(value) {
   if (glucoseArrow) {
     glucoseArrow.style.fill = blobColor;
     glucoseArrow.style.stroke = blobColor;
+  }
+
+  // Update assistant screen accent color (mic, glucose, arrow)
+  const assistantMic = document.querySelector('.assistant-mic');
+  const assistantGlucoseText = document.querySelector('.assistant-glucose-text');
+  const assistantArrow = document.querySelector('.assistant-arrow path');
+  if (assistantMic) {
+    assistantMic.style.color = blobColor;
+  }
+  if (assistantGlucoseText) {
+    assistantGlucoseText.style.fill = blobColor;
+  }
+  if (assistantArrow) {
+    assistantArrow.style.fill = blobColor;
+    assistantArrow.style.stroke = blobColor;
   }
 
   // Update arrow position based on text width
@@ -420,6 +463,32 @@ function updateArrowPosition() {
   if (arrowKnockout) {
     arrowKnockout.setAttribute('transform', transform);
   }
+
+  // Update assistant screen arrow position to match
+  updateAssistantArrowPosition();
+}
+
+/**
+ * Update assistant screen arrow position to match glucose text
+ */
+function updateAssistantArrowPosition() {
+  const glucoseTextElement = document.querySelector('.assistant-glucose-text');
+  const arrow = document.querySelector('.assistant-arrow');
+
+  if (!glucoseTextElement || !arrow) return;
+
+  const textBBox = glucoseTextElement.getBBox();
+
+  const gap = 2;
+  const arrowX = textBBox.x + textBBox.width + gap;
+  const arrowY = textBBox.y + (textBBox.height / 2) - 8;
+
+  const arrowCenterX = 6.5;
+  const arrowCenterY = 6.5;
+  const rotation = currentTrendAngle;
+  const transform = `translate(${arrowX}, ${arrowY}) rotate(${rotation}, ${arrowCenterX}, ${arrowCenterY})`;
+
+  arrow.setAttribute('transform', transform);
 }
 
 /**
@@ -737,8 +806,10 @@ function randomizeInitialValues() {
   // Update HTML glucose values
   const glucoseTextBase = document.querySelector('.nav-circle-base .nav-glucose textPath');
   const glucoseTextKnockout = document.querySelector('.nav-circle-knockout .nav-glucose-knockout textPath');
+  const assistantGlucoseText = document.querySelector('.assistant-glucose-text textPath');
   if (glucoseTextBase) glucoseTextBase.textContent = formattedGlucose;
   if (glucoseTextKnockout) glucoseTextKnockout.textContent = formattedGlucose;
+  if (assistantGlucoseText) assistantGlucoseText.textContent = formattedGlucose;
 
   // Update debug slider
   const slider = document.getElementById('glucose-slider');
@@ -859,6 +930,27 @@ document.addEventListener('DOMContentLoaded', () => {
         arrow.style.fill = color;
         arrow.style.stroke = color;
       }
+
+      // Sync assistant screen accent color (mic, glucose, arrow)
+      const assistantMic = document.querySelector('.assistant-mic');
+      const assistantGlucoseText = document.querySelector('.assistant-glucose-text');
+      const assistantArrow = document.querySelector('.assistant-arrow path');
+      if (assistantMic) assistantMic.style.color = color;
+      if (assistantGlucoseText) assistantGlucoseText.style.fill = color;
+      if (assistantArrow) {
+        assistantArrow.style.fill = color;
+        assistantArrow.style.stroke = color;
+      }
     }
+
+    // Sync assistant glucose value from home screen
+    const homeGlucose = document.querySelector('.nav-circle-base .nav-glucose textPath');
+    const assistantGlucose = document.querySelector('.assistant-glucose-text textPath');
+    if (homeGlucose && assistantGlucose) {
+      assistantGlucose.textContent = homeGlucose.textContent;
+    }
+
+    // Update assistant arrow position
+    updateAssistantArrowPosition();
   }, 100);
 });

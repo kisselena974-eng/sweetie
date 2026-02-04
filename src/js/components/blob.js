@@ -730,6 +730,15 @@ class GlucoseBlob {
     clipPath.setAttribute('transform',
       `translate(${tx}, ${ty}) scale(${scale}) translate(-50, -50)`
     );
+
+    // Also sync the fixed-time knockout clip path
+    const timeClipPath = document.getElementById('blobClipTimePath');
+    if (timeClipPath) {
+      timeClipPath.setAttribute('d', pathData);
+      timeClipPath.setAttribute('transform',
+        `translate(${tx}, ${ty}) scale(${scale}) translate(-50, -50)`
+      );
+    }
   }
 
   /**

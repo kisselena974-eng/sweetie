@@ -205,7 +205,9 @@ body {
 }
 
 /* Hide old nav-dots inside screens (replaced by fixed page-dots) */
-.nav-circle-knockout .nav-dot {
+.nav-circle-base .nav-dot,
+.nav-circle-knockout .nav-dot,
+.nav-circle-knockout .nav-dot-knockout {
   display: none;
 }
 
@@ -251,6 +253,7 @@ body {
 }
 
 /* Fixed time knockout layer (black text inside blob area) */
+/* Only visible on home screen where blob exists */
 .fixed-time-knockout {
   position: absolute;
   top: 0;
@@ -492,7 +495,6 @@ body {
 }
 
 /* Placeholder content for other screens */
-.assistant-content,
 .tracking-content {
   display: flex;
   flex-direction: column;
@@ -506,6 +508,69 @@ body {
   color: var(--color-faded-text);
   font-size: var(--text-font-size-s);
   margin-top: var(--spacing-padding-m);
+}
+
+/* ===========================================
+   PAGE 2: AI ASSISTANT
+   =========================================== */
+
+.assistant-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+  padding-bottom: 30px;
+}
+
+.assistant-mic {
+  color: var(--color-accent-good);
+  cursor: pointer;
+  transition:
+    transform var(--duration-short) var(--motion-spatial),
+    color var(--duration-medium) var(--motion-effects);
+}
+
+.assistant-mic:active {
+  transform: scale(0.92);
+}
+
+.assistant-text {
+  font-family: 'Roboto Flex', sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  color: #707070;
+  margin-top: 10px;
+  letter-spacing: 0.3px;
+}
+
+/* Assistant glucose display (bottom arc) */
+.assistant-nav {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.assistant-glucose-text {
+  font-family: 'Roboto Flex', sans-serif;
+  font-size: var(--text-font-size-l);
+  font-weight: 600;
+  fill: var(--color-accent-warning);
+  letter-spacing: 1.5px;
+}
+
+.assistant-arrow {
+  transition: transform var(--duration-short) var(--motion-spatial);
+}
+
+/* Assistant + button (reuses .add-context-btn styles) */
+.assistant-add-btn {
+  z-index: 10;
 }
 
 /* ===========================================
