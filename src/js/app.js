@@ -837,6 +837,12 @@ function initAssistantMic() {
     answerMain.innerHTML = mainHtml;
     if (answerDetail) answerDetail.textContent = currentAnswer.detail;
 
+    // Set accent color to match current glucose/blob color
+    const accentColor = glucoseBlob ? glucoseBlob.getColor() : '';
+    answerMain.querySelectorAll('.accent').forEach(el => {
+      el.style.color = accentColor;
+    });
+
     // Show answer and mic button, show glucose nav
     answerEl.classList.add('visible');
     if (micBtn) micBtn.classList.add('visible');
