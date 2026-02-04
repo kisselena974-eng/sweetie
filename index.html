@@ -194,6 +194,36 @@
         </div>
       </div>
 
+      <!-- Meal Input Screen -->
+      <div class="screen" data-screen="meal-input">
+        <div class="meal-input-content">
+          <svg class="meal-mic" width="60" height="60" viewBox="0 0 25 25" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12.9166 15.2778C12.0486 15.2778 11.3107 14.974 10.7031 14.3663C10.0955 13.7587 9.79164 13.0208 9.79164 12.1528V5.90277C9.79164 5.03472 10.0955 4.29687 10.7031 3.68923C11.3107 3.08159 12.0486 2.77777 12.9166 2.77777C13.7847 2.77777 14.5225 3.08159 15.1302 3.68923C15.7378 4.29687 16.0416 5.03472 16.0416 5.90277V12.1528C16.0416 13.0208 15.7378 13.7587 15.1302 14.3663C14.5225 14.974 13.7847 15.2778 12.9166 15.2778ZM11.9791 20.5903V18.9496C10.4514 18.7587 9.1406 18.125 8.04685 17.0486C6.97046 15.9549 6.3281 14.6441 6.11976 13.1163C6.08504 12.8559 6.15449 12.6302 6.3281 12.4392C6.50171 12.2483 6.71872 12.1528 6.97914 12.1528C7.23956 12.1528 7.45657 12.2483 7.63018 12.4392C7.82115 12.6128 7.94268 12.8299 7.99477 13.0903C8.22046 14.2882 8.79338 15.2691 9.71352 16.033C10.651 16.7795 11.7187 17.1528 12.9166 17.1528C14.1146 17.1528 15.1736 16.7708 16.0937 16.0069C17.0312 15.243 17.6128 14.2708 17.8385 13.0903C17.8906 12.8299 18.0034 12.6128 18.1771 12.4392C18.368 12.2483 18.5937 12.1528 18.8541 12.1528C19.1146 12.1528 19.3316 12.2483 19.5052 12.4392C19.6788 12.6302 19.7482 12.8559 19.7135 13.1163C19.5052 14.6441 18.8541 15.9549 17.7604 17.0486C16.684 18.125 15.3819 18.7587 13.8541 18.9496V20.5903C13.8541 20.8507 13.7587 21.0764 13.5677 21.2674C13.3941 21.441 13.1771 21.5278 12.9166 21.5278C12.6562 21.5278 12.4305 21.441 12.2396 21.2674C12.0659 21.0764 11.9791 20.8507 11.9791 20.5903Z" fill="currentColor"/>
+          </svg>
+          <p class="meal-prompt">Što si pojeo?</p>
+          <p class="meal-speech"></p>
+        </div>
+
+        <!-- Meal options (shown after speech) -->
+        <div class="meal-options">
+          <button class="context-btn meal-option-btn" data-option="0"></button>
+          <button class="context-btn meal-option-btn" data-option="1"></button>
+        </div>
+
+        <!-- Confirm button -->
+        <button class="confirm-btn meal-confirm-btn" aria-label="Potvrdi">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+          </svg>
+        </button>
+
+        <!-- Answer view -->
+        <div class="meal-answer">
+          <p class="meal-answer-main"></p>
+          <p class="meal-answer-detail"></p>
+        </div>
+      </div>
+
       <!-- Insulin Confirmation Screen -->
       <div class="screen" data-screen="insulin-confirm">
         <svg class="nav-circle" viewBox="0 0 252 252" width="252" height="252">
@@ -392,6 +422,7 @@
   <script src="src/js/components/context-menu.js"></script>
   <script src="src/js/components/insulin-input.js"></script>
   <script src="src/js/components/med-input.js"></script>
+  <script src="src/js/components/meal-input.js"></script>
   <script src="src/js/app.js"></script>
 </body>
 </html>

@@ -331,7 +331,7 @@ class MedInputController {
       checkmarkOverlay.style.opacity = '0';
     }, 1100);
 
-    // At 2500ms: fade out confirmation text, fade in nav elements
+    // At 2500ms: fade out confirmation text, fade in nav elements and clock
     setTimeout(() => {
       confirmTextOverlay.style.transition = 'opacity 0.5s ease-out';
       confirmTextOverlay.style.opacity = '0';
@@ -343,6 +343,18 @@ class MedInputController {
       if (addContextBtn) {
         addContextBtn.style.transition = 'opacity 0.6s ease-out';
         addContextBtn.style.opacity = '1';
+      }
+
+      // Fade in clock together with other elements
+      const fixedTime = document.querySelector('.fixed-time');
+      const fixedTimeKnockout = document.querySelector('.fixed-time-knockout');
+      if (fixedTime) {
+        fixedTime.style.transition = 'opacity 0.6s ease-out';
+        fixedTime.style.opacity = '1';
+      }
+      if (fixedTimeKnockout) {
+        fixedTimeKnockout.style.transition = 'opacity 0.6s ease-out';
+        fixedTimeKnockout.style.opacity = '1';
       }
     }, 2500);
 
@@ -375,11 +387,17 @@ class MedInputController {
         homeBlob.style.opacity = '';
       }
 
-      // Show clock again
+      // Reset clock styles
       const fixedTime = document.querySelector('.fixed-time');
       const fixedTimeKnockout = document.querySelector('.fixed-time-knockout');
-      if (fixedTime) fixedTime.style.opacity = '';
-      if (fixedTimeKnockout) fixedTimeKnockout.style.opacity = '';
+      if (fixedTime) {
+        fixedTime.style.transition = '';
+        fixedTime.style.opacity = '';
+      }
+      if (fixedTimeKnockout) {
+        fixedTimeKnockout.style.transition = '';
+        fixedTimeKnockout.style.opacity = '';
+      }
 
       // Unlock glucose blob from center
       if (blobInstance && blobInstance.unlockFromCenter) {

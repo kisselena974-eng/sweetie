@@ -10,6 +10,7 @@ let currentTrendAngle = 45; // Will be randomized on init
 let contextMenuController = null;
 let insulinInputController = null;
 let medInputController = null;
+let mealInputController = null;
 
 // Trend angles: 0=up (rising fast), 45=up-right (rising), 90=right (stable), 135=down-right (falling), 180=down (falling fast)
 const TREND_ANGLES = [0, 45, 90, 135, 180];
@@ -1285,6 +1286,11 @@ document.addEventListener('DOMContentLoaded', () => {
     medInputController = new MedInputController();
   }
 
+  // Initialize meal input controller
+  if (window.MealInputController) {
+    mealInputController = new MealInputController();
+  }
+
   // Listen for context menu actions
   document.addEventListener('contextMenuAction', (e) => {
     const action = e.detail.action;
@@ -1327,6 +1333,22 @@ document.addEventListener('DOMContentLoaded', () => {
         break;
 
       case 'meal':
+        // Show meal input screen
+        if (mealInputController) {
+          mealInputController.show();
+        }
+
+        // After meal screen is visible, reset context menu and hide home
+        setTimeout(() => {
+          const homeScreen = document.querySelector('[data-screen="home"]');
+          if (homeScreen) homeScreen.classList.remove('active');
+
+          if (contextMenuController) {
+            contextMenuController.resetState();
+          }
+        }, 300);
+        break;
+
       case 'activity':
         console.log(`${action} input - coming soon`);
         break;
