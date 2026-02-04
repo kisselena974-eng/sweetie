@@ -229,6 +229,10 @@ body {
 
 .page-dot {
   fill: var(--color-faded-bc);
+  stroke: transparent;
+  stroke-width: 16;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
   transition:
     fill var(--duration-short) var(--motion-effects),
     r var(--duration-short) var(--motion-spatial);

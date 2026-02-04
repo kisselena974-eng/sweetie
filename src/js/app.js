@@ -702,24 +702,49 @@ function resetToHomeView() {
 window.resetToHomeView = resetToHomeView;
 
 /**
- * Initialize graph toggle via nav dot click
+ * Initialize page dot navigation (tap any dot to go to that page)
  */
 function initGraphToggle() {
-  // Click on first page dot to return to blob when graph is visible
   const pageDots = document.querySelectorAll('.page-dots .page-dot');
-  const firstDot = pageDots[0];
 
-  if (firstDot) {
-    firstDot.style.cursor = 'pointer';
-    firstDot.style.pointerEvents = 'auto';
+  pageDots.forEach((dot, index) => {
+    dot.style.cursor = 'pointer';
+    dot.style.pointerEvents = 'auto';
 
-    firstDot.addEventListener('click', (e) => {
+    const handleDotTap = (e) => {
       e.stopPropagation();
-      if (isGraphVisible) {
+      e.preventDefault();
+
+      // First dot on home screen with graph visible: toggle back to blob
+      if (index === 0 && currentScreenIndex === 0 && isGraphVisible) {
         toggleGraphView();
+        return;
       }
+
+      // Navigate to the screen this dot represents
+      if (index !== currentScreenIndex && index < screens.length) {
+        const direction = index > currentScreenIndex ? 'up' : 'down';
+        navigateTo(screens[index], direction);
+      }
+    };
+
+    // Touch handler (mobile)
+    dot.addEventListener('touchend', (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      handleDotTap(e);
+    }, { passive: false });
+
+    // Click handler (desktop)
+    dot.addEventListener('click', (e) => {
+      handleDotTap(e);
     });
-  }
+
+    // Prevent touch events from triggering swipe navigation
+    dot.addEventListener('touchstart', (e) => {
+      e.stopPropagation();
+    }, { passive: true });
+  });
 }
 
 /**
