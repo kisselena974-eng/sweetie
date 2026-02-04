@@ -565,15 +565,6 @@ body {
   transform: scale(0.92);
 }
 
-.assistant-text {
-  font-family: 'Roboto Flex', sans-serif;
-  font-size: 13px;
-  font-weight: 400;
-  color: #707070;
-  margin-top: 10px;
-  letter-spacing: 0.3px;
-  transition: opacity var(--duration-medium) var(--motion-effects);
-}
 
 /* Speech text (word-by-word) */
 .assistant-speech {
@@ -598,13 +589,6 @@ body {
 
 .assistant-content.listening .assistant-mic {
   transform: scale(0.7);
-}
-
-.assistant-content.listening .assistant-text {
-  opacity: 0;
-  height: 0;
-  margin: 0;
-  overflow: hidden;
 }
 
 .assistant-content.listening .assistant-speech {
@@ -652,6 +636,29 @@ body {
 
 .assistant-arrow {
   transition: transform var(--duration-short) var(--motion-spatial);
+}
+
+/* "Postavi pitanje." label on left (where + button appears later) */
+.assistant-prompt {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+  font-family: 'Roboto Flex', sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  color: #707070;
+  line-height: 1.3;
+  z-index: 2;
+  transition: opacity var(--duration-medium) var(--motion-effects);
+}
+
+.assistant-content.listening ~ .assistant-prompt {
+  opacity: 0;
+  pointer-events: none;
 }
 
 /* Assistant + button (reuses .add-context-btn styles) */
