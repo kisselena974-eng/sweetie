@@ -720,39 +720,53 @@ function initAssistantMic() {
 
   if (!mic || !content || !speechEl) return;
 
-  const speechQuestions = [
-    'Koliko da inzulina uzmem? Pojeo sam srednju pizzu i sok od jabuke.',
-    'Zašto mi šećer stalno raste poslije doručka?',
-    'Mogu li pojesti komad torte ako si dam inzulin?',
-    'Koliko jedinica za tanjur tjestenine s umakom?',
-    'Šećer mi je visok već dva sata, što da napravim?',
-    'Je li normalno da mi šećer padne nakon trčanja?',
-    'Koliko inzulina za dva peciva i čašu mlijeka?',
-    'Šećer mi je nizak, što da pojedem da ga brzo podignem?',
-    'Zašto mi je šećer visok ako nisam ništa jeo?',
-    'Hoće li mi kava podići šećer ujutro?',
-    'Mogu li jesti voće bez da mi šećer skače?',
-    'Planiram ići na trening, trebam li smanjiti inzulin?',
-    'Šećer mi je 4.2, trebam li nešto pojesti prije spavanja?',
-    'Koliko inzulina za kebab i pomfrit?',
-    'Što da radim kad mi šećer naglo padne?',
-    'Je li bolje dati inzulin prije ili poslije jela?',
-    'Zašto mi šećer raste tijekom noći?',
-    'Koliko ugljikohidrata ima u banani?',
-    'Mogu li piti sok od naranče kad imam nizak šećer?',
-    'Pojeo sam sladoled, koliko da si dam inzulina?',
+  const speechData = [
+    { q: 'Koliko da inzulina uzmem? Pojeo sam srednju pizzu i sok od jabuke.', ctx: ['Koliko je prošlo od obroka?', 'Neka aktivnost ubrzo nakon?'] },
+    { q: 'Zašto mi šećer stalno raste poslije doručka?', ctx: ['Što obično jedem za doručak?'] },
+    { q: 'Mogu li pojesti komad torte ako si dam inzulin?', ctx: ['Koliki je komad?', 'Kakva je torta?'] },
+    { q: 'Koliko jedinica za tanjur tjestenine s umakom?', ctx: ['Koliko je velik tanjur?'] },
+    { q: 'Šećer mi je visok već dva sata, što da napravim?', ctx: ['Jesam li dao korekciju?', 'Imam li ketone?'] },
+    { q: 'Je li normalno da mi šećer padne nakon trčanja?', ctx: ['Koliko dugo sam trčao?'] },
+    { q: 'Koliko inzulina za dva peciva i čašu mlijeka?', ctx: ['Kakvo je mlijeko?', 'Kakva su peciva?'] },
+    { q: 'Šećer mi je nizak, što da pojedem da ga brzo podignem?', ctx: ['Koliko je nizak?'] },
+    { q: 'Zašto mi je šećer visok ako nisam ništa jeo?', ctx: ['Jesam li pod stresom?', 'Kad sam zadnji jeo?'] },
+    { q: 'Hoće li mi kava podići šećer ujutro?', ctx: ['Pijem li s mlijekom?'] },
+    { q: 'Mogu li jesti voće bez da mi šećer skače?', ctx: ['Koje voće?', 'Koliko komada?'] },
+    { q: 'Planiram ići na trening, trebam li smanjiti inzulin?', ctx: ['Kakav trening?', 'Koliko dugo?'] },
+    { q: 'Šećer mi je 4.2, trebam li nešto pojesti prije spavanja?', ctx: ['Imam li aktivan inzulin?'] },
+    { q: 'Koliko inzulina za kebab i pomfrit?', ctx: ['Koja veličina porcije?'] },
+    { q: 'Što da radim kad mi šećer naglo padne?', ctx: ['Imam li glukagon?', 'Koliko brzo pada?'] },
+    { q: 'Je li bolje dati inzulin prije ili poslije jela?', ctx: ['Koji tip inzulina?'] },
+    { q: 'Zašto mi šećer raste tijekom noći?', ctx: ['U koliko sati počne rasti?'] },
+    { q: 'Koliko ugljikohidrata ima u banani?', ctx: ['Koliko je velika?'] },
+    { q: 'Mogu li piti sok od naranče kad imam nizak šećer?', ctx: ['Koliko je nizak?', 'Imam li simptome?'] },
+    { q: 'Pojeo sam sladoled, koliko da si dam inzulina?', ctx: ['Koja vrsta sladoleda?', 'Koliko kuglica?'] },
   ];
   let lastQuestionIndex = -1;
+  let currentCtx = [];
   let wordTimers = [];
   let isListening = false;
 
   function getRandomQuestion() {
     let index;
     do {
-      index = Math.floor(Math.random() * speechQuestions.length);
+      index = Math.floor(Math.random() * speechData.length);
     } while (index === lastQuestionIndex);
     lastQuestionIndex = index;
-    return speechQuestions[index];
+    currentCtx = speechData[index].ctx;
+
+    // Update context menu buttons
+    const ctxBtns = document.querySelectorAll('.assistant-ctx-btn');
+    ctxBtns.forEach((btn, i) => {
+      if (i < currentCtx.length) {
+        btn.textContent = currentCtx[i];
+        btn.style.display = '';
+      } else {
+        btn.style.display = 'none';
+      }
+    });
+
+    return speechData[index].q;
   }
 
   function startListening() {
