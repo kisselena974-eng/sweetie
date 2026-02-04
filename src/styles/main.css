@@ -590,6 +590,11 @@ body {
 }
 
 /* Listening state: mic shrinks & moves up, text hides, speech appears */
+.assistant-content.listening {
+  justify-content: flex-start;
+  padding-top: 55px;
+}
+
 .assistant-content.listening .assistant-mic {
   transform: scale(0.7);
 }
