@@ -716,6 +716,7 @@ function initAssistantMic() {
   const speechEl = document.querySelector('.assistant-speech');
   const confirmBtn = document.querySelector('.assistant-confirm-btn');
   const assistantNav = document.querySelector('.assistant-nav');
+  const addBtn = document.querySelector('.assistant-add-btn');
 
   if (!mic || !content || !speechEl) return;
 
@@ -783,9 +784,10 @@ function initAssistantMic() {
       wordTimers.push(timer);
     });
 
-    // Show confirm button after all words
+    // Show confirm button and + button after all words
     const confirmTimer = setTimeout(() => {
       if (confirmBtn) confirmBtn.classList.add('visible');
+      if (addBtn) addBtn.classList.add('visible');
     }, words.length * 300 + 400);
     wordTimers.push(confirmTimer);
   }
@@ -798,6 +800,15 @@ function initAssistantMic() {
     content.classList.remove('listening');
     speechEl.textContent = '';
     if (confirmBtn) confirmBtn.classList.remove('visible');
+    if (addBtn) {
+      addBtn.classList.remove('visible');
+      addBtn.style.backgroundColor = '';
+      const icon = addBtn.querySelector('.plus-icon');
+      if (icon) icon.classList.remove('rotated');
+    }
+    // Close context menu if open
+    const ctxMenu = document.querySelector('.assistant-context-menu');
+    if (ctxMenu) ctxMenu.classList.remove('open');
     if (assistantNav) assistantNav.style.opacity = '';
   }
 
