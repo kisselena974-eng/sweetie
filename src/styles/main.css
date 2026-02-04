@@ -756,9 +756,10 @@ body {
   position: static;
   font-size: 12px;
   font-weight: 400;
-  padding: 8px 8px;
-  width: auto;
+  padding: 8px 10px;
+  width: fit-content;
   max-width: 136px;
+  align-self: center;
 }
 
 .assistant-context-menu.open .assistant-ctx-btn {
