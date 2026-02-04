@@ -792,7 +792,7 @@ body {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: #2c2c2c;
+  background: transparent;
   border: none;
   cursor: pointer;
   display: flex;
@@ -800,11 +800,11 @@ body {
   justify-content: center;
   transition:
     transform var(--duration-short) var(--motion-spatial),
-    background-color var(--duration-short) var(--motion-effects);
+    opacity var(--duration-short) var(--motion-effects);
 }
 
 .debug-toggle:hover {
-  background: #3c3c3c;
+  opacity: 0.7;
 }
 
 .debug-toggle:active {
