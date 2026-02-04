@@ -671,6 +671,12 @@ body {
   background: var(--color-background);
   opacity: 0;
   transition: opacity var(--duration-medium) var(--motion-effects);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 0 30px;
 }
 
 .assistant-context-menu.open {
@@ -680,22 +686,10 @@ body {
 
 /* Override shared .context-btn styles for assistant */
 .assistant-ctx-btn {
+  position: static;
   font-size: 12px;
   font-weight: 400;
   max-width: 140px;
-}
-
-/* Positions matching design home2-27.png */
-.assistant-ctx-btn[data-ctx="0"] {
-  top: 80px;
-  right: 30px;
-  transition-delay: 0ms;
-}
-
-.assistant-ctx-btn[data-ctx="1"] {
-  bottom: 90px;
-  left: 30px;
-  transition-delay: 60ms;
 }
 
 .assistant-context-menu.open .assistant-ctx-btn {
