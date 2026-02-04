@@ -581,7 +581,7 @@ body {
   font-size: 11px;
   font-weight: 400;
   color: #707070;
-  margin-top: 6px;
+  margin-top: 4px;
   letter-spacing: 0.3px;
   line-height: 1.4;
   max-width: 130px;
@@ -592,7 +592,8 @@ body {
 /* Listening state: mic shrinks & moves up, text hides, speech appears */
 .assistant-content.listening {
   justify-content: flex-start;
-  padding-top: 55px;
+  padding-top: 50px;
+  padding-bottom: 80px;
 }
 
 .assistant-content.listening .assistant-mic {
