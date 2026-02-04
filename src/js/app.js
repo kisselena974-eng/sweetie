@@ -987,13 +987,12 @@ function initAssistantMic() {
     if (assistantNav) assistantNav.style.opacity = '';
   }
 
-  // Touch events (mobile)
+  // Prevent touch from bubbling (no action on touchstart, let click handle it)
   mic.addEventListener('touchstart', (e) => {
     e.stopPropagation();
-    startListening();
   }, { passive: true });
 
-  // Click (desktop) — toggle on/off
+  // Click handles both mobile and desktop
   mic.addEventListener('click', (e) => {
     e.stopPropagation();
     if (isListening) {
