@@ -916,6 +916,77 @@ body {
   line-height: 1.3;
 }
 
+/* Meal favorites button (heart) - positioned on right */
+.meal-favorites-btn {
+  right: 10px;
+  left: auto;
+  z-index: 10;
+}
+
+/* Meal favorites overlay */
+.meal-favorites {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 5;
+  background: var(--color-background);
+  opacity: 0;
+  transition: opacity var(--duration-medium) var(--motion-effects);
+}
+
+.meal-favorites.open {
+  pointer-events: auto;
+  opacity: 1;
+}
+
+.meal-fav-btn {
+  position: absolute;
+  padding: 8px 12px;
+  border-radius: 20px;
+  background: var(--color-surface-container);
+  border: none;
+  color: var(--color-text-color);
+  font-family: 'Roboto Flex', sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  cursor: pointer;
+  opacity: 0;
+  transform: scale(0.8);
+  transition:
+    opacity var(--duration-medium) var(--motion-effects),
+    transform var(--duration-medium) var(--motion-spatial);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.meal-favorites.open .meal-fav-btn {
+  opacity: 1;
+  transform: scale(1);
+  pointer-events: auto;
+}
+
+/* Stagger animation for favorite buttons */
+.meal-favorites.open .meal-fav-btn[data-fav="0"] { transition-delay: 0ms; }
+.meal-favorites.open .meal-fav-btn[data-fav="1"] { transition-delay: 40ms; }
+.meal-favorites.open .meal-fav-btn[data-fav="2"] { transition-delay: 80ms; }
+.meal-favorites.open .meal-fav-btn[data-fav="3"] { transition-delay: 120ms; }
+.meal-favorites.open .meal-fav-btn[data-fav="4"] { transition-delay: 160ms; }
+
+/* Reverse stagger on close */
+.meal-favorites:not(.open) .meal-fav-btn[data-fav="0"] { transition-delay: 120ms; }
+.meal-favorites:not(.open) .meal-fav-btn[data-fav="1"] { transition-delay: 90ms; }
+.meal-favorites:not(.open) .meal-fav-btn[data-fav="2"] { transition-delay: 60ms; }
+.meal-favorites:not(.open) .meal-fav-btn[data-fav="3"] { transition-delay: 30ms; }
+.meal-favorites:not(.open) .meal-fav-btn[data-fav="4"] { transition-delay: 0ms; }
+
+@media (hover: hover) {
+  .meal-fav-btn:hover {
+    background: var(--button-bg-hover);
+  }
+}
+
 /* ===========================================
    DEBUG PANEL - Glucose Slider
    =========================================== */

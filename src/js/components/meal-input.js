@@ -21,9 +21,13 @@ class MealInputController {
     this.answerEl = this.screen.querySelector('.meal-answer');
     this.answerMain = this.screen.querySelector('.meal-answer-main');
     this.answerDetail = this.screen.querySelector('.meal-answer-detail');
+    this.favoritesBtn = this.screen.querySelector('.meal-favorites-btn');
+    this.favoritesOverlay = this.screen.querySelector('.meal-favorites');
+    this.favBtns = this.screen.querySelectorAll('.meal-fav-btn');
 
     // State
     this.isListening = false;
+    this.isFavoritesOpen = false;
     this.wordTimers = [];
     this.currentMeal = null;
     this.currentAnswer = null;
@@ -133,6 +137,15 @@ class MealInputController {
       }
     ];
 
+    // Favorite meals with direct answers (no options)
+    this.favoriteMeals = [
+      { name: 'Tost', answer: { main: 'Za tost treba {3 jedinice.}', detail: 'Dva komada tosta su oko 30g UH. Daj inzulin 10 min prije.' } },
+      { name: 'Rižoto', answer: { main: 'Za rižoto daj {10 jedinica.}', detail: 'Srednja porcija rižota je oko 55g UH. Riža ima srednji GI.' } },
+      { name: 'Pahuljice', answer: { main: 'Preporučam {5 jedinica.}', detail: 'Zobene pahuljice s mlijekom oko 40g UH. Daj 15 min prije.' } },
+      { name: 'Kajgana', answer: { main: 'Samo {1 jedinica} ili ništa.', detail: 'Jaja imaju minimalno UH. Ako ima kruha uz, dodaj 2-3 jed.' } },
+      { name: 'Salata', answer: { main: 'Bez inzulina ili {1 jedinica.}', detail: 'Salata ima minimalno UH. Ovisi o dresingu i dodacima.' } }
+    ];
+
     this.init();
   }
 
@@ -147,11 +160,29 @@ class MealInputController {
       this.mic.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: true });
       this.mic.addEventListener('click', (e) => {
         e.stopPropagation();
-        if (!this.isListening) {
+        if (!this.isListening && !this.isFavoritesOpen) {
           this.startListening();
         }
       });
     }
+
+    // Favorites button (heart)
+    if (this.favoritesBtn) {
+      this.favoritesBtn.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: true });
+      this.favoritesBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.toggleFavorites();
+      });
+    }
+
+    // Favorite meal buttons
+    this.favBtns.forEach((btn, index) => {
+      btn.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: true });
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.selectFavorite(index);
+      });
+    });
 
     // Confirm button
     if (this.confirmBtn) {
@@ -206,6 +237,7 @@ class MealInputController {
 
   reset() {
     this.isListening = false;
+    this.isFavoritesOpen = false;
     this.wordTimers.forEach(t => clearTimeout(t));
     this.wordTimers = [];
     this.currentMeal = null;
@@ -219,6 +251,38 @@ class MealInputController {
     this.confirmBtn.classList.remove('visible');
     this.options.classList.remove('open');
     this.answerEl.classList.remove('visible');
+    if (this.favoritesOverlay) this.favoritesOverlay.classList.remove('open');
+  }
+
+  toggleFavorites() {
+    this.isFavoritesOpen = !this.isFavoritesOpen;
+
+    if (this.isFavoritesOpen) {
+      // Hide mic content, show favorites
+      this.content.style.display = 'none';
+      this.favoritesOverlay.classList.add('open');
+      // Change heart button to X (rotate)
+      this.favoritesBtn.style.backgroundColor = '#000';
+    } else {
+      // Show mic content, hide favorites
+      this.content.style.display = '';
+      this.favoritesOverlay.classList.remove('open');
+      this.favoritesBtn.style.backgroundColor = '';
+    }
+  }
+
+  selectFavorite(index) {
+    const favorite = this.favoriteMeals[index];
+    if (!favorite) return;
+
+    // Close favorites
+    this.isFavoritesOpen = false;
+    this.favoritesOverlay.classList.remove('open');
+    this.favoritesBtn.style.backgroundColor = '';
+
+    // Set answer and show it directly
+    this.currentAnswer = favorite.answer;
+    this.showAnswer();
   }
 
   getRandomMeal() {
