@@ -456,6 +456,12 @@ function setGlucoseValue(value) {
     assistantArrow.style.stroke = blobColor;
   }
 
+  // Update answer accent color if visible
+  const answerAccents = document.querySelectorAll('.answer-main .accent');
+  answerAccents.forEach(el => {
+    el.style.color = blobColor;
+  });
+
   // Update arrow position based on text width
   updateArrowPosition();
 }
