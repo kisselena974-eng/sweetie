@@ -756,7 +756,9 @@ body {
   position: static;
   font-size: 12px;
   font-weight: 400;
-  max-width: 140px;
+  padding: 8px 8px;
+  width: auto;
+  max-width: none;
 }
 
 .assistant-context-menu.open .assistant-ctx-btn {
