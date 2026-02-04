@@ -716,9 +716,40 @@ function initAssistantMic() {
 
   if (!mic || !content || !speechEl) return;
 
-  const speechText = 'Koliko da inzulina uzmem? Pojeo sam srednju pizzu i sok od jabuke.';
+  const speechQuestions = [
+    'Koliko da inzulina uzmem? Pojeo sam srednju pizzu i sok od jabuke.',
+    'Zašto mi šećer stalno raste poslije doručka?',
+    'Mogu li pojesti komad torte ako si dam inzulin?',
+    'Koliko jedinica za tanjur tjestenine s umakom?',
+    'Šećer mi je visok već dva sata, što da napravim?',
+    'Je li normalno da mi šećer padne nakon trčanja?',
+    'Koliko inzulina za dva peciva i čašu mlijeka?',
+    'Imam nizak šećer, koliko glukoze trebam popiti?',
+    'Zašto mi je šećer visok ako nisam ništa jeo?',
+    'Hoće li mi kava podići šećer ujutro?',
+    'Mogu li jesti voće bez da mi šećer skače?',
+    'Planiram ići na trening, trebam li smanjiti inzulin?',
+    'Šećer mi je 4.2, trebam li nešto pojesti prije spavanja?',
+    'Koliko inzulina za kebab i pomfrit?',
+    'Što da radim kad mi šećer naglo padne?',
+    'Je li bolje dati inzulin prije ili poslije jela?',
+    'Zašto mi šećer raste tijekom noći?',
+    'Koliko ugljikohidrata ima u banani?',
+    'Mogu li piti sok od naranče kad imam nizak šećer?',
+    'Pojeo sam sladoled, koliko da si dam inzulina?',
+  ];
+  let lastQuestionIndex = -1;
   let wordTimers = [];
   let isListening = false;
+
+  function getRandomQuestion() {
+    let index;
+    do {
+      index = Math.floor(Math.random() * speechQuestions.length);
+    } while (index === lastQuestionIndex);
+    lastQuestionIndex = index;
+    return speechQuestions[index];
+  }
 
   function startListening() {
     if (isListening) return;
@@ -732,7 +763,7 @@ function initAssistantMic() {
     if (assistantNav) assistantNav.style.opacity = '0';
 
     // Animate words one by one
-    const words = speechText.split(' ');
+    const words = getRandomQuestion().split(' ');
     let currentText = '';
 
     words.forEach((word, i) => {
