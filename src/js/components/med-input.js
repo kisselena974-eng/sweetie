@@ -12,7 +12,7 @@ class MedInputController {
     // State
     this.selectedUnits = 1;
     this.minUnits = 1;
-    this.maxUnits = 9;
+    this.maxUnits = 3;
 
     // Elements
     this.pickerItems = null;
