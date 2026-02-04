@@ -659,6 +659,44 @@ body {
   z-index: 10;
 }
 
+/* Assistant context menu (contextual follow-up questions) */
+.assistant-context-menu {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 5;
+}
+
+.assistant-context-menu.open {
+  pointer-events: auto;
+}
+
+/* Positions matching design home2-27.png */
+.assistant-ctx-btn[data-ctx="0"] {
+  top: 72px;
+  right: 30px;
+  transition-delay: 0ms;
+}
+
+.assistant-ctx-btn[data-ctx="1"] {
+  bottom: 100px;
+  left: 30px;
+  transition-delay: 60ms;
+}
+
+.assistant-context-menu.open .assistant-ctx-btn {
+  opacity: 1;
+  transform: scale(1);
+  pointer-events: auto;
+}
+
+/* Reverse stagger on close */
+.assistant-context-menu:not(.open) .assistant-ctx-btn[data-ctx="0"] { transition-delay: 40ms; }
+.assistant-context-menu:not(.open) .assistant-ctx-btn[data-ctx="1"] { transition-delay: 0ms; }
+
 /* ===========================================
    DEBUG PANEL - Glucose Slider
    =========================================== */

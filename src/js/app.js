@@ -364,6 +364,9 @@ function initHomeScreen() {
 
   // Initialize assistant mic interaction
   initAssistantMic();
+
+  // Initialize assistant context menu
+  initAssistantContext();
 }
 
 /**
@@ -822,6 +825,61 @@ function initAssistantMic() {
       resetListening();
     });
   }
+}
+
+/**
+ * Initialize assistant context menu (+ button toggle)
+ */
+function initAssistantContext() {
+  const assistantScreen = document.querySelector('[data-screen="assistant"]');
+  if (!assistantScreen) return;
+
+  const addBtn = assistantScreen.querySelector('.assistant-add-btn');
+  const plusIcon = addBtn ? addBtn.querySelector('.plus-icon') : null;
+  const ctxMenu = assistantScreen.querySelector('.assistant-context-menu');
+  const ctxBtns = assistantScreen.querySelectorAll('.assistant-ctx-btn');
+
+  if (!addBtn || !ctxMenu) return;
+
+  let isOpen = false;
+
+  function toggle() {
+    isOpen = !isOpen;
+    if (isOpen) {
+      ctxMenu.classList.add('open');
+      if (plusIcon) plusIcon.classList.add('rotated');
+    } else {
+      ctxMenu.classList.remove('open');
+      if (plusIcon) plusIcon.classList.remove('rotated');
+    }
+  }
+
+  function close() {
+    if (!isOpen) return;
+    isOpen = false;
+    ctxMenu.classList.remove('open');
+    if (plusIcon) plusIcon.classList.remove('rotated');
+  }
+
+  // + button toggle
+  addBtn.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: true });
+  addBtn.addEventListener('touchmove', (e) => e.stopPropagation(), { passive: true });
+  addBtn.addEventListener('touchend', (e) => e.stopPropagation(), { passive: true });
+  addBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggle();
+  });
+
+  // Context button handlers
+  ctxBtns.forEach(btn => {
+    btn.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: true });
+    btn.addEventListener('touchend', (e) => e.stopPropagation(), { passive: true });
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      console.log('Assistant context:', btn.textContent);
+      close();
+    });
+  });
 }
 
 /**
