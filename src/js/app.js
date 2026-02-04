@@ -724,7 +724,7 @@ function initAssistantMic() {
     'Šećer mi je visok već dva sata, što da napravim?',
     'Je li normalno da mi šećer padne nakon trčanja?',
     'Koliko inzulina za dva peciva i čašu mlijeka?',
-    'Imam nizak šećer, koliko glukoze trebam popiti?',
+    'Šećer mi je nizak, što da pojedem da ga brzo podignem?',
     'Zašto mi je šećer visok ako nisam ništa jeo?',
     'Hoće li mi kava podići šećer ujutro?',
     'Mogu li jesti voće bez da mi šećer skače?',
