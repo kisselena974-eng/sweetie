@@ -877,6 +877,10 @@ function initAssistantMic() {
     wordTimers = [];
     speechEl.textContent = '';
 
+    // Hide answer view if visible (coming from answer screen)
+    if (answerEl) answerEl.classList.remove('visible');
+    if (micBtn) micBtn.classList.remove('visible');
+
     // Hide + button and confirm while reply animates
     if (addBtn) addBtn.classList.remove('visible');
     if (confirmBtn) confirmBtn.classList.remove('visible');
@@ -943,6 +947,11 @@ function initAssistantMic() {
     answerEl.classList.add('visible');
     if (micBtn) micBtn.classList.add('visible');
     if (assistantNav) assistantNav.style.opacity = '';
+
+    // Show + button if this is the first answer and there are contextual questions
+    if (!selectedCtxAnswer && currentCtx.length > 0) {
+      if (addBtn) addBtn.classList.add('visible');
+    }
   }
 
   function resetToInitial() {
