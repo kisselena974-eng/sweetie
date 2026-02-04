@@ -684,7 +684,7 @@ body {
   align-items: center;
   justify-content: center;
   gap: 20px;
-  padding: 0 30px;
+  padding: 0 50px;
 }
 
 .assistant-context-menu.open {
