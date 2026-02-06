@@ -185,15 +185,18 @@ class GlucoseBlob {
    * Setup drag event listeners for manual blob movement
    */
   setupDragEvents() {
-    // Mouse events
-    this.svg.addEventListener('mousedown', (e) => this.handleDragStart(e));
+    // Mouse events - only on the blob path itself
+    this.path.addEventListener('mousedown', (e) => this.handleDragStart(e));
     document.addEventListener('mousemove', (e) => this.handleDragMove(e));
     document.addEventListener('mouseup', () => this.handleDragEnd());
 
-    // Touch events
-    this.svg.addEventListener('touchstart', (e) => this.handleDragStart(e), { passive: false });
+    // Touch events - only on the blob path itself
+    this.path.addEventListener('touchstart', (e) => this.handleDragStart(e), { passive: false });
     document.addEventListener('touchmove', (e) => this.handleDragMove(e), { passive: false });
     document.addEventListener('touchend', () => this.handleDragEnd());
+
+    // Set cursor on blob path
+    this.path.style.cursor = 'grab';
   }
 
   /**
@@ -207,7 +210,7 @@ class GlucoseBlob {
 
     this.isDragging = true;
     this.hasMoved = false; // Reset movement flag
-    this.svg.style.cursor = 'grabbing';
+    this.path.style.cursor = 'grabbing';
 
     // Get pointer position
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
@@ -270,7 +273,7 @@ class GlucoseBlob {
     if (!this.isDragging) return;
 
     this.isDragging = false;
-    this.svg.style.cursor = 'grab';
+    this.path.style.cursor = 'grab';
 
     // Only set wasDragged if blob actually moved (to allow clicks)
     if (this.hasMoved) {

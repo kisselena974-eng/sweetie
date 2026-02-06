@@ -14,6 +14,7 @@
   --color-accent-panic: #FF4444;    /* Glucose dangerous (<4.0 or >10.0 mmol/L) */
   --color-accent-good: #7ED321;     /* Glucose safe (4.5-9.0 mmol/L) */
   --color-accent-warning: #FFD700;  /* Glucose borderline (4.0-4.5 or 9.0-10.0 mmol/L) */
+  --accent-color: #7ED321;          /* Current accent color (updated by JS based on glucose) */
 
   /* === COLORS - BASE === */
   --color-background: #000000;      /* Main background - ALWAYS BLACK for OLED */

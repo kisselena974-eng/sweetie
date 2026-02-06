@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Sweetie App by Elena</title>
+  <title>Sweetie</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Roboto+Flex:opsz,wght@8..144,100..1000&display=swap" rel="stylesheet">
@@ -11,23 +11,33 @@
   <link rel="stylesheet" href="src/styles/main.css">
 </head>
 <body>
-  <!-- Debug panel for glucose and trend testing -->
-  <div class="debug-panel">
-    <button class="debug-toggle" aria-label="Toggle debug controls">
-      <span class="toggle-icon">⚙</span>
-    </button>
-    <div class="debug-controls">
-      <input type="range" id="glucose-slider" min="2" max="15" step="0.1" value="6.5">
-      <span class="glucose-value">6,5</span>
-      <button class="trend-arrow-btn" aria-label="Change trend direction">
-        <svg width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M0 6.5L1.14562 7.64562L5.6875 3.11187L5.6875 13L7.3125 13L7.3125 3.11187L11.8462 7.65375L13 6.5L6.5 0L0 6.5Z" fill="#6DC027"/>
-        </svg>
-      </button>
-    </div>
-  </div>
+  <!-- Landing Page Layout -->
+  <div class="landing-page">
+    <!-- Header -->
+    <header class="landing-header">
+      <div class="header-left">
+        <h1 class="landing-title">Sweetie</h1>
+        <p class="landing-subtitle">
+          <span data-lang="en">Prototype for a smart watch app<br>for tracking and managing sugar<br>for people with diabetes.</span>
+          <span data-lang="hr" style="display: none;">Prototip aplikacije za pametni sat<br>za praćenje i upravljanje šećerom<br>za osobe s dijabetesom.</span>
+        </p>
+      </div>
+      <div class="header-right">
+        <div class="language-toggle">
+          <button class="lang-btn" data-lang="hr">HR</button>
+          <span class="lang-separator">|</span>
+          <button class="lang-btn active" data-lang="en">ENG</button>
+        </div>
+        <button class="about-btn">
+          <span data-lang="en">About</span>
+          <span data-lang="hr" style="display: none;">O projektu</span>
+        </button>
+      </div>
+    </header>
 
-  <div class="watch-container">
+    <!-- Main content - Watch -->
+    <main class="landing-main">
+      <div class="watch-container">
     <!-- Watch hardware mockup with glow (decorative) -->
     <img class="watch-mockup" src="src/assets/WatchMocks.svg" alt="" aria-hidden="true">
 
@@ -50,11 +60,11 @@
 
           <!-- Glucose value -->
           <text class="nav-glucose">
-            <textPath href="#circlePathBottom" startOffset="50%" text-anchor="middle">6,5</textPath>
+            <textPath href="#circlePathBottom" startOffset="47%" text-anchor="middle">6,5</textPath>
           </text>
 
           <!-- Trend arrow -->
-          <g class="nav-arrow" transform="translate(140, 217)">
+          <g class="nav-arrow" transform="translate(133, 217)">
             <path d="M0 6.5L1.14562 7.64562L5.6875 3.11187L5.6875 13L7.3125 13L7.3125 3.11187L11.8462 7.65375L13 6.5L6.5 0L0 6.5Z" fill="#6DC027" stroke="#6DC027" stroke-width="0.5" stroke-linejoin="round"/>
           </g>
         </svg>
@@ -82,9 +92,9 @@
               <textPath href="#circlePathTopKO" startOffset="50%" text-anchor="middle">09:30</textPath>
             </text>
             <text class="nav-glucose-knockout">
-              <textPath href="#circlePathBottomKO" startOffset="50%" text-anchor="middle">6,5</textPath>
+              <textPath href="#circlePathBottomKO" startOffset="47%" text-anchor="middle">6,5</textPath>
             </text>
-            <g class="nav-arrow-knockout" transform="translate(140, 217)">
+            <g class="nav-arrow-knockout" transform="translate(133, 217)">
               <path d="M0 6.5L1.14562 7.64562L5.6875 3.11187L5.6875 13L7.3125 13L7.3125 3.11187L11.8462 7.65375L13 6.5L6.5 0L0 6.5Z" fill="#000000" stroke="#000000" stroke-width="0.5" stroke-linejoin="round"/>
             </g>
           </g>
@@ -111,36 +121,53 @@
               <clipPath id="segment-clip">
                 <rect class="segment-clip-rect" x="182" y="96" width="27" height="60"/>
               </clipPath>
+              <!-- Clip to keep graph within circular bounds -->
+              <clipPath id="graph-clip">
+                <circle cx="126" cy="126" r="126"/>
+              </clipPath>
             </defs>
 
-            <!-- Upper boundary line (glucose = 10) -->
-            <line class="graph-boundary" x1="46" y1="96" x2="222" y2="96"/>
-            <!-- Lower boundary line (glucose = 4) -->
-            <line class="graph-boundary" x1="46" y1="156" x2="222" y2="156"/>
+            <!-- Clip wrapper (stays fixed) -->
+            <g clip-path="url(#graph-clip)">
+              <!-- Pannable graph content group (includes slider so it moves with graph) -->
+              <g class="graph-pan-group">
+                <!-- Extended history graph line (rendered dynamically) -->
+                <path class="graph-line-history" d="" fill="none"/>
 
-            <!-- Vertical dashed line at "now" - avoids time/glucose when in their area -->
-            <line class="graph-now-line" x1="206" y1="0" x2="206" y2="252" stroke-dasharray="4,4"/>
+                <!-- Upper boundary line (glucose = 10) - extended for pan -->
+                <line class="graph-boundary graph-boundary-upper" x1="-200" y1="96" x2="222" y2="96"/>
+                <!-- Lower boundary line (glucose = 4) - extended for pan -->
+                <line class="graph-boundary graph-boundary-lower" x1="-200" y1="156" x2="222" y2="156"/>
 
-            <!-- Time label background (covers dashed line where text goes) -->
-            <rect class="graph-time-bg" x="191" y="161" width="30" height="18"/>
+                <!-- Base graph line (always white) -->
+                <path class="graph-line-base" d="M0,72 C40,72 55,72 75,85 C95,98 110,140 125,165 C140,185 155,185 165,178 C175,171 182,162 185,156 C192,144 200,130 206,126" fill="none"/>
 
-            <!-- Base graph line (always white) -->
-            <path class="graph-line-base" d="M0,72 C40,72 55,72 75,85 C95,98 110,140 125,165 C140,185 155,185 165,178 C175,171 182,162 185,156 C192,144 200,130 206,126" fill="none"/>
+                <!-- Highlight overlay (clipped to current segment + zone) -->
+                <path class="graph-line-highlight" d="M0,72 C40,72 55,72 75,85 C95,98 110,140 125,165 C140,185 155,185 165,178 C175,171 182,162 185,156 C192,144 200,130 206,126" fill="none" clip-path="url(#segment-clip)"/>
 
-            <!-- Highlight overlay (clipped to current segment + zone) -->
-            <path class="graph-line-highlight" d="M0,72 C40,72 55,72 75,85 C95,98 110,140 125,165 C140,185 155,185 165,178 C175,171 182,162 185,156 C192,144 200,130 206,126" fill="none" clip-path="url(#segment-clip)"/>
+                <!-- Slider elements (inside pan group so they move with graph) -->
+                <!-- Vertical dashed line -->
+                <line class="graph-now-line" x1="206" y1="0" x2="206" y2="252" stroke-dasharray="4,4"/>
 
-            <!-- Invisible wider hitbox for slider interaction -->
-            <line class="graph-slider-hitbox" x1="206" y1="0" x2="206" y2="252" stroke="transparent" stroke-width="20"/>
+                <!-- Time label background -->
+                <rect class="graph-time-bg" x="191" y="161" width="30" height="18"/>
 
-            <!-- Current position dot -->
-            <circle class="graph-now-dot" cx="206" cy="126" r="3.5"/>
+                <!-- Invisible wider hitbox for slider interaction -->
+                <line class="graph-slider-hitbox" x1="206" y1="0" x2="206" y2="252" stroke="transparent" stroke-width="20"/>
 
-            <!-- Time label (on top of everything) -->
-            <text class="graph-now-text" x="206" y="172">
-              <tspan class="graph-time-line1" x="206" dy="0">now</tspan>
-              <tspan class="graph-time-line2" x="206" dy="12"></tspan>
-            </text>
+                <!-- Current position dot -->
+                <circle class="graph-now-dot" cx="206" cy="126" r="3.5"/>
+
+                <!-- Time label -->
+                <text class="graph-now-text" x="206" y="172">
+                  <tspan class="graph-time-line1" x="206" dy="0">now</tspan>
+                  <tspan class="graph-time-line2" x="206" dy="12"></tspan>
+                </text>
+
+                <!-- Context markers (meal, insulin, activity, med) - on top of everything -->
+                <g class="graph-context-markers"></g>
+              </g>
+            </g>
           </svg>
         </div>
       </div>
@@ -333,9 +360,9 @@
             <path id="assistantArcBottom" d="M 29.9,181.5 A 111,111 0 0,0 222.1,181.5" fill="none"/>
           </defs>
           <text class="assistant-glucose-text">
-            <textPath href="#assistantArcBottom" startOffset="50%" text-anchor="middle">6,5</textPath>
+            <textPath href="#assistantArcBottom" startOffset="47%" text-anchor="middle">6,5</textPath>
           </text>
-          <g class="assistant-arrow" transform="translate(140, 217)">
+          <g class="assistant-arrow" transform="translate(133, 217)">
             <path d="M0 6.5L1.14562 7.64562L5.6875 3.11187L5.6875 13L7.3125 13L7.3125 3.11187L11.8462 7.65375L13 6.5L6.5 0L0 6.5Z" fill="#FFD700" stroke="#FFD700" stroke-width="0.5" stroke-linejoin="round"/>
           </g>
         </svg>
@@ -368,13 +395,32 @@
           <span>i</span>
         </button>
 
+        <!-- Glucose display at bottom (same as home/assistant) -->
+        <svg class="tracking-nav" viewBox="0 0 252 252" width="252" height="252">
+          <defs>
+            <path id="trackingGlucoseArc" d="M 29.9,181.5 A 111,111 0 0,0 222.1,181.5" fill="none"/>
+          </defs>
+          <text class="tracking-glucose-text">
+            <textPath href="#trackingGlucoseArc" startOffset="47%" text-anchor="middle">6,5</textPath>
+          </text>
+          <g class="tracking-glucose-arrow" transform="translate(133, 217)">
+            <path d="M0 6.5L1.14562 7.64562L5.6875 3.11187L5.6875 13L7.3125 13L7.3125 3.11187L11.8462 7.65375L13 6.5L6.5 0L0 6.5Z" fill="#6DC027" stroke="#6DC027" stroke-width="0.5" stroke-linejoin="round"/>
+          </g>
+        </svg>
+
         <!-- Main tracking clock SVG -->
         <svg class="tracking-clock" viewBox="0 0 252 252" width="252" height="252">
+          <defs>
+            <!-- Arc paths for labels (radius 111, same as nav circle) -->
+            <path id="trackingLabelArcTop" d="M 29.9,70.5 A 111,111 0 0,1 222.1,70.5" fill="none"/>
+            <path id="trackingLabelArcBottom" d="M 29.9,181.5 A 111,111 0 0,0 222.1,181.5" fill="none"/>
+          </defs>
+
           <!-- Outer circle - Fast insulin -->
-          <circle class="tracking-circle tracking-circle-outer" cx="126" cy="126" r="95" fill="none"/>
+          <circle class="tracking-circle tracking-circle-outer" cx="126" cy="126" r="69" fill="none"/>
 
           <!-- Middle circle - Slow insulin -->
-          <circle class="tracking-circle tracking-circle-middle" cx="126" cy="126" r="67" fill="none"/>
+          <circle class="tracking-circle tracking-circle-middle" cx="126" cy="126" r="46" fill="none"/>
 
           <!-- Inner circle - Sensor (14 dashes) -->
           <g class="tracking-sensor-ticks"></g>
@@ -393,29 +439,25 @@
 
           <!-- Alert dots (dynamic) -->
           <g class="tracking-alerts"></g>
-        </svg>
 
-        <!-- Info labels (shown when info mode is ON) -->
-        <div class="tracking-labels">
-          <div class="tracking-label tracking-label-brzi">
-            <span>brzi</span>
-            <svg class="tracking-label-line" viewBox="0 0 55 40">
-              <line x1="5" y1="40" x2="50" y2="5" stroke-dasharray="2,2"/>
-            </svg>
-          </div>
-          <div class="tracking-label tracking-label-spori">
-            <span>spori</span>
-            <svg class="tracking-label-line" viewBox="0 0 55 40">
-              <line x1="50" y1="40" x2="5" y2="5" stroke-dasharray="2,2"/>
-            </svg>
-          </div>
-          <div class="tracking-label tracking-label-senzor">
-            <span>trajanje senzora</span>
-            <svg class="tracking-label-line" viewBox="0 0 10 30">
-              <line x1="5" y1="30" x2="5" y2="5" stroke-dasharray="2,2"/>
-            </svg>
-          </div>
-        </div>
+          <!-- Info labels on arc paths (shown when info mode is ON) -->
+          <g class="tracking-labels">
+            <!-- Connecting lines from circles to labels -->
+            <line class="tracking-connector tracking-connector-brzi" x1="83" y1="183" x2="69" y2="206"/>
+            <line class="tracking-connector tracking-connector-senzor" x1="126" y1="149" x2="126" y2="220"/>
+            <line class="tracking-connector tracking-connector-spori" x1="158" y1="162" x2="183" y2="206"/>
+
+            <text class="tracking-label tracking-label-brzi" dy="-2">
+              <textPath href="#trackingLabelArcBottom" startOffset="20%" text-anchor="middle">brzi</textPath>
+            </text>
+            <text class="tracking-label tracking-label-senzor" dy="-2">
+              <textPath href="#trackingLabelArcBottom" startOffset="50%" text-anchor="middle">trajanje senzora</textPath>
+            </text>
+            <text class="tracking-label tracking-label-spori" dy="-2">
+              <textPath href="#trackingLabelArcBottom" startOffset="80%" text-anchor="middle">dnevni</textPath>
+            </text>
+          </g>
+        </svg>
 
         <!-- Alert tooltips (shown when info mode is ON and alerts active) -->
         <div class="tracking-tooltips">
@@ -459,6 +501,19 @@
         <text class="fixed-time-text-knockout" dy="12" clip-path="url(#blobClip)">
           <textPath href="#fixedTimeArcKO" startOffset="50%" text-anchor="middle">09:30</textPath>
         </text>
+      </svg>
+
+      <!-- Fixed glucose display (outside screens, visible during page transitions) -->
+      <svg class="fixed-glucose" viewBox="0 0 252 252" width="252" height="252">
+        <defs>
+          <path id="fixedGlucoseArc" d="M 29.9,181.5 A 111,111 0 0,0 222.1,181.5" fill="none"/>
+        </defs>
+        <text class="fixed-glucose-text">
+          <textPath href="#fixedGlucoseArc" startOffset="47%" text-anchor="middle">6,5</textPath>
+        </text>
+        <g class="fixed-glucose-arrow" transform="translate(133, 217)">
+          <path d="M0 6.5L1.14562 7.64562L5.6875 3.11187L5.6875 13L7.3125 13L7.3125 3.11187L11.8462 7.65375L13 6.5L6.5 0L0 6.5Z" fill="#6DC027" stroke="#6DC027" stroke-width="0.5" stroke-linejoin="round"/>
+        </g>
       </svg>
     </div>
 
@@ -532,6 +587,54 @@
         </g>
       </g>
     </svg>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="landing-footer">
+      <!-- Legend - Bottom Left -->
+      <div class="landing-legend">
+        <h3 class="legend-title">
+          <span data-lang="en">Legend</span>
+          <span data-lang="hr" style="display: none;">Legenda</span>
+        </h3>
+        <ul class="legend-list">
+          <li>
+            <span data-lang="en">Swipe up/down — switch between pages</span>
+            <span data-lang="hr" style="display: none;">Swipe gore/dolje — promjena stranice</span>
+          </li>
+          <li>
+            <span data-lang="en">Tap the blob — open sugar graph</span>
+            <span data-lang="hr" style="display: none;">Klik na blob — graf šećera</span>
+          </li>
+          <li>
+            <span data-lang="en">Tap the mic — simulate voice input</span>
+            <span data-lang="hr" style="display: none;">Klik na mic — simulacija razgovora</span>
+          </li>
+          <li>
+            <span data-lang="en">Slider — adjust glucose level</span>
+            <span data-lang="hr" style="display: none;">Slider — simulacija razine glukoze</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Glucose Slider - Bottom Right -->
+      <div class="landing-slider">
+        <label class="slider-label">
+          <span data-lang="en">Glucose</span>
+          <span data-lang="hr" style="display: none;">Glukoza</span>
+        </label>
+        <div class="slider-controls">
+          <input type="range" id="glucose-slider" min="2" max="15" step="0.1" value="6.5">
+          <span class="glucose-value">6,5</span>
+          <button class="trend-arrow-btn" aria-label="Change trend direction">
+            <svg width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M0 6.5L1.14562 7.64562L5.6875 3.11187L5.6875 13L7.3125 13L7.3125 3.11187L11.8462 7.65375L13 6.5L6.5 0L0 6.5Z" fill="#7ED321"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </footer>
   </div>
 
   <script src="src/js/utils/spring.js"></script>

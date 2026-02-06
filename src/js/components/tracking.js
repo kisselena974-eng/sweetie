@@ -20,31 +20,48 @@ class TrackingController {
     this.dotsGroup = this.screen.querySelector('.tracking-dots');
     this.alertsGroup = this.screen.querySelector('.tracking-alerts');
     this.sensorTicksGroup = this.screen.querySelector('.tracking-sensor-ticks');
+    this.sensorLabel = this.screen.querySelector('.tracking-label-senzor textPath');
+    this.brziLabel = this.screen.querySelector('.tracking-label-brzi');
+    this.sporiLabel = this.screen.querySelector('.tracking-label-spori');
+    this.connectorBrzi = this.screen.querySelector('.tracking-connector-brzi');
+    this.connectorSpori = this.screen.querySelector('.tracking-connector-spori');
+    this.trackingNav = this.screen.querySelector('.tracking-nav');
+    this.trackingGlucoseText = this.screen.querySelector('.tracking-glucose-text');
+    this.trackingGlucoseArrow = this.screen.querySelector('.tracking-glucose-arrow');
 
     // Constants
     this.CENTER = 126;
-    this.OUTER_RADIUS = 95;
-    this.MIDDLE_RADIUS = 67;
-    this.INNER_RADIUS = 39;
+    this.OUTER_RADIUS = 69;
+    this.MIDDLE_RADIUS = 46;
+    this.INNER_RADIUS = 23;
     this.DOT_RADIUS = 3;
 
     // State
-    this.isInfoMode = false;
+    this.isInfoMode = false; // Info OFF by default
 
-    // Mock data (matching design images)
+    // Constants
+    this.FAST_INSULIN_DURATION_HOURS = 6; // Fast insulin dots disappear after 6 hours
+    this.SLOW_INSULIN_DURATION_HOURS = 24; // Slow insulin dots disappear after 24 hours
+
+    // Mock data for prototype
+    const now = new Date();
+    const eightHoursLater = new Date(now.getTime() + 8 * 60 * 60 * 1000);
+    const tenHoursLater = new Date(now.getTime() + 10 * 60 * 60 * 1000);
+
     this.trackingData = {
       fastInsulin: [
-        { time: '11:30', durationHours: 4 },
-        { time: '08:00', durationHours: 4 }
+        { timestamp: eightHoursLater.getTime(), durationHours: 4 }
       ],
       slowInsulin: {
-        time: '19:30',
+        timestamp: tenHoursLater.getTime(),
         durationHours: 20
       },
       sensorDaysRemaining: 5,
+      currentGlucose: 6.5, // Current glucose value
       alerts: {
         insulinReminder: false,
-        sensorWarning: false
+        sensorWarning: false,
+        highGlucose: false
       }
     };
 
@@ -63,12 +80,57 @@ class TrackingController {
     // Generate sensor ticks
     this.generateSensorTicks();
 
+    // Long-press on sensor ticks to demo expiring sensor (1 day remaining)
+    this.setupSensorLongPress();
+
+    // Cleanup expired insulin doses
+    this.cleanupExpiredFastInsulin();
+    this.cleanupExpiredSlowInsulin();
+
     // Initial render
     this.render();
 
-    // Update clock hand every minute
+    // Update clock hand and check for expired doses every minute
     this.updateClockHand();
-    setInterval(() => this.updateClockHand(), 60000);
+    setInterval(() => {
+      this.updateClockHand();
+      this.cleanupExpiredFastInsulin();
+      this.cleanupExpiredSlowInsulin();
+    }, 60000);
+
+    // Sync glucose display with current value
+    this.syncGlucoseDisplay();
+  }
+
+  /**
+   * Sync tracking screen glucose with home screen glucose
+   */
+  syncGlucoseDisplay() {
+    const homeGlucose = document.querySelector('.nav-circle-base .nav-glucose textPath');
+    const homeArrow = document.querySelector('.nav-circle-base .nav-arrow');
+
+    if (homeGlucose && this.trackingGlucoseText) {
+      const textPath = this.trackingGlucoseText.querySelector('textPath');
+      if (textPath) {
+        textPath.textContent = homeGlucose.textContent;
+      }
+    }
+
+    // Sync color
+    const color = window.glucoseBlob ? window.glucoseBlob.getColor() : '#7ED321';
+    if (this.trackingGlucoseText) {
+      this.trackingGlucoseText.style.fill = color;
+    }
+    const arrowPath = this.trackingGlucoseArrow ? this.trackingGlucoseArrow.querySelector('path') : null;
+    if (arrowPath) {
+      arrowPath.style.fill = color;
+      arrowPath.style.stroke = color;
+    }
+
+    // Sync arrow transform
+    if (homeArrow && this.trackingGlucoseArrow) {
+      this.trackingGlucoseArrow.setAttribute('transform', homeArrow.getAttribute('transform'));
+    }
   }
 
   toggleInfoMode() {
@@ -78,18 +140,79 @@ class TrackingController {
       this.infoBtn.classList.add('active');
       this.labels.classList.add('visible');
 
-      // Show relevant tooltips based on alerts
+      // Hide glucose display when info is shown
+      if (this.trackingNav) this.trackingNav.style.opacity = '0';
+
+      // Show insulin tooltip if reminder is active
       if (this.trackingData.alerts.insulinReminder) {
         this.tooltipInsulin.classList.add('visible');
       }
-      if (this.trackingData.alerts.sensorWarning || this.trackingData.sensorDaysRemaining <= 1) {
-        this.tooltipSensor.classList.add('visible');
-      }
+      // Note: sensor tooltip not shown - info is displayed in arc label instead
     } else {
       this.infoBtn.classList.remove('active');
       this.labels.classList.remove('visible');
       this.tooltipInsulin.classList.remove('visible');
       this.tooltipSensor.classList.remove('visible');
+
+      // Show glucose display when info is hidden
+      if (this.trackingNav) this.trackingNav.style.opacity = '1';
+
+      // Sync glucose in case it changed
+      this.syncGlucoseDisplay();
+    }
+  }
+
+  /**
+   * Create a timestamp for today at the specified time
+   */
+  createTimestamp(hours, minutes) {
+    const date = new Date();
+    date.setHours(hours, minutes, 0, 0);
+    return date.getTime();
+  }
+
+  /**
+   * Get time string from timestamp
+   */
+  getTimeFromTimestamp(timestamp) {
+    const date = new Date(timestamp);
+    const hours = date.getHours();
+    const minutes = date.getMinutes();
+    return `${hours}:${minutes.toString().padStart(2, '0')}`;
+  }
+
+  /**
+   * Remove fast insulin doses older than 6 hours
+   */
+  cleanupExpiredFastInsulin() {
+    const now = Date.now();
+    const maxAge = this.FAST_INSULIN_DURATION_HOURS * 60 * 60 * 1000; // 6 hours in ms
+
+    const before = this.trackingData.fastInsulin.length;
+    this.trackingData.fastInsulin = this.trackingData.fastInsulin.filter(dose => {
+      const age = now - dose.timestamp;
+      return age < maxAge;
+    });
+
+    // Re-render if any doses were removed
+    if (this.trackingData.fastInsulin.length !== before) {
+      this.render();
+    }
+  }
+
+  /**
+   * Remove slow insulin if older than 24 hours
+   */
+  cleanupExpiredSlowInsulin() {
+    if (!this.trackingData.slowInsulin || !this.trackingData.slowInsulin.timestamp) return;
+
+    const now = Date.now();
+    const maxAge = this.SLOW_INSULIN_DURATION_HOURS * 60 * 60 * 1000; // 24 hours in ms
+    const age = now - this.trackingData.slowInsulin.timestamp;
+
+    if (age >= maxAge) {
+      this.trackingData.slowInsulin = null;
+      this.render();
     }
   }
 
@@ -115,8 +238,8 @@ class TrackingController {
     const minutes = now.getMinutes();
     const angle = this.timeToAngle(`${hours}:${minutes}`);
 
-    // Calculate end point of hand (extends past outer circle)
-    const handLength = this.OUTER_RADIUS + 10;
+    // Calculate end point of hand (ends at outer circle)
+    const handLength = this.OUTER_RADIUS;
     const end = this.polarToCartesian(angle, handLength);
 
     this.hand.setAttribute('x2', end.x);
@@ -127,26 +250,29 @@ class TrackingController {
     // Clear existing
     this.sensorTicksGroup.innerHTML = '';
 
-    // 14 ticks for 14 days, arranged in a circle
+    // 14 small arc dashes for 14 days, arranged along the circle
     const tickCount = 14;
-    const tickLength = 6;
-    const angleStep = 360 / tickCount;
+    const gapAngle = 16; // Gap between ticks in degrees (larger = more visible gaps)
+    const totalGaps = tickCount * gapAngle;
+    const totalArcAngle = 360 - totalGaps;
+    const tickAngle = totalArcAngle / tickCount; // Angle span for each tick arc
 
     for (let i = 0; i < tickCount; i++) {
-      // Start from top (12 o'clock) and go clockwise
-      const angle = i * angleStep;
-      const innerPoint = this.polarToCartesian(angle, this.INNER_RADIUS - tickLength / 2);
-      const outerPoint = this.polarToCartesian(angle, this.INNER_RADIUS + tickLength / 2);
+      // Calculate start and end angles for this arc segment
+      const startAngle = i * (tickAngle + gapAngle);
+      const endAngle = startAngle + tickAngle;
 
-      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
-      line.setAttribute('x1', innerPoint.x);
-      line.setAttribute('y1', innerPoint.y);
-      line.setAttribute('x2', outerPoint.x);
-      line.setAttribute('y2', outerPoint.y);
-      line.setAttribute('class', 'tracking-sensor-tick');
-      line.dataset.day = i;
+      // Create arc path
+      const startPoint = this.polarToCartesian(startAngle, this.INNER_RADIUS);
+      const endPoint = this.polarToCartesian(endAngle, this.INNER_RADIUS);
 
-      this.sensorTicksGroup.appendChild(line);
+      const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      const d = `M ${startPoint.x} ${startPoint.y} A ${this.INNER_RADIUS} ${this.INNER_RADIUS} 0 0 1 ${endPoint.x} ${endPoint.y}`;
+      path.setAttribute('d', d);
+      path.setAttribute('class', 'tracking-sensor-tick');
+      path.dataset.day = i;
+
+      this.sensorTicksGroup.appendChild(path);
     }
 
     this.updateSensorTicks();
@@ -157,21 +283,76 @@ class TrackingController {
     const daysRemaining = this.trackingData.sensorDaysRemaining;
     const daysUsed = 14 - daysRemaining;
 
+    // Tick #8 is around 205° (just left of bottom) - next to sensor alert
+    const bottomTickIndex = 8;
+
     ticks.forEach((tick, i) => {
       tick.classList.remove('expired', 'warning');
 
-      if (i < daysUsed) {
+      if (daysRemaining === 1) {
+        // Special case: 1 day remaining - all expired except bottom tick which is red
+        if (i === bottomTickIndex) {
+          tick.classList.add('warning');
+        } else {
+          tick.classList.add('expired');
+        }
+      } else if (i < daysUsed) {
         // Days already used - dark/expired
         tick.classList.add('expired');
-      } else if (i === daysUsed && daysRemaining === 1) {
-        // Last day - red warning
-        tick.classList.add('warning');
       }
       // Otherwise stays white (default)
     });
 
     // Update alert state
     this.trackingData.alerts.sensorWarning = daysRemaining <= 1;
+  }
+
+  /**
+   * Setup long-press on sensor ticks to demo expiring sensor
+   */
+  setupSensorLongPress() {
+    let longPressTimer = null;
+    let originalDays = this.trackingData.sensorDaysRemaining;
+
+    // Create invisible hit area circle for easier touch
+    const hitArea = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+    hitArea.setAttribute('cx', this.CENTER);
+    hitArea.setAttribute('cy', this.CENTER);
+    hitArea.setAttribute('r', this.INNER_RADIUS + 10); // Larger than inner circle
+    hitArea.setAttribute('fill', 'transparent');
+    hitArea.setAttribute('stroke', 'transparent');
+    hitArea.setAttribute('stroke-width', '20'); // Wide stroke for bigger hit area
+    hitArea.style.cursor = 'pointer';
+    this.sensorTicksGroup.insertBefore(hitArea, this.sensorTicksGroup.firstChild);
+
+    const startPress = (e) => {
+      e.preventDefault();
+      originalDays = this.trackingData.sensorDaysRemaining;
+
+      longPressTimer = setTimeout(() => {
+        // Toggle between 1 day and original days
+        if (this.trackingData.sensorDaysRemaining === 1) {
+          this.setSensorDays(originalDays !== 1 ? originalDays : 5);
+        } else {
+          this.setSensorDays(1);
+        }
+      }, 500); // 500ms long press
+    };
+
+    const cancelPress = () => {
+      if (longPressTimer) {
+        clearTimeout(longPressTimer);
+        longPressTimer = null;
+      }
+    };
+
+    // Add listeners to the hit area
+    hitArea.addEventListener('mousedown', startPress);
+    hitArea.addEventListener('mouseup', cancelPress);
+    hitArea.addEventListener('mouseleave', cancelPress);
+    hitArea.addEventListener('touchstart', startPress, { passive: false });
+    hitArea.addEventListener('touchend', cancelPress);
+    hitArea.addEventListener('touchcancel', cancelPress);
   }
 
   createDot(x, y, className = '') {
@@ -271,7 +452,8 @@ class TrackingController {
 
     // Render fast insulin doses
     this.trackingData.fastInsulin.forEach((dose, i) => {
-      const angle = this.timeToAngle(dose.time);
+      const timeStr = dose.timestamp ? this.getTimeFromTimestamp(dose.timestamp) : dose.time;
+      const angle = this.timeToAngle(timeStr);
       const pos = this.polarToCartesian(angle, this.OUTER_RADIUS);
 
       // Trail
@@ -285,7 +467,10 @@ class TrackingController {
 
     // Render slow insulin dose
     if (this.trackingData.slowInsulin) {
-      const angle = this.timeToAngle(this.trackingData.slowInsulin.time);
+      const timeStr = this.trackingData.slowInsulin.timestamp
+        ? this.getTimeFromTimestamp(this.trackingData.slowInsulin.timestamp)
+        : this.trackingData.slowInsulin.time;
+      const angle = this.timeToAngle(timeStr);
       const pos = this.polarToCartesian(angle, this.MIDDLE_RADIUS);
 
       // Trail (longer for slow insulin)
@@ -306,14 +491,37 @@ class TrackingController {
     }
 
     if (this.trackingData.alerts.sensorWarning || this.trackingData.sensorDaysRemaining <= 1) {
-      // Position alert near inner circle
-      const alertPos = this.polarToCartesian(200, this.INNER_RADIUS + 5);
+      // Position alert at bottom center of inner circle (180°)
+      const alertPos = this.polarToCartesian(180, this.INNER_RADIUS);
       const alert = this.createAlert(alertPos.x, alertPos.y, 'sensor');
       this.alertsGroup.appendChild(alert);
     }
   }
 
   // Public methods to update data
+
+  /**
+   * Add a fast insulin dose (will auto-expire after 6 hours)
+   */
+  addFastInsulin(durationHours = 4) {
+    this.trackingData.fastInsulin.push({
+      timestamp: Date.now(),
+      durationHours
+    });
+    this.render();
+  }
+
+  /**
+   * Add a slow insulin dose (will auto-expire after 24 hours)
+   */
+  addSlowInsulin(durationHours = 20) {
+    this.trackingData.slowInsulin = {
+      timestamp: Date.now(),
+      durationHours
+    };
+    this.render();
+  }
+
   setFastInsulin(doses) {
     this.trackingData.fastInsulin = doses;
     this.render();
@@ -328,10 +536,44 @@ class TrackingController {
     this.trackingData.sensorDaysRemaining = days;
     this.updateSensorTicks();
     this.render();
+
+    // Update labels and connectors based on days remaining
+    if (days <= 1) {
+      // Show only sensor warning label and center connector
+      if (this.sensorLabel) {
+        this.sensorLabel.textContent = 'senzor ističe za 1 dan';
+      }
+      if (this.brziLabel) this.brziLabel.style.opacity = '0';
+      if (this.sporiLabel) this.sporiLabel.style.opacity = '0';
+      if (this.connectorBrzi) this.connectorBrzi.style.opacity = '0';
+      if (this.connectorSpori) this.connectorSpori.style.opacity = '0';
+    } else {
+      // Show all labels and connectors
+      if (this.sensorLabel) {
+        this.sensorLabel.textContent = 'trajanje senzora';
+      }
+      if (this.brziLabel) this.brziLabel.style.opacity = '';
+      if (this.sporiLabel) this.sporiLabel.style.opacity = '';
+      if (this.connectorBrzi) this.connectorBrzi.style.opacity = '';
+      if (this.connectorSpori) this.connectorSpori.style.opacity = '';
+    }
+
+    // Hide tooltip - info is now shown in the label
+    if (this.tooltipSensor) {
+      this.tooltipSensor.classList.remove('visible');
+    }
   }
 
   setInsulinReminder(active) {
     this.trackingData.alerts.insulinReminder = active;
+    this.render();
+  }
+
+  /**
+   * Update current glucose value (shows alert if > 10)
+   */
+  setGlucose(value) {
+    this.trackingData.currentGlucose = value;
     this.render();
   }
 }

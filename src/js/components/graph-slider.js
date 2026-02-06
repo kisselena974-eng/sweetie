@@ -41,6 +41,22 @@ class GraphSlider {
     // Dragging state
     this.isDragging = false;
 
+    // Pan state for history reveal
+    this.panOffset = 0;
+    this.maxPanOffset = 200; // How far user can pan to reveal history
+    this.isPanning = false;
+    this.panStartX = 0;
+    this.panStartOffset = 0;
+
+    // Current graph position (in graph coordinates, not viewport)
+    this.currentGraphX = this.maxX; // Start at "now"
+
+    // Combined path data (history + main)
+    this.combinedPathData = null;
+
+    // Context markers (meal, insulin, activity, med)
+    this.contextMarkers = [];
+
     this.init();
   }
 
@@ -56,6 +72,9 @@ class GraphSlider {
     this.graphLineBase = document.querySelector('.graph-line-base');
     this.graphLineHighlight = document.querySelector('.graph-line-highlight');
     this.segmentClipRect = document.querySelector('.segment-clip-rect');
+    this.panGroup = document.querySelector('.graph-pan-group');
+    this.historyLine = document.querySelector('.graph-line-history');
+    this.markersGroup = document.querySelector('.graph-context-markers');
 
     // Default Y position for time label (below lower boundary)
     this.defaultTimeLabelY = 172;
@@ -71,11 +90,20 @@ class GraphSlider {
     // Sample the combined path to get Y values for any X
     this.samplePath();
 
+    // Generate history path (needs pathSamples to connect properly)
+    this.generateHistoryPath();
+
+    // Sample history path and create combined samples
+    this.sampleHistoryPath();
+
     // Find boundary crossing points
     this.findBoundaryCrossings();
 
     // Make slider interactive
     this.setupDragEvents();
+
+    // Setup pan events for history reveal
+    this.setupPanEvents();
 
     // Initialize spring for smooth dot animation
     this.initDotSpring();
@@ -100,40 +128,52 @@ class GraphSlider {
   }
 
   /**
-   * Render the dot and related elements at a specific X position
-   * This is called by the spring animation for smooth movement
+   * Render the dot and related elements at a specific X position (in graph coordinates)
+   * Slider is now inside pan group, so coordinates are graph coordinates
    */
   renderDotAtX(x) {
-    // Clamp X to valid range
-    x = Math.max(this.minX, Math.min(this.maxX, x));
-    this.currentX = x;
+    // Clamp X to graph coordinate range (where we have samples)
+    const minGraphX = this.allSamples && this.allSamples.length > 0 ? this.allSamples[0].x : 0;
+    const maxGraphX = this.allSamples && this.allSamples.length > 0 ? this.allSamples[this.allSamples.length - 1].x : this.maxX;
 
-    // Get Y position on the curve
-    const y = this.getYForX(x);
+    // Also respect the slider visual bounds (can't go past left button area in viewport)
+    // When panned, minX in viewport becomes minX - panOffset in graph coords
+    const effectiveMinX = this.minX - this.panOffset;
+    const effectiveMaxX = this.maxX - this.panOffset;
 
-    // Calculate line bounds based on circular watch shape
-    const lineBounds = this.getLineBoundsForX(x);
+    let graphX = Math.max(Math.max(minGraphX, effectiveMinX), Math.min(Math.min(maxGraphX, effectiveMaxX), x));
 
-    // Update slider line position
-    this.sliderLine.setAttribute('x1', x);
-    this.sliderLine.setAttribute('x2', x);
+    this.currentX = graphX + this.panOffset; // Store viewport position for compatibility
+    this.currentGraphX = graphX;
+
+    // Get Y position on the curve using graph coordinates
+    const y = this.getYForX(graphX);
+
+    // Calculate line bounds based on graph position (adjusted for pan)
+    // lineBounds calculation uses viewport position for avoiding UI elements
+    const viewportX = graphX + this.panOffset;
+    const lineBounds = this.getLineBoundsForX(viewportX);
+
+    // Update slider line position (in graph coordinates since inside pan group)
+    this.sliderLine.setAttribute('x1', graphX);
+    this.sliderLine.setAttribute('x2', graphX);
     this.sliderLine.setAttribute('y1', lineBounds.y1);
     this.sliderLine.setAttribute('y2', lineBounds.y2);
 
     // Update hitbox position
     if (this.sliderHitbox) {
-      this.sliderHitbox.setAttribute('x1', x);
-      this.sliderHitbox.setAttribute('x2', x);
+      this.sliderHitbox.setAttribute('x1', graphX);
+      this.sliderHitbox.setAttribute('x2', graphX);
       this.sliderHitbox.setAttribute('y1', lineBounds.y1);
       this.sliderHitbox.setAttribute('y2', lineBounds.y2);
     }
 
-    // Update dot position (direct, no CSS transition)
-    this.sliderDot.setAttribute('cx', x);
+    // Update dot position (in graph coordinates)
+    this.sliderDot.setAttribute('cx', graphX);
     this.sliderDot.setAttribute('cy', y);
 
-    // Update time label
-    this.updateTimeLabel(x, y);
+    // Update time label (in graph coordinates)
+    this.updateTimeLabel(graphX, y, graphX);
 
     // Calculate glucose and update colors
     const glucose = this.yToGlucose(y);
@@ -141,15 +181,25 @@ class GraphSlider {
     const isHigh = y < this.upperBoundaryY;
     const isDanger = isLow || isHigh;
 
-    // At "now" position, let app.js handle all accent colors via glucoseColorChange event
+    // At "now" position (graphX at maxX), let app.js handle all accent colors
     // This ensures all colors (text, graph, arrow) transition together with CSS
-    const isAtNow = Math.abs(x - this.maxX) < 5;
+    const isAtNow = Math.abs(graphX - this.maxX) < 5;
     if (!isAtNow) {
       // Only update colors when viewing historical positions
-      this.updateColors(x, y, isDanger, isLow);
+      // Use graphX for segment lookup (segments are in graph coordinates)
+      this.updateColors(graphX, y, isDanger, isLow);
     } else {
       // Still update clip-path at "now" position for proper segment display
-      this.updateClipPath(x, y);
+      this.updateClipPath(graphX, y);
+    }
+
+    // Update context markers color based on position (grey when not at "now")
+    if (this.contextMarkers.length > 0) {
+      const wasAtNow = this._wasAtNow !== undefined ? this._wasAtNow : true;
+      if (wasAtNow !== isAtNow) {
+        this.renderContextMarkers();
+      }
+      this._wasAtNow = isAtNow;
     }
 
     this.updateGlucoseDisplay(glucose, isDanger);
@@ -157,9 +207,13 @@ class GraphSlider {
 
   /**
    * Update time label position and text
+   * @param {number} x - Viewport X position
+   * @param {number} y - Y position
+   * @param {number} graphX - Graph coordinate X (for time calculation)
    */
-  updateTimeLabel(x, y) {
-    const fuzzyTime = this.getFuzzyTime(x);
+  updateTimeLabel(x, y, graphX) {
+    // Use graphX for time calculation (how far back in history)
+    const fuzzyTime = this.getFuzzyTime(graphX);
     if (this.timeLine1 && this.timeLine2) {
       this.timeLine1.textContent = fuzzyTime.line1;
       this.timeLine2.textContent = fuzzyTime.line2;
@@ -167,11 +221,13 @@ class GraphSlider {
       this.timeLine2.setAttribute('x', x);
     }
 
-    // Position time label
+    // Position time label - sample nearby graph coordinates
     const safeMargin = 8;
     let maxY = y;
-    for (let sampleX = Math.max(x - 25, this.minX); sampleX <= Math.min(x + 25, this.maxX); sampleX += 3) {
-      const sampleY = this.getYForX(sampleX);
+    const minGraphX = this.allSamples ? this.allSamples[0].x : 0;
+    const maxGraphX = this.allSamples ? this.allSamples[this.allSamples.length - 1].x : this.maxX;
+    for (let sampleGX = Math.max(graphX - 25, minGraphX); sampleGX <= Math.min(graphX + 25, maxGraphX); sampleGX += 3) {
+      const sampleY = this.getYForX(sampleGX);
       if (sampleY > maxY) maxY = sampleY;
     }
 
@@ -185,26 +241,26 @@ class GraphSlider {
     this.timeLabel.setAttribute('y', textY);
     this.timeLabel.setAttribute('x', x);
 
-    // Update background rect
+    // Update background rect (tight fit around text)
     if (this.timeBg) {
       let bgWidth, bgHeight, bgYOffset;
 
       if (fuzzyTime.line2) {
-        bgWidth = 45;
-        bgHeight = 26;
-        bgYOffset = 9;
+        bgWidth = 36;
+        bgHeight = 24;
+        bgYOffset = 8;
       } else if (fuzzyTime.line1 === 'now') {
-        bgWidth = 30;
-        bgHeight = 16;
-        bgYOffset = 11;
+        bgWidth = 22;
+        bgHeight = 14;
+        bgYOffset = 10;
       } else if (fuzzyTime.line1 === 'just now') {
-        bgWidth = 50;
-        bgHeight = 16;
-        bgYOffset = 11;
+        bgWidth = 40;
+        bgHeight = 14;
+        bgYOffset = 10;
       } else {
-        bgWidth = 62;
-        bgHeight = 16;
-        bgYOffset = 11;
+        bgWidth = 52;
+        bgHeight = 14;
+        bgYOffset = 10;
       }
 
       this.timeBg.setAttribute('x', x - bgWidth / 2);
@@ -215,10 +271,18 @@ class GraphSlider {
   }
 
   /**
-   * Animate dot to target X position using spring physics
+   * Animate dot to target X position using spring physics (in graph coordinates)
    */
   animateToX(targetX) {
-    targetX = Math.max(this.minX, Math.min(this.maxX, targetX));
+    // Clamp to graph coordinate range
+    const minGraphX = this.allSamples && this.allSamples.length > 0 ? this.allSamples[0].x : 0;
+    const maxGraphX = this.allSamples && this.allSamples.length > 0 ? this.allSamples[this.allSamples.length - 1].x : this.maxX;
+
+    // Also respect viewport bounds (adjusted for pan)
+    const effectiveMinX = this.minX - this.panOffset;
+    const effectiveMaxX = this.maxX - this.panOffset;
+
+    targetX = Math.max(Math.max(minGraphX, effectiveMinX), Math.min(Math.min(maxGraphX, effectiveMaxX), targetX));
     this.targetX = targetX;
 
     if (this.dotSpring) {
@@ -256,11 +320,44 @@ class GraphSlider {
   }
 
   /**
+   * Sample the combined path (history + main) for Y lookups
+   */
+  sampleHistoryPath() {
+    if (!this.combinedPathData) return;
+
+    this.allSamples = [];
+
+    // Create a temporary path element with combined data
+    const tempPath = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    tempPath.setAttribute('d', this.combinedPathData);
+    this.svg.appendChild(tempPath);
+
+    const pathLength = tempPath.getTotalLength();
+    const numSamples = 300; // More samples for combined path
+
+    for (let i = 0; i <= numSamples; i++) {
+      const point = tempPath.getPointAtLength((i / numSamples) * pathLength);
+      this.allSamples.push({ x: point.x, y: point.y });
+    }
+
+    // Sort by X
+    this.allSamples.sort((a, b) => a.x - b.x);
+
+    // Remove temp path
+    tempPath.remove();
+  }
+
+  /**
    * Find X coordinates where the graph crosses boundary lines
-   * Includes warning zone boundaries
+   * Includes warning zone boundaries - uses combined samples (history + main)
    */
   findBoundaryCrossings() {
     this.boundaryCrossings = [];
+
+    // Use combined samples if available
+    const samples = this.allSamples && this.allSamples.length > 0
+      ? this.allSamples
+      : this.pathSamples;
 
     // All boundary Y values
     const boundaries = [
@@ -270,9 +367,9 @@ class GraphSlider {
       { y: 156, name: 'danger-low' }     // glucose = 4
     ];
 
-    for (let i = 1; i < this.pathSamples.length; i++) {
-      const prev = this.pathSamples[i - 1];
-      const curr = this.pathSamples[i];
+    for (let i = 1; i < samples.length; i++) {
+      const prev = samples[i - 1];
+      const curr = samples[i];
 
       for (const boundary of boundaries) {
         if ((prev.y < boundary.y && curr.y >= boundary.y) ||
@@ -293,10 +390,20 @@ class GraphSlider {
 
   /**
    * Build segments between boundary crossings
+   * Uses the full graph range (including history)
    */
   buildSegments() {
     this.segments = [];
-    let lastX = this.minX;
+
+    // Start from the beginning of the combined graph (history start)
+    const graphStartX = this.allSamples && this.allSamples.length > 0
+      ? this.allSamples[0].x
+      : this.minX;
+    const graphEndX = this.allSamples && this.allSamples.length > 0
+      ? this.allSamples[this.allSamples.length - 1].x
+      : this.maxX;
+
+    let lastX = graphStartX;
 
     for (const crossing of this.boundaryCrossings) {
       // Determine zone type based on the Y at midpoint
@@ -315,13 +422,13 @@ class GraphSlider {
     }
 
     // Add final segment
-    const midX = (lastX + this.maxX) / 2;
+    const midX = (lastX + graphEndX) / 2;
     let midY = this.getYForX(midX);
     const zone = this.getZoneNameForY(midY);
 
     this.segments.push({
       startX: lastX,
-      endX: this.maxX,
+      endX: graphEndX,
       zone: zone
     });
   }
@@ -446,17 +553,23 @@ class GraphSlider {
   }
 
   /**
-   * Get Y value on the path for a given X
+   * Get Y value on the path for a given X (in graph coordinates)
+   * Uses combined samples (history + main) when available
    */
   getYForX(x) {
-    // Find the two samples that bracket this X
-    let lower = this.pathSamples[0];
-    let upper = this.pathSamples[this.pathSamples.length - 1];
+    // Use combined samples if available, otherwise just main path
+    const samples = this.allSamples && this.allSamples.length > 0
+      ? this.allSamples
+      : this.pathSamples;
 
-    for (let i = 0; i < this.pathSamples.length - 1; i++) {
-      if (this.pathSamples[i].x <= x && this.pathSamples[i + 1].x >= x) {
-        lower = this.pathSamples[i];
-        upper = this.pathSamples[i + 1];
+    // Find the two samples that bracket this X
+    let lower = samples[0];
+    let upper = samples[samples.length - 1];
+
+    for (let i = 0; i < samples.length - 1; i++) {
+      if (samples[i].x <= x && samples[i + 1].x >= x) {
+        lower = samples[i];
+        upper = samples[i + 1];
         break;
       }
     }
@@ -481,12 +594,15 @@ class GraphSlider {
   }
 
   /**
-   * Get fuzzy time text based on slider position
+   * Get fuzzy time text based on slider position (in graph coordinates)
    * Returns object with line1 and line2 - uses two lines only for longer text
+   * Graph extends from -200 (oldest history) to 206 (now)
    */
-  getFuzzyTime(x) {
-    const ratio = (this.maxX - x) / this.maxX;
-    const minutesAgo = ratio * 360; // Assume 6 hours of history
+  getFuzzyTime(graphX) {
+    // Calculate distance from "now" position (206)
+    // Total range is -200 to 206 = 406 units representing ~12 hours
+    const distanceFromNow = this.maxX - graphX;
+    const minutesAgo = (distanceFromNow / 406) * 720; // 720 minutes = 12 hours
 
     if (minutesAgo < 1) return { line1: 'now', line2: '' };
     if (minutesAgo < 5) return { line1: 'just now', line2: '' };
@@ -497,7 +613,13 @@ class GraphSlider {
     if (minutesAgo < 240) return { line1: '3 h ago', line2: '' };
     if (minutesAgo < 300) return { line1: '4 h ago', line2: '' };
     if (minutesAgo < 360) return { line1: '5 h ago', line2: '' };
-    return { line1: '6 h ago', line2: '' };
+    if (minutesAgo < 420) return { line1: '6 h ago', line2: '' };
+    if (minutesAgo < 480) return { line1: '7 h ago', line2: '' };
+    if (minutesAgo < 540) return { line1: '8 h ago', line2: '' };
+    if (minutesAgo < 600) return { line1: '9 h ago', line2: '' };
+    if (minutesAgo < 660) return { line1: '10 h ago', line2: '' };
+    if (minutesAgo < 720) return { line1: '11 h ago', line2: '' };
+    return { line1: '12 h ago', line2: '' };
   }
 
   /**
@@ -749,7 +871,7 @@ class GraphSlider {
   }
 
   /**
-   * Calculate the slope (derivative) of the graph at a given X position
+   * Calculate the slope (derivative) of the graph at a given X position (graph coordinates)
    * Returns one of 5 discrete angles: 0°, 45°, 90°, 135°, 180°
    * - 0° = pointing straight up (rising fast)
    * - 45° = pointing up-right (rising)
@@ -757,11 +879,13 @@ class GraphSlider {
    * - 135° = pointing down-right (falling)
    * - 180° = pointing down (falling fast)
    */
-  getSlopeAngleAtX(x) {
+  getSlopeAngleAtX(graphX) {
     // Sample points before and after current position to calculate slope
     const delta = 8; // Sample distance
-    const x1 = Math.max(this.minX, x - delta);
-    const x2 = Math.min(this.maxX, x + delta);
+    const minGraphX = this.allSamples ? this.allSamples[0].x : 0;
+    const maxGraphX = this.allSamples ? this.allSamples[this.allSamples.length - 1].x : this.maxX;
+    const x1 = Math.max(minGraphX, graphX - delta);
+    const x2 = Math.min(maxGraphX, graphX + delta);
 
     const y1 = this.getYForX(x1);
     const y2 = this.getYForX(x2);
@@ -864,8 +988,8 @@ class GraphSlider {
       glucoseText.textContent = displayValue;
     }
 
-    // Calculate trend angle from graph slope at current position
-    const trendAngle = this.getSlopeAngleAtX(this.currentX);
+    // Calculate trend angle from graph slope at current position (use graph coordinates)
+    const trendAngle = this.getSlopeAngleAtX(this.currentGraphX !== undefined ? this.currentGraphX : this.currentX);
 
     // Update arrow position and rotation based on text width and graph slope
     if (glucoseTextElement && arrow) {
@@ -975,6 +1099,11 @@ class GraphSlider {
     // Store new path and re-sample
     this.originalPathData = newPath;
     this.samplePath();
+
+    // Regenerate history path to connect with new main path
+    this.generateHistoryPath();
+    this.sampleHistoryPath();
+
     this.findBoundaryCrossings();
 
     // Reset spring to current position
@@ -1019,11 +1148,14 @@ class GraphSlider {
       const svgRect = this.svg.getBoundingClientRect();
       const clientX = e.clientX || e.touches?.[0]?.clientX;
 
-      // Convert screen coordinates to SVG coordinates
+      // Convert screen coordinates to SVG viewport coordinates
       const svgX = ((clientX - svgRect.left) / svgRect.width) * 252;
 
+      // Convert viewport to graph coordinates (slider is in pan group)
+      const graphX = svgX - this.panOffset;
+
       // Immediate update during drag for responsive feel
-      this.updateSliderPosition(svgX, true);
+      this.updateSliderPosition(graphX, true);
     };
 
     const handleEnd = () => {
@@ -1061,13 +1193,223 @@ class GraphSlider {
     this.svg.addEventListener('click', (e) => {
       if (e.target === this.sliderDot || e.target === this.sliderLine || e.target === this.sliderHitbox) return;
       if (this.isDragging) return;
+      // Don't animate if user just finished panning
+      if (this.panMoved) {
+        this.panMoved = false;
+        return;
+      }
 
       const svgRect = this.svg.getBoundingClientRect();
       const svgX = ((e.clientX - svgRect.left) / svgRect.width) * 252;
 
+      // Convert viewport to graph coordinates
+      const graphX = svgX - this.panOffset;
+
       // Animate to clicked position with spring physics
-      this.updateSliderPosition(svgX, false);
+      this.updateSliderPosition(graphX, false);
     });
+  }
+
+  /**
+   * Generate combined path with history + main graph as ONE continuous smooth path
+   * Uses Catmull-Rom spline converted to Bezier for guaranteed smoothness
+   */
+  generateHistoryPath() {
+    if (!this.originalPathData) return;
+
+    // Get the starting point and direction of the main graph
+    const mainStartY = this.pathSamples && this.pathSamples.length > 0
+      ? this.pathSamples[0].y
+      : 72;
+
+    // Sample a few points from the main path to understand its initial direction
+    const mainSecondY = this.pathSamples && this.pathSamples.length > 5
+      ? this.pathSamples[5].y
+      : mainStartY;
+
+    // Generate history points that will smoothly connect
+    const historyPoints = [];
+
+    // Start point (far left)
+    historyPoints.push({ x: -200, y: 80 + Math.random() * 80 });
+
+    // Intermediate points with natural flow
+    historyPoints.push({ x: -160, y: 60 + Math.random() * 100 });
+    historyPoints.push({ x: -120, y: 70 + Math.random() * 90 });
+    historyPoints.push({ x: -80, y: 60 + Math.random() * 100 });
+    historyPoints.push({ x: -40, y: 50 + Math.random() * 80 });
+
+    // Approach point - starts transitioning to main graph's Y
+    const approachY = mainStartY + (Math.random() - 0.5) * 30;
+    historyPoints.push({ x: -20, y: approachY });
+
+    // Junction point - exactly matches main graph start
+    historyPoints.push({ x: 0, y: mainStartY });
+
+    // Now sample points from the main graph to include in our spline
+    const mainPoints = [];
+    if (this.pathSamples && this.pathSamples.length > 0) {
+      // Take every few samples from main path
+      for (let i = 0; i < this.pathSamples.length; i += Math.floor(this.pathSamples.length / 8)) {
+        mainPoints.push({ x: this.pathSamples[i].x, y: this.pathSamples[i].y });
+      }
+      // Always include the last point
+      const lastSample = this.pathSamples[this.pathSamples.length - 1];
+      if (mainPoints[mainPoints.length - 1].x !== lastSample.x) {
+        mainPoints.push(lastSample);
+      }
+    }
+
+    // Combine all points (skip junction duplicate)
+    const allPoints = [...historyPoints, ...mainPoints.slice(1)];
+
+    // Generate smooth Catmull-Rom spline through all points
+    this.combinedPathData = this.catmullRomToBezier(allPoints);
+
+    // Update the base line with combined path
+    if (this.graphLineBase) {
+      this.graphLineBase.setAttribute('d', this.combinedPathData);
+    }
+    if (this.graphLineHighlight) {
+      this.graphLineHighlight.setAttribute('d', this.combinedPathData);
+    }
+
+    // Hide the separate history line
+    if (this.historyLine) {
+      this.historyLine.setAttribute('d', '');
+    }
+  }
+
+  /**
+   * Convert a series of points to a smooth Catmull-Rom spline (as Bezier curves)
+   * This guarantees C1 continuity (smooth tangents) at all points
+   */
+  catmullRomToBezier(points) {
+    if (points.length < 2) return '';
+
+    let path = `M${points[0].x.toFixed(1)},${points[0].y.toFixed(1)}`;
+
+    for (let i = 0; i < points.length - 1; i++) {
+      const p0 = points[Math.max(0, i - 1)];
+      const p1 = points[i];
+      const p2 = points[i + 1];
+      const p3 = points[Math.min(points.length - 1, i + 2)];
+
+      // Catmull-Rom to Bezier conversion
+      // Tension factor (0.5 = standard Catmull-Rom)
+      const tension = 0.5;
+
+      const cp1x = p1.x + (p2.x - p0.x) * tension / 3;
+      const cp1y = p1.y + (p2.y - p0.y) * tension / 3;
+      const cp2x = p2.x - (p3.x - p1.x) * tension / 3;
+      const cp2y = p2.y - (p3.y - p1.y) * tension / 3;
+
+      path += ` C${cp1x.toFixed(1)},${cp1y.toFixed(1)} ${cp2x.toFixed(1)},${cp2y.toFixed(1)} ${p2.x.toFixed(1)},${p2.y.toFixed(1)}`;
+    }
+
+    return path;
+  }
+
+  /**
+   * Setup pan events for revealing history when dragging right
+   */
+  setupPanEvents() {
+    if (!this.panGroup || !this.svg) return;
+
+    // Track if a meaningful pan occurred (to prevent click after pan)
+    this.panMoved = false;
+
+    const handlePanStart = (e) => {
+      // Don't start pan if dragging the slider dot
+      if (e.target === this.sliderDot || e.target === this.sliderHitbox) return;
+      // Don't start pan if slider is being dragged
+      if (this.isDragging) return;
+
+      this.isPanning = true;
+      this.panMoved = false;
+      const clientX = e.clientX || e.touches?.[0]?.clientX;
+      this.panStartX = clientX;
+      this.panStartOffset = this.panOffset;
+
+      // Disable transition during drag for immediate feedback
+      if (this.panGroup) {
+        this.panGroup.style.transition = 'none';
+      }
+    };
+
+    const handlePanMove = (e) => {
+      if (!this.isPanning) return;
+
+      const clientX = e.clientX || e.touches?.[0]?.clientX;
+      const deltaX = clientX - this.panStartX;
+
+      // Mark as moved if dragged more than 5px
+      if (Math.abs(deltaX) > 5) {
+        this.panMoved = true;
+      }
+
+      // Calculate new pan offset (dragging right = positive offset = reveal history)
+      let newOffset = this.panStartOffset + deltaX;
+
+      // Clamp to valid range
+      newOffset = Math.max(0, Math.min(this.maxPanOffset, newOffset));
+
+      this.panOffset = newOffset;
+      this.updatePanPosition();
+    };
+
+    const handlePanEnd = () => {
+      if (!this.isPanning) return;
+      this.isPanning = false;
+
+      // Re-enable transition for animations
+      if (this.panGroup) {
+        this.panGroup.style.transition = '';
+      }
+
+      // Snap back if pulled less than 30% of max
+      if (this.panOffset < this.maxPanOffset * 0.3) {
+        this.animatePanTo(0);
+      }
+    };
+
+    // Add events to svg background
+    this.svg.addEventListener('mousedown', handlePanStart);
+    this.svg.addEventListener('touchstart', handlePanStart, { passive: true });
+
+    document.addEventListener('mousemove', handlePanMove);
+    document.addEventListener('touchmove', handlePanMove, { passive: true });
+
+    document.addEventListener('mouseup', handlePanEnd);
+    document.addEventListener('touchend', handlePanEnd);
+  }
+
+  /**
+   * Update the pan group position
+   * Slider elements are now inside the pan group, so they move automatically
+   */
+  updatePanPosition() {
+    if (this.panGroup) {
+      this.panGroup.style.transform = `translateX(${this.panOffset}px)`;
+    }
+  }
+
+  /**
+   * Animate pan to target offset using CSS M3 expressive motion
+   */
+  animatePanTo(targetOffset) {
+    // Let CSS transition handle the animation with M3 spatial easing
+    this.panOffset = targetOffset;
+    this.updatePanPosition();
+  }
+
+  /**
+   * Reset pan position
+   */
+  resetPan() {
+    this.panOffset = 0;
+    this.isPanning = false;
+    this.updatePanPosition();
   }
 
   /**
@@ -1080,8 +1422,12 @@ class GraphSlider {
       this.dotSpring.setValue(this.maxX);
     }
 
+    // Reset pan position
+    this.resetPan();
+
     // Reset position immediately (no animation)
     this.currentX = this.maxX;
+    this.currentGraphX = this.maxX;
     this.targetX = this.maxX;
     this.renderDotAtX(this.maxX);
 
@@ -1128,6 +1474,181 @@ class GraphSlider {
       this.segmentClipRect.setAttribute('height', clipHeight);
     }
   }
+
+  /**
+   * Add a context marker to the graph at the current "now" position
+   * @param {string} type - 'meal', 'insulin', 'activity', or 'med'
+   * @param {number} value - Optional value (units for insulin/med)
+   */
+  addContextMarker(type, value = 1) {
+    const x = this.maxX; // Current "now" position
+    const y = this.getYForX(x);
+
+    this.contextMarkers.push({
+      type,
+      value,
+      x,
+      y,
+      timestamp: Date.now()
+    });
+
+    this.renderContextMarkers();
+  }
+
+  /**
+   * Render all context markers on the graph
+   */
+  renderContextMarkers() {
+    if (!this.markersGroup) return;
+
+    // Clear existing markers
+    this.markersGroup.innerHTML = '';
+
+    // Check if slider is at "now" position
+    const isAtNow = Math.abs(this.currentGraphX - this.maxX) < 5;
+
+    // Use accent color when at "now", grey when viewing history
+    const greyColor = '#8E8E93';
+    const accentColor = isAtNow
+      ? (window.glucoseBlob ? window.glucoseBlob.getColor() : '#7ED321')
+      : greyColor;
+
+    // Inline SVG paths for each icon type
+    const iconSvgs = {
+      meal: `<svg width="12" height="12" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M4.5 2.5V5.3125" stroke="${accentColor}" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M4.6875 7.5V13.125" stroke="${accentColor}" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M12.1875 9.84375H8.90625C8.90625 9.84375 8.90625 3.75 12.1875 2.34375V13.125" stroke="${accentColor}" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M2.46875 2L2 4.8125C2 5.4341 2.24693 6.03024 2.68647 6.46978C3.12601 6.90932 3.72215 7.15625 4.34375 7.15625C4.96535 7.15625 5.56149 6.90932 6.00103 6.46978C6.44057 6.03024 6.6875 5.4341 6.6875 4.8125L6.21875 2" stroke="${accentColor}" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>`,
+      insulin: `<svg width="12" height="12" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M12.8639 2.92166L10.0783 0.136056C10.0352 0.0929212 9.984 0.0587044 9.92764 0.0353598C9.87128 0.0120153 9.81087 0 9.74987 0C9.68887 0 9.62846 0.0120153 9.5721 0.0353598C9.51575 0.0587044 9.46454 0.0929212 9.4214 0.136056C9.37827 0.179192 9.34405 0.2304 9.32071 0.286759C9.29736 0.343118 9.28534 0.403523 9.28534 0.464525C9.28534 0.525528 9.29736 0.585933 9.32071 0.642292C9.34405 0.69865 9.37827 0.749859 9.4214 0.792994L10.4863 1.85733L8.82134 3.52231L6.82847 1.52886C6.74135 1.44174 6.6232 1.3928 6.5 1.3928C6.3768 1.3928 6.25865 1.44174 6.17153 1.52886C6.08441 1.61597 6.03547 1.73413 6.03547 1.85733C6.03547 1.98053 6.08441 2.09868 6.17153 2.1858L6.54004 2.55373L1.66524 7.42853C1.57864 7.51444 1.50998 7.61671 1.46326 7.72939C1.41653 7.84207 1.39267 7.96291 1.39306 8.08489V10.9506L0.136056 12.207C0.0929212 12.2501 0.0587044 12.3013 0.0353598 12.3577C0.0120153 12.4141 0 12.4745 0 12.5355C0 12.5965 0.0120153 12.6569 0.0353598 12.7132C0.0587044 12.7696 0.0929212 12.8208 0.136056 12.8639C0.223172 12.9511 0.341326 13 0.464525 13C0.525528 13 0.585933 12.988 0.642292 12.9646C0.69865 12.9413 0.749859 12.9071 0.792994 12.8639L2.04942 11.6069H4.91511C5.03709 11.6073 5.15793 11.5835 5.27061 11.5367C5.38329 11.49 5.48555 11.4214 5.57146 11.3348L10.4463 6.45996L10.8142 6.82847C10.8573 6.8716 10.9085 6.90582 10.9649 6.92916C11.0213 6.95251 11.0817 6.96452 11.1427 6.96452C11.2037 6.96452 11.2641 6.95251 11.3204 6.92916C11.3768 6.90582 11.428 6.8716 11.4711 6.82847C11.5143 6.78533 11.5485 6.73412 11.5718 6.67777C11.5952 6.62141 11.6072 6.561 11.6072 6.5C11.6072 6.439 11.5952 6.37859 11.5718 6.32223C11.5485 6.26587 11.5143 6.21466 11.4711 6.17153L9.47769 4.17866L11.1427 2.51368L12.207 3.5786C12.2941 3.66571 12.4123 3.71465 12.5355 3.71465C12.6587 3.71465 12.7768 3.66571 12.8639 3.5786C12.9511 3.49148 13 3.37333 13 3.25013C13 3.12693 12.9511 3.00877 12.8639 2.92166ZM4.91511 10.6784H2.32159V8.08489L3.3662 7.04029L4.54659 8.22127C4.58973 8.26441 4.64094 8.29862 4.6973 8.32197C4.75366 8.34531 4.81406 8.35733 4.87506 8.35733C4.93607 8.35733 4.99647 8.34531 5.05283 8.32197C5.10919 8.29862 5.1604 8.26441 5.20353 8.22127C5.24667 8.17814 5.28089 8.12693 5.30423 8.07057C5.32757 8.01421 5.33959 7.9538 5.33959 7.8928C5.33959 7.8318 5.32757 7.77139 5.30423 7.71503C5.28089 7.65868 5.24667 7.60747 5.20353 7.56433L4.02255 6.38393L4.759 5.64749L5.9394 6.82847C6.02651 6.91558 6.14467 6.96452 6.26787 6.96452C6.39107 6.96452 6.50922 6.91558 6.59633 6.82847C6.68345 6.74135 6.73239 6.6232 6.73239 6.5C6.73239 6.3768 6.68345 6.25865 6.59633 6.17153L5.41535 4.99113L7.1964 3.21009L9.78991 5.8036L4.91511 10.6784Z" fill="${accentColor}"/>
+      </svg>`,
+      activity: `<svg width="12" height="12" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M19 10C20.6569 10 22 8.65685 22 7C22 5.34315 20.6569 4 19 4C17.3431 4 16 5.34315 16 7C16 8.65685 17.3431 10 19 10Z" stroke="${accentColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M7 13.2C7 13.2 11 9.99125 17 14.075C23.3088 18.3625 27 16.6813 27 16.6813" stroke="${accentColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M13.83 20.145C16.0587 20.625 22 22.5 22 29" stroke="${accentColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M16.805 13.9388C16.0463 16.905 12.3512 25.835 4 25" stroke="${accentColor}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>`,
+      med: `<svg width="14" height="14" viewBox="0 0 18 18" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M14.7735 5.97268C14.2888 5.49838 13.8086 5.02113 13.3254 4.54389C12.8571 4.08284 12.3917 3.61885 11.9205 3.16076C11.7489 2.99431 11.5372 2.9619 11.3179 3.04144C11.0868 3.1254 10.9451 3.29627 10.9153 3.54079C10.8914 3.73669 10.9466 3.92965 10.9704 4.12409C11.0346 4.64699 11.1062 5.1699 11.1777 5.69281C11.1867 5.75762 11.1598 5.74289 11.1226 5.72669C11.0346 5.68986 10.9496 5.64715 10.8601 5.61769C10.259 5.41884 9.64906 5.39085 9.03311 5.54846C8.53647 5.67513 8.08756 5.89903 7.71769 6.25549C7.28519 6.67382 6.85268 7.09362 6.43509 7.5252C5.56411 8.42372 5.35383 9.47543 5.71922 10.6523C5.75501 10.7687 5.80572 10.8806 5.85046 10.9941C5.83107 11.0073 5.81318 11 5.79528 10.997C5.31654 10.9263 4.83929 10.8556 4.36055 10.7864C4.11746 10.751 3.87585 10.7039 3.63126 10.6818C3.34789 10.6553 3.08839 10.8394 3.01979 11.109C2.95864 11.3476 3.04365 11.5361 3.21367 11.7026C3.80725 12.2844 4.39933 12.8662 4.99142 13.4481C5.44629 13.8958 5.90117 14.3451 6.35605 14.7929C6.45597 14.8916 6.56783 14.9667 6.71547 14.9932C7.04209 15.0492 7.38064 14.7502 7.34186 14.4246C7.30905 14.1389 7.26878 13.8546 7.22852 13.5703C7.16289 13.1137 7.09429 12.6556 7.02867 12.199C7.02569 12.1754 7.00331 12.143 7.03016 12.1268C7.05402 12.1121 7.07938 12.1386 7.10175 12.1489C7.49398 12.3374 7.90859 12.4229 8.34259 12.4288C8.60806 12.4332 8.86905 12.3963 9.12707 12.336C9.59387 12.227 10.0159 12.0296 10.3605 11.6967C10.8332 11.2401 11.3015 10.779 11.7609 10.3091C12.3187 9.73762 12.6035 9.04679 12.6259 8.2558C12.6363 7.88755 12.5692 7.52814 12.438 7.18199C12.3738 7.01113 12.2918 6.8491 12.1993 6.68413C12.2172 6.68265 12.2277 6.67823 12.2366 6.67971C12.6706 6.74452 13.1031 6.80933 13.5371 6.87267C13.8086 6.91244 14.08 6.95663 14.3529 6.98756C14.6557 7.02144 14.9212 6.83142 14.9853 6.54861C15.039 6.30999 14.9405 6.12881 14.775 5.96678L14.7735 5.97268ZM10.951 9.74204C10.5767 10.1029 10.2143 10.4771 9.83548 10.8335C9.31498 11.3225 8.69605 11.517 7.98615 11.3844C7.45223 11.2842 7.03314 11.0117 6.7632 10.5374C6.59914 10.2502 6.54247 9.93647 6.54247 9.66544C6.54993 9.09392 6.71249 8.63435 7.07639 8.25727C7.37616 7.94794 7.68936 7.6504 7.99659 7.34844C8.09353 7.2527 8.19196 7.15843 8.2889 7.06121C8.61701 6.72832 9.02565 6.55303 9.48053 6.47349C9.92049 6.3969 10.3411 6.45581 10.7303 6.67382C11.3045 6.9964 11.5983 7.49427 11.6117 8.14238C11.6237 8.76398 11.4089 9.30014 10.9525 9.74056L10.951 9.74204Z" fill="${accentColor}"/>
+      </svg>`
+    };
+
+    // Get current glucose Y position (markers follow current glucose level)
+    const currentGlucoseY = this.getYForX(this.maxX);
+    const minMarginY = 55; // Top margin - can't go above (clock area)
+    const maxMarginY = 170; // Bottom margin - can't go below (now area)
+    const badgeSize = 20;
+    const minGap = 15; // Minimum gap between markers
+    const firstMarkerGap = 40; // First marker 40px from glucose point
+    const glucoseGap = 15; // Gap from glucose point for zones
+
+    const markerCount = this.contextMarkers.length;
+
+    // Calculate available space above and below glucose point (never cross glucose point)
+    const aboveZoneTop = minMarginY;
+    const aboveZoneBottom = currentGlucoseY - glucoseGap - badgeSize;
+    const belowZoneTop = currentGlucoseY + glucoseGap;
+    const belowZoneBottom = maxMarginY - badgeSize;
+
+    const spaceAbove = Math.max(0, aboveZoneBottom - aboveZoneTop);
+    const spaceBelow = Math.max(0, belowZoneBottom - belowZoneTop);
+
+    // Calculate how many markers fit in each zone
+    const maxMarkersAbove = spaceAbove > 0 ? Math.floor(spaceAbove / (badgeSize + minGap)) + 1 : 0;
+    const maxMarkersBelow = spaceBelow > 0 ? Math.floor(spaceBelow / (badgeSize + minGap)) + 1 : 0;
+
+    // Distribute markers between zones
+    let markersAbove = Math.min(Math.ceil(markerCount / 2), maxMarkersAbove);
+    let markersBelow = Math.min(markerCount - markersAbove, maxMarkersBelow);
+
+    // If we couldn't fit all below, try to add more above
+    if (markersAbove + markersBelow < markerCount) {
+      markersAbove = Math.min(markerCount - markersBelow, maxMarkersAbove);
+    }
+
+    // Calculate Y positions for all markers
+    const markerPositions = [];
+
+    // Position markers above (from glucose going up)
+    // First marker is 30px above, subsequent markers are 15px apart
+    for (let i = 0; i < markersAbove; i++) {
+      let y;
+      if (i === 0) {
+        y = currentGlucoseY - firstMarkerGap - badgeSize;
+      } else {
+        y = markerPositions[i - 1] - minGap - badgeSize;
+      }
+      markerPositions.push(Math.max(minMarginY, y));
+    }
+
+    // Position markers below (from glucose going down)
+    for (let i = 0; i < markersBelow; i++) {
+      let y;
+      if (markersAbove === 0 && i === 0) {
+        // First marker overall, but below
+        y = currentGlucoseY + firstMarkerGap;
+      } else {
+        y = belowZoneTop + (i * (badgeSize + minGap));
+      }
+      markerPositions.push(Math.min(maxMarginY - badgeSize, y));
+    }
+
+    this.contextMarkers.forEach((marker, index) => {
+      // Determine badge size based on whether we show a number
+      const showNumber = (marker.type === 'insulin' || marker.type === 'med') && marker.value > 1;
+      const badgeWidth = showNumber ? 36 : badgeSize;
+      const badgeHeight = badgeSize;
+
+      // Use pre-calculated position
+      const markerY = markerPositions[index] || minMarginY;
+
+      // Draw connecting line from graph point to marker
+      const graphPointY = marker.y; // Y position on graph where marker was added
+      const badgeCenterY = markerY + badgeHeight / 2;
+
+      // Always draw the line (grey when not at now, accent when at now)
+      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      line.setAttribute('x1', marker.x);
+      line.setAttribute('y1', graphPointY);
+      line.setAttribute('x2', marker.x);
+      line.setAttribute('y2', markerY < graphPointY ? markerY + badgeHeight : markerY);
+      line.setAttribute('stroke', isAtNow ? accentColor : greyColor);
+      line.setAttribute('stroke-width', '1');
+      line.setAttribute('stroke-dasharray', '3,3');
+      this.markersGroup.appendChild(line);
+
+      // Create foreignObject to embed HTML
+      const fo = document.createElementNS('http://www.w3.org/2000/svg', 'foreignObject');
+
+      fo.setAttribute('x', marker.x - badgeWidth / 2);
+      fo.setAttribute('y', markerY);
+      fo.setAttribute('width', badgeWidth);
+      fo.setAttribute('height', badgeHeight);
+
+      // Create the badge HTML with inline SVG
+      const badge = document.createElement('div');
+      badge.className = showNumber ? 'graph-context-badge with-value' : 'graph-context-badge';
+      badge.innerHTML = `
+        ${iconSvgs[marker.type]}
+        ${showNumber ? `<span class="graph-context-value" style="color: ${accentColor}">${marker.value}</span>` : ''}
+      `;
+
+      fo.appendChild(badge);
+      this.markersGroup.appendChild(fo);
+    });
+  }
+
+  /**
+   * Clear all context markers
+   */
+  clearContextMarkers() {
+    this.contextMarkers = [];
+    if (this.markersGroup) {
+      this.markersGroup.innerHTML = '';
+    }
+  }
 }
 
 // Initialize when DOM is ready and graph is visible
@@ -1136,6 +1657,7 @@ let graphSlider = null;
 function initGraphSlider() {
   if (!graphSlider) {
     graphSlider = new GraphSlider();
+    window.graphSlider = graphSlider; // Expose globally
   }
   return graphSlider;
 }

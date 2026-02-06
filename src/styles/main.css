@@ -11,9 +11,6 @@ html {
 body {
   background: var(--color-background);
   min-height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
   font-family: 'Roboto Flex', sans-serif;
   /* Prevent pull-to-refresh and overscroll on mobile */
   overscroll-behavior: none;
@@ -22,6 +19,302 @@ body {
   position: fixed;
   width: 100%;
   height: 100%;
+}
+
+/* ===========================================
+   LANDING PAGE LAYOUT
+   =========================================== */
+
+.landing-page {
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  width: 100%;
+  height: 100%;
+  padding: 40px 60px;
+  box-sizing: border-box;
+}
+
+/* Header */
+.landing-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.header-left {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.landing-title {
+  font-size: 12pt;
+  font-weight: 700;
+  color: var(--landing-accent-color, #7ED321);
+  margin: 0;
+  line-height: 14pt;
+  transition: color 0.3s ease;
+}
+
+.landing-subtitle {
+  font-size: 12pt;
+  font-weight: 400;
+  color: #BEBCBA;
+  line-height: 14pt;
+  margin: 0;
+}
+
+.header-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 16px;
+}
+
+.language-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.lang-btn {
+  background: none;
+  border: none;
+  color: #888888;
+  font-family: 'Roboto Flex', sans-serif;
+  font-size: 12pt;
+  font-weight: 400;
+  cursor: pointer;
+  padding: 0;
+  line-height: 14pt;
+  transition: color 0.2s ease;
+}
+
+.lang-btn.active {
+  color: #FFFFFF;
+  font-weight: 700;
+}
+
+.lang-btn:hover {
+  color: #FFFFFF;
+}
+
+.lang-separator {
+  color: #888888;
+  font-size: 12pt;
+  line-height: 14pt;
+}
+
+.about-btn {
+  background: none;
+  border: none;
+  color: #FFFFFF;
+  font-family: 'Roboto Flex', sans-serif;
+  font-size: 12pt;
+  font-weight: 400;
+  cursor: pointer;
+  padding: 0;
+  line-height: 14pt;
+  text-decoration: none;
+  transition: opacity 0.2s ease;
+}
+
+.about-btn:hover {
+  opacity: 0.7;
+}
+
+/* Main - Watch centered */
+.landing-main {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Footer */
+.landing-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+}
+
+/* Legend */
+.landing-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.legend-title {
+  font-size: 12pt;
+  font-weight: 500;
+  color: #FFFFFF;
+  margin: 0;
+  line-height: 14pt;
+}
+
+.legend-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.legend-list li {
+  font-size: 12pt;
+  font-weight: 400;
+  color: #BEBCBA;
+  line-height: 14pt;
+}
+
+/* Glucose Slider */
+.landing-slider {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.slider-label {
+  font-size: 12pt;
+  font-weight: 500;
+  color: #FFFFFF;
+  line-height: 14pt;
+}
+
+.slider-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.slider-controls .glucose-value {
+  font-size: 12pt;
+  font-weight: 500;
+  color: #7ED321;
+  min-width: 35px;
+  text-align: right;
+  line-height: 14pt;
+}
+
+.slider-controls .trend-arrow-btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #333;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.slider-controls .trend-arrow-btn:hover {
+  background: #444;
+}
+
+.slider-controls .trend-arrow-btn:active {
+  transform: scale(0.95);
+}
+
+.slider-controls .trend-arrow-btn svg {
+  transition: transform 0.3s ease;
+}
+
+/* Responsive - Tablet */
+@media (max-width: 900px) {
+  .landing-page {
+    padding: 30px 40px;
+  }
+
+  .header-right {
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+  }
+
+  .landing-footer {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+
+  .landing-legend {
+    align-items: flex-start;
+    text-align: left;
+  }
+
+  .landing-slider {
+    align-items: flex-end;
+  }
+}
+
+/* Responsive - Mobile */
+@media (max-width: 600px) {
+  .landing-page {
+    padding: 24px 20px;
+  }
+
+  .landing-header {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .header-left {
+    order: 2;
+  }
+
+  .header-right {
+    order: 1;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .landing-footer {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+
+  .landing-legend {
+    align-items: flex-start;
+    text-align: left;
+    max-width: 50%;
+  }
+
+  .landing-slider {
+    align-items: flex-end;
+  }
+
+  /* Vertical slider when space is tight */
+  .slider-controls {
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+  }
+
+  .slider-controls #glucose-slider {
+    width: 80px;
+    transform: rotate(-90deg);
+    transform-origin: right center;
+    margin-right: 30px;
+  }
+}
+
+/* Very small screens */
+@media (max-width: 400px) {
+  .landing-page {
+    padding: 16px 12px;
+  }
+
+  .legend-list li {
+    font-size: 10pt;
+    line-height: 12pt;
+  }
 }
 
 /* Watch container - centers the display and accommodates mockup */
@@ -281,6 +574,34 @@ body {
   letter-spacing: 0.74px;
 }
 
+/* Fixed glucose display - stays visible during page transitions */
+.fixed-glucose {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 100;
+  opacity: 0;
+}
+
+.fixed-glucose.visible {
+  opacity: 1;
+}
+
+.fixed-glucose-text {
+  font-family: 'Roboto Flex', sans-serif;
+  font-size: var(--text-font-size-l);
+  font-weight: 600;
+  fill: var(--color-accent-good);
+  letter-spacing: 1.5px;
+}
+
+.fixed-glucose-arrow {
+  transition: transform var(--duration-short) var(--motion-spatial);
+}
+
 /* Hide time elements inside screens (fixed-time replaces them) */
 .screen .time,
 .nav-time,
@@ -526,33 +847,59 @@ body {
    PAGE 3: INSULIN & SENSOR TRACKING
    =========================================== */
 
-/* Info button (left side) */
+/* Tracking glucose display (bottom arc) - same as home/assistant */
+.tracking-nav {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 1;
+  transition: opacity var(--duration-medium) var(--motion-effects);
+}
+
+.tracking-glucose-text {
+  font-family: 'Roboto Flex', sans-serif;
+  font-size: var(--text-font-size-l);
+  font-weight: 600;
+  fill: var(--color-accent-good);
+  letter-spacing: 1.5px;
+}
+
+.tracking-glucose-arrow {
+  transition: transform var(--duration-short) var(--motion-spatial);
+}
+
+/* Info button (left side) - smaller than plus button */
 .tracking-info-btn {
   position: absolute;
-  left: 10px;
+  left: 12px;
   top: 50%;
   transform: translateY(-50%);
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
+  padding: 2px;
   border-radius: 50%;
-  background: transparent;
+  background: var(--color-surface-container);
   border: none;
   color: #fff;
   font-family: 'Roboto Flex', sans-serif;
   font-size: 14px;
   font-weight: 400;
-  font-style: italic;
+  font-style: normal;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 10;
+  box-shadow: 0 0 0 6px var(--color-background);
   transition: background-color var(--duration-short) var(--motion-effects);
   -webkit-tap-highlight-color: transparent;
 }
 
 .tracking-info-btn.active {
-  background: rgba(255, 255, 255, 0.15);
+  background: #000;
 }
 
 /* Main tracking clock */
@@ -573,7 +920,7 @@ body {
 /* Clock hand */
 .tracking-hand {
   stroke: #fff;
-  stroke-width: 1.5;
+  stroke-width: 1;
   stroke-linecap: round;
 }
 
@@ -590,15 +937,17 @@ body {
 /* Insulin trails (arcs with gradient fade) */
 .tracking-trail {
   fill: none;
-  stroke-width: 2;
+  stroke-width: 1;
   stroke-linecap: round;
 }
 
-/* Sensor ticks */
+/* Sensor ticks (arc segments along the inner circle) */
 .tracking-sensor-tick {
+  fill: none;
   stroke: #fff;
-  stroke-width: 1.5;
+  stroke-width: 2;
   stroke-linecap: round;
+  cursor: pointer;
 }
 
 .tracking-sensor-tick.expired {
@@ -627,14 +976,8 @@ body {
   dominant-baseline: central;
 }
 
-/* Info labels */
+/* Info labels (SVG text on arc path) */
 .tracking-labels {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
   opacity: 0;
   transition: opacity var(--duration-medium) var(--motion-effects);
 }
@@ -644,65 +987,18 @@ body {
 }
 
 .tracking-label {
-  position: absolute;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-.tracking-label span {
   font-family: 'Roboto Flex', sans-serif;
   font-size: 11px;
-  font-weight: 400;
-  color: #fff;
-  white-space: nowrap;
+  font-weight: 300;
+  fill: rgba(255, 255, 255, 0.7);
+  letter-spacing: 0.5px;
 }
 
-.tracking-label-line {
-  stroke: rgba(255, 255, 255, 0.5);
-  stroke-width: 1;
-}
-
-.tracking-label-line line {
-  stroke: rgba(255, 255, 255, 0.5);
-}
-
-.tracking-label-brzi {
-  bottom: 42px;
-  left: 22px;
-  flex-direction: column-reverse;
-}
-
-.tracking-label-brzi .tracking-label-line {
-  width: 55px;
-  height: 40px;
-  margin-bottom: 2px;
-}
-
-.tracking-label-spori {
-  bottom: 42px;
-  right: 22px;
-  flex-direction: column-reverse;
-  align-items: flex-end;
-}
-
-.tracking-label-spori .tracking-label-line {
-  width: 55px;
-  height: 40px;
-  margin-bottom: 2px;
-}
-
-.tracking-label-senzor {
-  bottom: 22px;
-  left: 50%;
-  transform: translateX(-50%);
-  flex-direction: column-reverse;
-}
-
-.tracking-label-senzor .tracking-label-line {
-  width: 10px;
-  height: 30px;
-  margin-bottom: 2px;
+.tracking-connector {
+  stroke: rgba(255, 255, 255, 0.4);
+  stroke-width: 0.5;
+  stroke-dasharray: 2, 2;
+  fill: none;
 }
 
 /* Alert tooltips */
@@ -1424,76 +1720,12 @@ body {
 }
 
 /* ===========================================
-   DEBUG PANEL - Glucose Slider
+   DEBUG PANEL - Glucose Slider (DEPRECATED - now in landing-slider)
    =========================================== */
 
+/* Old debug panel - hidden, slider moved to landing footer */
 .debug-panel {
-  position: fixed;
-  left: 50%;
-  top: calc(50% + 170px);
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-  z-index: 1000;
-}
-
-.debug-toggle {
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition:
-    transform var(--duration-short) var(--motion-spatial),
-    opacity var(--duration-short) var(--motion-effects);
-}
-
-.debug-toggle:hover {
-  opacity: 0.7;
-}
-
-.debug-toggle:active {
-  transform: scale(0.92);
-}
-
-.toggle-icon {
-  font-size: 24px;
-  color: #888;
-  transition: transform var(--duration-medium) var(--motion-spatial);
-}
-
-.debug-panel.open .toggle-icon {
-  transform: rotate(90deg);
-  color: #fff;
-}
-
-.debug-controls {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  gap: 12px;
-  background: #2c2c2c;
-  padding: 12px 16px;
-  border-radius: var(--shape-medium);
-  opacity: 0;
-  visibility: hidden;
-  transform: translateY(-10px);
-  transition:
-    opacity var(--duration-medium) var(--motion-effects),
-    visibility var(--duration-medium) var(--motion-effects),
-    transform var(--duration-medium) var(--motion-spatial);
-}
-
-.debug-panel.open .debug-controls {
-  opacity: 1;
-  visibility: visible;
-  transform: translateY(0);
+  display: none;
 }
 
 #glucose-slider {
@@ -1623,6 +1855,19 @@ body {
   stroke-linejoin: round;
 }
 
+/* History graph line (older data, same style as main) */
+.graph-line-history {
+  stroke: #fff;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Pan group for smooth transitions */
+.graph-pan-group {
+  transition: transform var(--duration-medium) var(--motion-spatial);
+}
+
 /* Highlight overlay (colored segment by zone) */
 .graph-line-highlight {
   stroke: var(--color-accent-good);
@@ -1685,6 +1930,43 @@ body {
 /* Hide blob when graph is visible */
 .glucose-graph:not(.hidden) ~ .glucose-blob {
   display: none;
+}
+
+/* Context markers on graph (meal, insulin, activity, med) */
+.graph-context-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  background: var(--button-bg);
+  border-radius: 50%;
+  min-width: 20px;
+  min-height: 20px;
+  width: 20px;
+  height: 20px;
+  box-sizing: border-box;
+}
+
+.graph-context-badge.with-value {
+  border-radius: 10px;
+  width: auto;
+  min-width: auto;
+  padding: 2px 6px;
+}
+
+.graph-context-icon {
+  width: 12px;
+  height: 12px;
+  filter: brightness(0) saturate(100%) invert(70%) sepia(65%) saturate(450%) hue-rotate(50deg) brightness(92%) contrast(88%);
+}
+
+.graph-context-value {
+  font-family: 'Roboto Flex', sans-serif;
+  font-size: 8px;
+  font-weight: 500;
+  color: var(--color-accent-good);
+  line-height: 1;
+  padding-right: 2px;
 }
 
 /* ===========================================

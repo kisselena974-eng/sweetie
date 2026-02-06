@@ -62,7 +62,18 @@ function navigateTo(screenName, direction = 'up') {
 
   if (!targetScreen || targetScreen === currentScreen) return;
 
+  const currentScreenName = currentScreen ? currentScreen.dataset.screen : null;
   const newIndex = screens.indexOf(screenName);
+
+  // Check if transitioning between pages that have glucose display (home, assistant, tracking)
+  const glucoseScreens = ['home', 'assistant', 'tracking'];
+  const isGlucoseTransition =
+    glucoseScreens.includes(currentScreenName) && glucoseScreens.includes(screenName);
+
+  // Show fixed glucose during transition between home and assistant
+  if (isGlucoseTransition) {
+    showFixedGlucose();
+  }
 
   // Determine exit direction based on navigation
   if (currentScreen) {
@@ -85,6 +96,13 @@ function navigateTo(screenName, direction = 'up') {
   targetScreen.classList.add('active');
 
   currentScreenIndex = newIndex;
+
+  // Hide fixed glucose after transition completes
+  if (isGlucoseTransition) {
+    setTimeout(() => {
+      hideFixedGlucose();
+    }, 350); // Match --duration-long
+  }
 
   // Update nav dots
   updateNavDots(newIndex);
@@ -110,6 +128,59 @@ function navigateTo(screenName, direction = 'up') {
     // Update arrow position after value sync
     setTimeout(() => updateAssistantArrowPosition(), 50);
   }
+
+  // Sync tracking glucose display when navigating to it
+  if (screenName === 'tracking' && window.trackingController) {
+    window.trackingController.syncGlucoseDisplay();
+  }
+}
+
+/**
+ * Show fixed glucose display during page transitions
+ */
+function showFixedGlucose() {
+  const fixedGlucose = document.querySelector('.fixed-glucose');
+  const homeGlucose = document.querySelector('.nav-circle-base .nav-glucose');
+  const homeArrow = document.querySelector('.nav-circle-base .nav-arrow');
+  const assistantNav = document.querySelector('.assistant-nav');
+  const trackingNav = document.querySelector('.tracking-nav');
+
+  if (!fixedGlucose) return;
+
+  // Show fixed glucose and hide screen elements in same frame
+  fixedGlucose.classList.add('visible');
+  if (homeGlucose) homeGlucose.style.visibility = 'hidden';
+  if (homeArrow) homeArrow.style.visibility = 'hidden';
+  if (assistantNav) assistantNav.style.visibility = 'hidden';
+  if (trackingNav) trackingNav.style.visibility = 'hidden';
+}
+
+/**
+ * Hide fixed glucose display after page transitions
+ */
+function hideFixedGlucose() {
+  const fixedGlucose = document.querySelector('.fixed-glucose');
+  const homeGlucose = document.querySelector('.nav-circle-base .nav-glucose');
+  const homeArrow = document.querySelector('.nav-circle-base .nav-arrow');
+  const assistantNav = document.querySelector('.assistant-nav');
+  const trackingNav = document.querySelector('.tracking-nav');
+
+  if (!fixedGlucose) return;
+
+  // Show screen elements first, then hide fixed glucose
+  if (homeGlucose) homeGlucose.style.visibility = '';
+  if (homeArrow) homeArrow.style.visibility = '';
+  if (assistantNav) assistantNav.style.visibility = '';
+
+  // Only show tracking glucose if info mode is off
+  if (trackingNav) {
+    const isInfoModeOn = window.trackingController && window.trackingController.isInfoMode;
+    if (!isInfoModeOn) {
+      trackingNav.style.visibility = '';
+    }
+  }
+
+  fixedGlucose.classList.remove('visible');
 }
 
 /**
@@ -305,7 +376,14 @@ function initHomeScreen() {
     // Listen for color changes BEFORE creating blob (so initial event is caught)
     homeScreen.addEventListener('glucoseColorChange', (e) => {
       const color = e.detail.color;
+      const glucose = e.detail.glucose;
       updateGlucoseTextColor(color); // Graph elements
+
+      // Set global CSS variable for accent color (used by tracking screen, etc.)
+      document.documentElement.style.setProperty('--accent-color', color);
+
+      // Update landing page title color
+      document.documentElement.style.setProperty('--landing-accent-color', color);
 
       // Update glucose text and arrow to match blob
       const glucoseText = document.querySelector('.nav-circle-base .nav-glucose');
@@ -314,6 +392,34 @@ function initHomeScreen() {
       if (arrow) {
         arrow.style.fill = color;
         arrow.style.stroke = color;
+      }
+
+      // Update fixed glucose color (for transitions)
+      const fixedGlucoseText = document.querySelector('.fixed-glucose-text');
+      const fixedGlucoseArrow = document.querySelector('.fixed-glucose-arrow path');
+      if (fixedGlucoseText) fixedGlucoseText.style.fill = color;
+      if (fixedGlucoseArrow) {
+        fixedGlucoseArrow.style.fill = color;
+        fixedGlucoseArrow.style.stroke = color;
+      }
+
+      // Update tracking screen glucose color
+      const trackingGlucoseText = document.querySelector('.tracking-glucose-text');
+      const trackingGlucoseArrow = document.querySelector('.tracking-glucose-arrow path');
+      if (trackingGlucoseText) trackingGlucoseText.style.fill = color;
+      if (trackingGlucoseArrow) {
+        trackingGlucoseArrow.style.fill = color;
+        trackingGlucoseArrow.style.stroke = color;
+      }
+
+      // Update tracking screen with current glucose (for high glucose alert)
+      if (window.trackingController && glucose !== undefined) {
+        window.trackingController.setGlucose(glucose);
+      }
+
+      // Re-render context markers with new accent color
+      if (window.graphSlider && window.graphSlider.contextMarkers.length > 0) {
+        window.graphSlider.renderContextMarkers();
       }
     });
 
@@ -431,6 +537,18 @@ function setGlucoseValue(value) {
     assistantGlucose.textContent = formattedValue;
   }
 
+  // Update fixed glucose text (for transitions)
+  const fixedGlucose = document.querySelector('.fixed-glucose-text textPath');
+  if (fixedGlucose) {
+    fixedGlucose.textContent = formattedValue;
+  }
+
+  // Update tracking screen glucose text
+  const trackingGlucose = document.querySelector('.tracking-glucose-text textPath');
+  if (trackingGlucose) {
+    trackingGlucose.textContent = formattedValue;
+  }
+
   // Use blob's color for glucose text and arrow (matches blob exactly)
   const blobColor = glucoseBlob ? glucoseBlob.getColor() : getColorForGlucose(value);
   const glucoseTextElement = document.querySelector('.nav-circle-base .nav-glucose');
@@ -442,6 +560,28 @@ function setGlucoseValue(value) {
   if (glucoseArrow) {
     glucoseArrow.style.fill = blobColor;
     glucoseArrow.style.stroke = blobColor;
+  }
+
+  // Update fixed glucose color (for transitions)
+  const fixedGlucoseText = document.querySelector('.fixed-glucose-text');
+  const fixedGlucoseArrow = document.querySelector('.fixed-glucose-arrow path');
+  if (fixedGlucoseText) {
+    fixedGlucoseText.style.fill = blobColor;
+  }
+  if (fixedGlucoseArrow) {
+    fixedGlucoseArrow.style.fill = blobColor;
+    fixedGlucoseArrow.style.stroke = blobColor;
+  }
+
+  // Update tracking screen glucose color
+  const trackingGlucoseText = document.querySelector('.tracking-glucose-text');
+  const trackingGlucoseArrow = document.querySelector('.tracking-glucose-arrow path');
+  if (trackingGlucoseText) {
+    trackingGlucoseText.style.fill = blobColor;
+  }
+  if (trackingGlucoseArrow) {
+    trackingGlucoseArrow.style.fill = blobColor;
+    trackingGlucoseArrow.style.stroke = blobColor;
   }
 
   // Update assistant screen accent color (mic, glucose, arrow)
@@ -501,6 +641,18 @@ function updateArrowPosition() {
   // Update knockout layer arrow position to match
   if (arrowKnockout) {
     arrowKnockout.setAttribute('transform', transform);
+  }
+
+  // Update fixed glucose arrow position to match
+  const fixedArrow = document.querySelector('.fixed-glucose-arrow');
+  if (fixedArrow) {
+    fixedArrow.setAttribute('transform', transform);
+  }
+
+  // Update tracking screen arrow position to match
+  const trackingArrow = document.querySelector('.tracking-glucose-arrow');
+  if (trackingArrow) {
+    trackingArrow.setAttribute('transform', transform);
   }
 
   // Update assistant screen arrow position to match
@@ -1152,17 +1304,10 @@ function initGraphToggle() {
  * Initialize debug slider for glucose testing
  */
 function initDebugSlider() {
-  const debugPanel = document.querySelector('.debug-panel');
-  const toggleBtn = document.querySelector('.debug-toggle');
   const slider = document.getElementById('glucose-slider');
   const valueDisplay = document.querySelector('.glucose-value');
 
-  if (!toggleBtn || !slider) return;
-
-  // Toggle panel visibility
-  toggleBtn.addEventListener('click', () => {
-    debugPanel.classList.toggle('open');
-  });
+  if (!slider) return;
 
   // Update glucose on slider change
   slider.addEventListener('input', (e) => {
@@ -1314,6 +1459,7 @@ document.addEventListener('DOMContentLoaded', () => {
   // Initialize tracking controller
   if (window.TrackingController) {
     trackingController = new TrackingController();
+    window.trackingController = trackingController;
   }
 
   // Listen for context menu actions
@@ -1449,7 +1595,89 @@ document.addEventListener('DOMContentLoaded', () => {
       assistantGlucose.textContent = homeGlucose.textContent;
     }
 
+    // Sync fixed glucose (for transitions)
+    const fixedGlucose = document.querySelector('.fixed-glucose-text textPath');
+    if (homeGlucose && fixedGlucose) {
+      fixedGlucose.textContent = homeGlucose.textContent;
+    }
+
+    // Sync tracking glucose
+    const trackingGlucose = document.querySelector('.tracking-glucose-text textPath');
+    if (homeGlucose && trackingGlucose) {
+      trackingGlucose.textContent = homeGlucose.textContent;
+    }
+
+    // Sync fixed and tracking glucose color
+    if (glucoseBlob) {
+      const color = glucoseBlob.getColor();
+      const fixedGlucoseText = document.querySelector('.fixed-glucose-text');
+      const fixedGlucoseArrow = document.querySelector('.fixed-glucose-arrow path');
+      if (fixedGlucoseText) fixedGlucoseText.style.fill = color;
+      if (fixedGlucoseArrow) {
+        fixedGlucoseArrow.style.fill = color;
+        fixedGlucoseArrow.style.stroke = color;
+      }
+
+      const trackingGlucoseText = document.querySelector('.tracking-glucose-text');
+      const trackingGlucoseArrow = document.querySelector('.tracking-glucose-arrow path');
+      if (trackingGlucoseText) trackingGlucoseText.style.fill = color;
+      if (trackingGlucoseArrow) {
+        trackingGlucoseArrow.style.fill = color;
+        trackingGlucoseArrow.style.stroke = color;
+      }
+    }
+
     // Update assistant arrow position
     updateAssistantArrowPosition();
   }, 100);
+});
+
+
+// ===========================================
+// LANDING PAGE - Language Switching
+// ===========================================
+
+let currentLang = 'en';
+
+function setLanguage(lang) {
+  currentLang = lang;
+  
+  // Update language button states
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.lang === lang);
+  });
+  
+  // Show/hide text based on language
+  document.querySelectorAll('[data-lang]').forEach(el => {
+    if (el.classList.contains('lang-btn')) return; // Skip buttons
+    el.style.display = el.dataset.lang === lang ? '' : 'none';
+  });
+  
+  // Store preference
+  localStorage.setItem('sweetie-lang', lang);
+}
+
+// Initialize language switching
+document.addEventListener('DOMContentLoaded', () => {
+  // Check for stored preference
+  const storedLang = localStorage.getItem('sweetie-lang');
+  if (storedLang) {
+    setLanguage(storedLang);
+  }
+  
+  // Add click handlers to language buttons
+  document.querySelectorAll('.lang-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      setLanguage(btn.dataset.lang);
+    });
+  });
+  
+  // About button (placeholder - will open modal later)
+  const aboutBtn = document.querySelector('.about-btn');
+  if (aboutBtn) {
+    aboutBtn.addEventListener('click', () => {
+      console.log('About modal will open here');
+      // TODO: Open about modal
+    });
+  }
 });
