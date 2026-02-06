@@ -36,7 +36,7 @@ class MealInputController {
     // Meal data with AI responses
     this.mealData = [
       {
-        speech: 'Pojeo sam pizzu i popio sok.',
+        speech: 'Pojela sam pizzu i popila sok.',
         options: ['Kolika pizza?', 'Kakav sok?'],
         optionReplies: ['Srednja, oko 300g.', 'Sok od jabuke, 250ml.'],
         answer: { main: 'Za to treba {14 jedinica.}', detail: 'Pizza ~70g UH, sok ~25g UH. Daj 10 sad, 4 za 45 min zbog masti.' },
@@ -76,7 +76,7 @@ class MealInputController {
         ]
       },
       {
-        speech: 'Pojeo sam burger i pomfrit.',
+        speech: 'Pojela sam burger i pomfrit.',
         options: ['Kakav burger?', 'Koliko pomfrita?'],
         optionReplies: ['Big Mac.', 'Velika porcija.'],
         answer: { main: 'Za to treba {16 jedinica.}', detail: 'Burger ~45g UH, pomfrit ~50g UH. Split doza zbog masti.' },
@@ -189,7 +189,11 @@ class MealInputController {
       this.confirmBtn.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: true });
       this.confirmBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        this.showAnswer();
+        if (this.isAnswerVisible) {
+          this.logMealAndReturn();
+        } else {
+          this.showAnswer();
+        }
       });
     }
 
@@ -238,6 +242,7 @@ class MealInputController {
   reset() {
     this.isListening = false;
     this.isFavoritesOpen = false;
+    this.isAnswerVisible = false;
     this.wordTimers.forEach(t => clearTimeout(t));
     this.wordTimers = [];
     this.currentMeal = null;
@@ -382,7 +387,6 @@ class MealInputController {
     this.content.classList.remove('listening');
     this.content.style.display = 'none';
     this.speechEl.textContent = '';
-    this.confirmBtn.classList.remove('visible');
     this.options.classList.remove('open');
 
     // Build answer with accent spans
@@ -399,13 +403,10 @@ class MealInputController {
       el.style.color = accentColor;
     });
 
-    // Show answer
+    // Show answer and confirm button
     this.answerEl.classList.add('visible');
-
-    // After 3 seconds, log and return to home
-    setTimeout(() => {
-      this.logMealAndReturn();
-    }, 3000);
+    this.isAnswerVisible = true;
+    this.confirmBtn.classList.add('visible');
   }
 
   logMealAndReturn() {

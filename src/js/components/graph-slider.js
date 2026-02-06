@@ -14,7 +14,7 @@ class GraphSlider {
     this.graphPathGood = null;
 
     // Graph boundaries
-    this.minX = 0;
+    this.minX = 28; // Middle of left button (x=10 + width/2) - slider can't go further left
     this.maxX = 206; // End of graph (now position)
     this.currentX = this.maxX;
     this.targetX = this.maxX;

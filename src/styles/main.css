@@ -522,14 +522,253 @@ body {
   font-size: var(--text-font-size-l);
 }
 
-/* Placeholder content for other screens */
-.tracking-content {
+/* ===========================================
+   PAGE 3: INSULIN & SENSOR TRACKING
+   =========================================== */
+
+/* Info button (left side) */
+.tracking-info-btn {
+  position: absolute;
+  left: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: transparent;
+  border: none;
+  color: #fff;
+  font-family: 'Roboto Flex', sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  font-style: italic;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  transition: background-color var(--duration-short) var(--motion-effects);
+  -webkit-tap-highlight-color: transparent;
+}
+
+.tracking-info-btn.active {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Main tracking clock */
+.tracking-clock {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+/* Concentric circles */
+.tracking-circle {
+  stroke: rgba(255, 255, 255, 0.25);
+  stroke-width: 1;
+}
+
+/* Clock hand */
+.tracking-hand {
+  stroke: #fff;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+}
+
+/* Center dot */
+.tracking-center-dot {
+  fill: #fff;
+}
+
+/* Insulin dose dots */
+.tracking-dose-dot {
+  fill: #fff;
+}
+
+/* Insulin trails (arcs with gradient fade) */
+.tracking-trail {
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+}
+
+/* Sensor ticks */
+.tracking-sensor-tick {
+  stroke: #fff;
+  stroke-width: 1.5;
+  stroke-linecap: round;
+}
+
+.tracking-sensor-tick.expired {
+  stroke: rgba(255, 255, 255, 0.15);
+}
+
+.tracking-sensor-tick.warning {
+  stroke: #FF4444;
+}
+
+/* Alert dot */
+.tracking-alert {
+  cursor: pointer;
+}
+
+.tracking-alert-circle {
+  fill: #FF4444;
+}
+
+.tracking-alert-text {
+  fill: #fff;
+  font-family: 'Roboto Flex', sans-serif;
+  font-size: 10px;
+  font-weight: 700;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
+/* Info labels */
+.tracking-labels {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity var(--duration-medium) var(--motion-effects);
+}
+
+.tracking-labels.visible {
+  opacity: 1;
+}
+
+.tracking-label {
+  position: absolute;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+}
+
+.tracking-label span {
+  font-family: 'Roboto Flex', sans-serif;
+  font-size: 11px;
+  font-weight: 400;
+  color: #fff;
+  white-space: nowrap;
+}
+
+.tracking-label-line {
+  stroke: rgba(255, 255, 255, 0.5);
+  stroke-width: 1;
+}
+
+.tracking-label-line line {
+  stroke: rgba(255, 255, 255, 0.5);
+}
+
+.tracking-label-brzi {
+  bottom: 42px;
+  left: 22px;
+  flex-direction: column-reverse;
+}
+
+.tracking-label-brzi .tracking-label-line {
+  width: 55px;
+  height: 40px;
+  margin-bottom: 2px;
+}
+
+.tracking-label-spori {
+  bottom: 42px;
+  right: 22px;
+  flex-direction: column-reverse;
+  align-items: flex-end;
+}
+
+.tracking-label-spori .tracking-label-line {
+  width: 55px;
+  height: 40px;
+  margin-bottom: 2px;
+}
+
+.tracking-label-senzor {
+  bottom: 22px;
+  left: 50%;
+  transform: translateX(-50%);
+  flex-direction: column-reverse;
+}
+
+.tracking-label-senzor .tracking-label-line {
+  width: 10px;
+  height: 30px;
+  margin-bottom: 2px;
+}
+
+/* Alert tooltips */
+.tracking-tooltips {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
   height: 100%;
-  text-align: center;
+  pointer-events: none;
+}
+
+.tracking-tooltip {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  opacity: 0;
+  transition: opacity var(--duration-medium) var(--motion-effects);
+}
+
+.tracking-tooltip.visible {
+  opacity: 1;
+}
+
+.tracking-tooltip span {
+  font-family: 'Roboto Flex', sans-serif;
+  font-size: 11px;
+  font-weight: 400;
+  color: #fff;
+  white-space: nowrap;
+}
+
+.tracking-tooltip-line {
+  stroke: rgba(255, 255, 255, 0.5);
+  stroke-width: 1;
+}
+
+.tracking-tooltip-line line {
+  stroke: rgba(255, 255, 255, 0.5);
+}
+
+.tracking-tooltip-insulin {
+  bottom: 25px;
+  left: 50%;
+  transform: translateX(-20%);
+  flex-direction: column-reverse;
+}
+
+.tracking-tooltip-insulin .tracking-tooltip-line {
+  width: 50px;
+  height: 50px;
+  margin-bottom: 2px;
+}
+
+.tracking-tooltip-sensor {
+  bottom: 25px;
+  left: 50%;
+  transform: translateX(-50%);
+  flex-direction: column-reverse;
+}
+
+.tracking-tooltip-sensor .tracking-tooltip-line {
+  width: 10px;
+  height: 40px;
+  margin-bottom: 2px;
 }
 
 .faded {
@@ -803,9 +1042,12 @@ body {
 }
 
 .meal-prompt {
-  font-size: 14px;
-  color: var(--color-text-color);
-  margin-top: 8px;
+  font-family: 'Roboto Flex', sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  color: #707070;
+  margin-top: 10px;
+  letter-spacing: 0.3px;
   transition: opacity var(--duration-medium) var(--motion-effects);
 }
 
@@ -865,6 +1107,7 @@ body {
 .meal-confirm-btn {
   opacity: 0;
   pointer-events: none;
+  z-index: 4;
   transition:
     opacity var(--duration-medium) var(--motion-effects),
     transform var(--duration-short) var(--motion-spatial);
@@ -916,10 +1159,8 @@ body {
   line-height: 1.3;
 }
 
-/* Meal favorites button (heart) - positioned on right */
+/* Meal favorites button (heart) - positioned on left, same as plus button */
 .meal-favorites-btn {
-  right: 10px;
-  left: auto;
   z-index: 10;
 }
 
@@ -961,10 +1202,22 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 
+/* Position favorite buttons in a scattered but balanced layout */
+.meal-fav-btn[data-fav="0"] { top: 55px; left: 50%; transform: scale(0.8) translateX(-50%); }
+.meal-fav-btn[data-fav="1"] { top: 110px; left: 60px; }
+.meal-fav-btn[data-fav="2"] { top: 110px; right: 35px; }
+.meal-fav-btn[data-fav="3"] { top: 165px; left: 50px; }
+.meal-fav-btn[data-fav="4"] { top: 165px; right: 50px; }
+
+.meal-favorites.open .meal-fav-btn[data-fav="0"] { transform: scale(1) translateX(-50%); }
+
 .meal-favorites.open .meal-fav-btn {
   opacity: 1;
-  transform: scale(1);
   pointer-events: auto;
+}
+
+.meal-favorites.open .meal-fav-btn:not([data-fav="0"]) {
+  transform: scale(1);
 }
 
 /* Stagger animation for favorite buttons */
@@ -983,6 +1236,189 @@ body {
 
 @media (hover: hover) {
   .meal-fav-btn:hover {
+    background: var(--button-bg-hover);
+  }
+}
+
+/* ===========================================
+   ACTIVITY INPUT SCREEN
+   =========================================== */
+
+.activity-input-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  text-align: center;
+  padding-top: 15px;
+  transition: all var(--duration-medium) var(--motion-effects);
+}
+
+.activity-input-content.listening {
+  justify-content: flex-end;
+  padding-top: 0;
+  padding-bottom: 80px;
+}
+
+.activity-mic {
+  color: var(--color-accent-good);
+  transition: transform var(--duration-medium) var(--motion-spatial);
+}
+
+.activity-input-content.listening .activity-mic {
+  transform: scale(0.7);
+}
+
+.activity-prompt {
+  font-family: 'Roboto Flex', sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  color: #707070;
+  margin-top: 10px;
+  letter-spacing: 0.3px;
+  transition: opacity var(--duration-medium) var(--motion-effects);
+}
+
+.activity-input-content.listening .activity-prompt {
+  opacity: 0;
+  position: absolute;
+}
+
+.activity-speech {
+  font-size: 11px;
+  color: #707070;
+  max-width: 130px;
+  margin-top: 4px;
+  min-height: 1em;
+}
+
+.activity-confirm-btn {
+  opacity: 0;
+  pointer-events: none;
+  z-index: 4;
+  transition:
+    opacity var(--duration-medium) var(--motion-effects),
+    transform var(--duration-short) var(--motion-spatial);
+}
+
+.activity-confirm-btn.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.activity-answer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0 60px;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 3;
+  transition: opacity var(--duration-medium) var(--motion-effects);
+}
+
+.activity-answer.visible {
+  opacity: 1;
+}
+
+.activity-answer-main {
+  font-size: 15px;
+  font-weight: 400;
+  color: var(--color-text-color);
+  line-height: 1.4;
+}
+
+.activity-answer-main .accent {
+  color: var(--color-accent-good);
+  white-space: nowrap;
+}
+
+.activity-answer-detail {
+  font-size: 11px;
+  color: #707070;
+  margin-top: 8px;
+  line-height: 1.3;
+}
+
+/* Activity favorites button (heart) - positioned on left, same as plus button */
+.activity-favorites-btn {
+  z-index: 10;
+}
+
+/* Activity favorites overlay */
+.activity-favorites {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 5;
+  background: var(--color-background);
+  opacity: 0;
+  transition: opacity var(--duration-medium) var(--motion-effects);
+}
+
+.activity-favorites.open {
+  pointer-events: auto;
+  opacity: 1;
+}
+
+.activity-fav-btn {
+  position: absolute;
+  padding: 8px 12px;
+  border-radius: 20px;
+  background: var(--color-surface-container);
+  border: none;
+  color: var(--color-text-color);
+  font-family: 'Roboto Flex', sans-serif;
+  font-size: 13px;
+  font-weight: 400;
+  cursor: pointer;
+  opacity: 0;
+  transform: scale(0.8);
+  transition:
+    opacity var(--duration-medium) var(--motion-effects),
+    transform var(--duration-medium) var(--motion-spatial);
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Position activity favorite buttons */
+.activity-fav-btn[data-fav="0"] { top: 70px; left: 50%; transform: scale(0.8) translateX(-50%); }
+.activity-fav-btn[data-fav="1"] { top: 130px; left: 60px; }
+.activity-fav-btn[data-fav="2"] { top: 130px; right: 60px; }
+
+.activity-favorites.open .activity-fav-btn[data-fav="0"] { transform: scale(1) translateX(-50%); }
+
+.activity-favorites.open .activity-fav-btn {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.activity-favorites.open .activity-fav-btn:not([data-fav="0"]) {
+  transform: scale(1);
+}
+
+/* Stagger animation for activity favorite buttons */
+.activity-favorites.open .activity-fav-btn[data-fav="0"] { transition-delay: 0ms; }
+.activity-favorites.open .activity-fav-btn[data-fav="1"] { transition-delay: 40ms; }
+.activity-favorites.open .activity-fav-btn[data-fav="2"] { transition-delay: 80ms; }
+
+/* Reverse stagger on close */
+.activity-favorites:not(.open) .activity-fav-btn[data-fav="0"] { transition-delay: 60ms; }
+.activity-favorites:not(.open) .activity-fav-btn[data-fav="1"] { transition-delay: 30ms; }
+.activity-favorites:not(.open) .activity-fav-btn[data-fav="2"] { transition-delay: 0ms; }
+
+@media (hover: hover) {
+  .activity-fav-btn:hover {
     background: var(--button-bg-hover);
   }
 }

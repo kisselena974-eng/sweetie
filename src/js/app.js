@@ -11,6 +11,8 @@ let contextMenuController = null;
 let insulinInputController = null;
 let medInputController = null;
 let mealInputController = null;
+let activityInputController = null;
+let trackingController = null;
 
 // Trend angles: 0=up (rising fast), 45=up-right (rising), 90=right (stable), 135=down-right (falling), 180=down (falling fast)
 const TREND_ANGLES = [0, 45, 90, 135, 180];
@@ -602,6 +604,10 @@ function toggleGraphView() {
           blobContainer.classList.add('fade-out');
           graph.classList.remove('hidden');
 
+          // Hide knockout text (blob is hidden when graph is visible)
+          const timeKnockout = document.querySelector('.fixed-time-knockout');
+          if (timeKnockout) timeKnockout.style.opacity = '0';
+
           requestAnimationFrame(() => {
             graph.classList.add('visible');
           });
@@ -628,6 +634,11 @@ function toggleGraphView() {
         // Fallback if spring not loaded
         blobContainer.classList.add('fade-out');
         graph.classList.remove('hidden');
+
+        // Hide knockout text (blob is hidden when graph is visible)
+        const timeKnockout = document.querySelector('.fixed-time-knockout');
+        if (timeKnockout) timeKnockout.style.opacity = '0';
+
         requestAnimationFrame(() => {
           graph.classList.add('visible');
         });
@@ -654,6 +665,10 @@ function toggleGraphView() {
 
     setTimeout(() => {
       graph.classList.add('hidden');
+
+      // Show knockout text again (blob will be visible)
+      const timeKnockout = document.querySelector('.fixed-time-knockout');
+      if (timeKnockout) timeKnockout.style.opacity = '';
 
       // Reset graph slider while hidden (user won't see it)
       if (window.initGraphSlider) {
@@ -793,8 +808,8 @@ function initAssistantMic() {
       { q: 'Koliko soka planiraš?', reply: 'Malu čašu, 150ml.', ans: { main: '150ml je sigurno bez inzulina.', detail: 'To je oko 15g UH. S obzirom da ti je šećer 5.4, podignut će ga na oko 7 — sasvim OK.' } },
       { q: 'Želiš li ga uz obrok?', reply: 'Da, uz doručak.', ans: { main: 'Dodaj {2 jedinice} na dozu za doručak.', detail: 'Sok uz obrok brže diže šećer. Dodaj ga u izračun UH za doručak.' } }
     ] },
-    { q: 'Pojeo sam sladoled, koliko da si dam inzulina?', ans: { main: 'Za to daj {6 jedinica.}', detail: 'Dvije kuglice su oko 30g UH. Mast usporava apsorpciju pa daj split dozu.' }, ctx: [
-      { q: 'Koliko si točno pojeo?', reply: 'Tri kuglice, oko 180g.', ans: { main: 'Za 180g treba {9 jedinica.}', detail: 'To je oko 45g UH. Daj 5 sad i 4 za 30 min jer mast usporava apsorpciju.' } },
+    { q: 'Pojela sam sladoled, koliko da si dam inzulina?', ans: { main: 'Za to daj {6 jedinica.}', detail: 'Dvije kuglice su oko 30g UH. Mast usporava apsorpciju pa daj split dozu.' }, ctx: [
+      { q: 'Koliko si točno pojela?', reply: 'Tri kuglice, oko 180g.', ans: { main: 'Za 180g treba {9 jedinica.}', detail: 'To je oko 45g UH. Daj 5 sad i 4 za 30 min jer mast usporava apsorpciju.' } },
       { q: 'Kakav sladoled?', reply: 'Domaći, s puno čokolade.', ans: { main: 'Za čokoladni daj {7 jedinica.}', detail: 'Domaći čokoladni ima više masti i šećera. Split doza je obavezna za bolju kontrolu.' } }
     ] },
   ];
@@ -1291,6 +1306,16 @@ document.addEventListener('DOMContentLoaded', () => {
     mealInputController = new MealInputController();
   }
 
+  // Initialize activity input controller
+  if (window.ActivityInputController) {
+    activityInputController = new ActivityInputController();
+  }
+
+  // Initialize tracking controller
+  if (window.TrackingController) {
+    trackingController = new TrackingController();
+  }
+
   // Listen for context menu actions
   document.addEventListener('contextMenuAction', (e) => {
     const action = e.detail.action;
@@ -1350,7 +1375,20 @@ document.addEventListener('DOMContentLoaded', () => {
         break;
 
       case 'activity':
-        console.log(`${action} input - coming soon`);
+        // Show activity input screen
+        if (activityInputController) {
+          activityInputController.show();
+        }
+
+        // After activity screen is visible, reset context menu and hide home
+        setTimeout(() => {
+          const homeScreen = document.querySelector('[data-screen="home"]');
+          if (homeScreen) homeScreen.classList.remove('active');
+
+          if (contextMenuController) {
+            contextMenuController.resetState();
+          }
+        }, 300);
         break;
     }
   });
@@ -1363,6 +1401,11 @@ document.addEventListener('DOMContentLoaded', () => {
   // Listen for med logged event
   document.addEventListener('medLogged', (e) => {
     console.log('Med logged:', e.detail);
+  });
+
+  // Listen for activity logged event
+  document.addEventListener('activityLogged', (e) => {
+    console.log('Activity logged:', e.detail);
   });
 
   // Generate initial graph with current random trend

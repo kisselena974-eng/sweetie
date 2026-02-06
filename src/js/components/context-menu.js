@@ -92,6 +92,12 @@ class ContextMenuController {
     this.isAnimating = true;
     this.isOpen = true;
 
+    // Hide knockout text (blob is not visible when menu is open)
+    const timeKnockout = document.querySelector('.fixed-time-knockout');
+    const navKnockout = document.querySelector('.nav-circle-knockout');
+    if (timeKnockout) timeKnockout.style.opacity = '0';
+    if (navKnockout) navKnockout.style.opacity = '0';
+
     // Clear any inline styles on context buttons (let CSS take over)
     this.contextBtns.forEach(btn => {
       btn.style.opacity = '';
@@ -124,6 +130,12 @@ class ContextMenuController {
 
     this.isAnimating = true;
     this.isOpen = false;
+
+    // Show knockout text again (blob will be visible)
+    const timeKnockout = document.querySelector('.fixed-time-knockout');
+    const navKnockout = document.querySelector('.nav-circle-knockout');
+    if (timeKnockout) timeKnockout.style.opacity = '';
+    if (navKnockout) navKnockout.style.opacity = '';
 
     // Remove open class - CSS transitions handle button hide with reverse stagger
     this.contextMenu.classList.remove('open');
