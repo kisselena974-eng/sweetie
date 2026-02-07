@@ -209,8 +209,8 @@ body {
 
 .slider-controls #glucose-slider {
   width: 100px;
-  transform: rotate(-90deg);
-  transform-origin: center center;
+  transform: rotate(-90deg) translateX(50%);
+  transform-origin: right center;
   margin: 70px 0;
   cursor: grab;
 }
