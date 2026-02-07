@@ -433,6 +433,16 @@ body {
   margin: 14pt 0;
 }
 
+.about-link {
+  color: #888;
+  text-decoration: underline;
+  transition: color 0.2s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.about-link:hover {
+  color: var(--landing-accent-color, #7ED321);
+}
+
 /* Watch container - centers the display and accommodates mockup */
 .watch-container {
   position: relative;
