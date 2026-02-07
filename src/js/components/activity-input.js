@@ -262,6 +262,11 @@ class ActivityInputController {
   }
 
   logActivityAndReturn() {
+    // Add marker to graph
+    if (window.graphSlider) {
+      window.graphSlider.addContextMarker('activity');
+    }
+
     // Get glucose blob
     const blobInstance = window.glucoseBlob;
 

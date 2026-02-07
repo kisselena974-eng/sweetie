@@ -410,6 +410,11 @@ class MealInputController {
   }
 
   logMealAndReturn() {
+    // Add marker to graph
+    if (window.graphSlider) {
+      window.graphSlider.addContextMarker('meal');
+    }
+
     // Get glucose blob
     const blobInstance = window.glucoseBlob;
 

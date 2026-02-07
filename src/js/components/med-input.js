@@ -270,6 +270,11 @@ class MedInputController {
     const units = this.selectedUnits;
     const label = this.getMedLabel(units);
 
+    // Add marker to graph
+    if (window.graphSlider) {
+      window.graphSlider.addContextMarker('med', units);
+    }
+
     // Get glucose blob instance
     const blobInstance = window.glucoseBlob;
 

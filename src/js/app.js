@@ -1672,12 +1672,32 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
   
-  // About button (placeholder - will open modal later)
+  // About overlay
   const aboutBtn = document.querySelector('.about-btn');
-  if (aboutBtn) {
+  const aboutOverlay = document.getElementById('aboutOverlay');
+  const aboutCloseBtn = document.querySelector('.about-close-btn');
+
+  if (aboutBtn && aboutOverlay) {
     aboutBtn.addEventListener('click', () => {
-      console.log('About modal will open here');
-      // TODO: Open about modal
+      aboutOverlay.classList.add('active');
+    });
+
+    aboutCloseBtn?.addEventListener('click', () => {
+      aboutOverlay.classList.remove('active');
+    });
+
+    // Close on click outside content
+    aboutOverlay.addEventListener('click', (e) => {
+      if (e.target === aboutOverlay) {
+        aboutOverlay.classList.remove('active');
+      }
+    });
+
+    // Close on Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && aboutOverlay.classList.contains('active')) {
+        aboutOverlay.classList.remove('active');
+      }
     });
   }
 });

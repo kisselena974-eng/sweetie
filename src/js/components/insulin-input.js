@@ -286,6 +286,20 @@ class InsulinInputController {
     const type = this.selectedType;
     const typeLabel = type === 'brzi' ? 'brzog' : 'dnevnog';
 
+    // Add to tracking screen
+    if (window.trackingController) {
+      if (type === 'brzi') {
+        window.trackingController.addFastInsulin(4); // 4 hour trail, expires after 6h
+      } else {
+        window.trackingController.addSlowInsulin(20); // 20 hour trail, expires after 24h
+      }
+    }
+
+    // Add marker to graph
+    if (window.graphSlider) {
+      window.graphSlider.addContextMarker('insulin', units);
+    }
+
     // Get glucose blob instance
     const blobInstance = window.glucoseBlob;
 
