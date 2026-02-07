@@ -173,7 +173,7 @@ body {
 .landing-slider {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-end;
 }
 
 .slider-label {
@@ -187,13 +187,13 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  gap: 0;
 }
 
 .slider-controls #glucose-slider {
   width: 100px;
   transform: rotate(-90deg);
-  margin: 40px 0;
+  margin: 50px 0;
 }
 
 .slider-controls .glucose-value {
