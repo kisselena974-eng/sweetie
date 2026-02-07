@@ -322,18 +322,18 @@ body {
   }
 
   .watch-container {
-    transform: translateY(0) scale(0.85);
+    transform: translateY(10px);
   }
 }
 
 /* Very small screens */
 @media (max-width: 400px) {
   .landing-page {
-    padding: 16px 12px 20px 12px;
+    padding: 16px 12px 24px 12px;
   }
 
   .watch-container {
-    transform: translateY(0) scale(0.75);
+    transform: translateY(0);
   }
 
   .legend-list li {
