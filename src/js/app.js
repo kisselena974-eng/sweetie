@@ -1641,6 +1641,11 @@ function setLanguage(lang) {
   if (senzorLabel) senzorLabel.textContent = labels.senzor;
   if (sporiLabel) sporiLabel.textContent = labels.spori;
 
+  // Refresh graph slider fuzzy time if visible
+  if (window.graphSlider) {
+    window.graphSlider.updateTimeLabel(window.graphSlider.currentGraphX);
+  }
+
   // Store preference
   localStorage.setItem('sweetie-lang', lang);
 }
