@@ -357,10 +357,14 @@ body {
 }
 
 .about-content {
-  background: rgba(20, 20, 20, 0.5);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.08) 0%,
+    rgba(255, 255, 255, 0.02) 50%,
+    rgba(255, 255, 255, 0.05) 100%
+  );
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border-radius: 20px;
   padding: 40px;
   max-width: 500px;
@@ -368,6 +372,7 @@ body {
   width: 90%;
   position: relative;
   overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
 .about-content::-webkit-scrollbar {
