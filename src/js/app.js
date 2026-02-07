@@ -894,77 +894,50 @@ function initAssistantMic() {
 
   if (!mic || !content || !speechEl) return;
 
-  const speechData = [
+  const speechDataHR = [
     { q: 'Koliko da inzulina uzmem? Pojeo sam srednju pizzu i sok od jabuke.', ans: { main: '{12 jedinica} je optimalno.', detail: 'Vidim da ti je šećer 7.8 i stabilan. Prošli put s pizzom si dao 14 i bio prenizak.' }, ctx: [
       { q: 'Planiraš li neku aktivnost?', reply: 'Idem prošetati za pola sata.', ans: { main: '{10 jedinica} je dovoljno.', detail: 'Šetnja će pomoći s apsorpcijom. Smanjujem dozu jer ćeš potrošiti dio glukoze.' } },
       { q: 'Je li pizza bila masna?', reply: 'Da, dosta sira i ulja.', ans: { main: '{12 jedinica} ali split doza.', detail: 'Masna pizza usporava apsorpciju. Daj 7 sad i 5 za 45 min da pokriješ kasni porast.' } }
     ] },
-    { q: 'Zašto mi šećer stalno raste poslije doručka?', ans: { main: 'Zadnja 3 doručka šećer ti skoči za 5+.', detail: 'Vidim da uzimaš inzulin sa jelom — probaj 15 min ranije za bolji učinak.' }, ctx: [
-      { q: 'Što obično jedeš za doručak?', reply: 'Žitarice s mlijekom i bananu.', ans: { main: 'To je oko 70g brzih UH.', detail: 'Žitarice + banana + mlijeko su brzi šećeri. Zamijeni jajima i avokadom — tvoj šećer poslije je stabilniji s proteinima.' } }
-    ] },
-    { q: 'Mogu li pojesti komad torte ako si dam inzulin?', ans: { main: 'Da, uz {8 jedinica} unaprijed.', detail: 'Šećer ti je trenutno 6.2, imaš prostora. Daj 15 min prije prvog zalogaja.' }, ctx: [
-      { q: 'Koliko torte planiraš?', reply: 'Oko 150 grama.', ans: { main: 'Za 150g treba {10 jedinica.}', detail: 'To je oko 55g UH. Šećer ti je 6.2 pa imaš prostora, ali daj inzulin 15 min ranije.' } },
-      { q: 'Kakva je torta?', reply: 'Čokoladna s ganacheom.', ans: { main: 'Za čokoladnu daj {9 jedinica.}', detail: 'Ganache ima puno masti — usporava apsorpciju. Razmisli o split dozi za bolju kontrolu.' } }
-    ] },
-    { q: 'Koliko jedinica za tanjur tjestenine s umakom?', ans: { main: 'Preporučam {10 jedinica.}', detail: 'Srednji tanjur je oko 60g UH. Tvoj šećer je stabilan pa je dobar trenutak.' }, ctx: [
-      { q: 'Koliko tjestenine planiraš?', reply: 'Oko 200 grama kuhane.', ans: { main: 'Za 200g treba {12 jedinica.}', detail: '200g kuhane tjestenine je oko 56g UH plus umak. Daj inzulin 10 min prije.' } }
-    ] },
     { q: 'Šećer mi je visok, što da napravim?', ans: { main: 'Daj korekciju od {3 jedinice.}', detail: 'Vidim da ti je 13.4 i polako raste. Zadnja korekcija je bila prije 4 sata.' }, ctx: [
-      { q: 'Imaš li simptome?', reply: 'Malo me boli glava.', ans: { main: 'Daj {3 jedinice} i pij vodu.', detail: 'Glavobolja može biti od visokog šećera. Pij 2-3 čaše vode u sljedećih sat vremena.' } },
-      { q: 'Jesi li nešto jeo nedavno?', reply: 'Sendvič prije sat vremena.', ans: { main: 'Daj još {2 jedinice} korekcije.', detail: 'Vidim da si za sendvič dao 6 jedinica — izgleda da je trebalo više. Dodaj korekciju.' } }
-    ] },
-    { q: 'Je li normalno da mi šećer padne nakon trčanja?', ans: { main: 'Da, potpuno normalno.', detail: 'Vidim da ti šećer pada prosječno za 3.5 mmol/L nakon aktivnosti. Smanji cjelodnevni inzulin prije treninga.' }, ctx: [
-      { q: 'Planiraš li još trenirati?', reply: 'Da, sutra ujutro opet.', ans: { main: 'Smanji sutra cjelodnevni inzulin za {40%} sat prije.', detail: 'Prema tvojoj povijesti, šećer ti pada za 3-4 nakon trčanja. Smanji cjelodnevni inzulin i pojedi 15g UH prije.' } }
-    ] },
-    { q: 'Koliko inzulina za dva peciva i čašu mlijeka?', ans: { main: 'Za to ti treba {7 jedinica.}', detail: 'Dva peciva ~40g UH, mlijeko ~12g. Šećer ti je sad 6.8 — dobar trenutak.' }, ctx: [
-      { q: 'Jesu li peciva integralna?', reply: 'Ne, obična bijela.', ans: { main: 'Za bijela peciva daj {8 jedinica.}', detail: 'Bijela peciva imaju viši GI. Daj inzulin 15 min prije jer šećer brže raste.' } },
-      { q: 'Planiraš li još nešto jesti?', reply: 'Možda malo sira.', ans: { main: 'Ostani na {7 jedinica.}', detail: 'Sir nema značajnih UH, ali usporava apsorpciju. Ne treba dodatni inzulin.' } }
+      { q: 'Imaš li simptome?', reply: 'Malo me boli glava.', ans: { main: 'Daj {3 jedinice} i pij vodu.', detail: 'Glavobolja može biti od visokog šećera. Pij 2-3 čaše vode u sljedećih sat vremena.' } }
     ] },
     { q: 'Šećer mi je nizak, što da pojedem?', ans: { main: 'Pojedi 15g brzih UH odmah.', detail: 'Vidim da ti je 3.8 i pada. Sok, tablete glukoze ili 3-4 bombona — provjeri za 15 min.' }, ctx: [
-      { q: 'Što imaš pri ruci?', reply: 'Imam sok od jabuke.', ans: { main: 'Popij pola čaše soka odmah.', detail: 'To je oko 15g brzih UH. S obzirom da ti je 3.8, to bi trebalo biti dovoljno. Provjeri za 15 min.' } }
-    ] },
-    { q: 'Zašto mi je šećer visok ako nisam ništa jeo?', ans: { main: 'Vidim da nemaš unosa već 6 sati.', detail: 'Moguć je stres ili dawn fenomen. Tvoj cjelodnevni inzulin možda nije dovoljan za ovo doba dana.' }, ctx: [
-      { q: 'Jesi li pod stresom?', reply: 'Da, imam deadline na poslu.', ans: { main: 'Stres ti diže šećer.', detail: 'Kortizol potiče jetru da otpusti glukozu. Daj malu korekciju od {2 jedinice} i probaj se opustiti.' } },
-      { q: 'Je li ovo čest obrazac?', reply: 'Da, zadnjih par dana.', ans: { main: 'Trebalo bi ti povećati cjelodnevni inzulin.', detail: 'Vidim da ti šećer raste u ovo doba već 3 dana. Povećaj cjelodnevni inzulin za {15%} od 14-18h.' } }
-    ] },
-    { q: 'Hoće li mi kava podići šećer ujutro?', ans: { main: 'Crna kava minimalno utječe.', detail: 'Ali vidim da ti šećer nakon kave obično skoči za 1.5 — piješ li je s nečim?' }, ctx: [
-      { q: 'Piješ li je s nečim?', reply: 'S mlijekom i žlicom šećera.', ans: { main: 'Mlijeko i šećer dodaju {2 jedinice.}', detail: 'To je oko 15g UH. Tvoja povijest pokazuje skok od 1.5 nakon kave — ovo je razlog.' } }
-    ] },
-    { q: 'Mogu li jesti voće a da mi šećer ne skače?', ans: { main: 'Da, ali ovisi o vrsti.', detail: 'Prema tvojoj povijesti, bobičasto voće ti ne diže šećer značajno, a banana da.' }, ctx: [
-      { q: 'Koje voće planiraš?', reply: 'Jagode, oko 200g.', ans: { main: '200g jagoda je sigurno.', detail: 'To je samo 14g UH. Prema tvojoj povijesti, jagode ti minimalno utječu na šećer.' } },
-      { q: 'Planiraš li ga jesti samo?', reply: 'S jogurtom i medom.', ans: { main: 'Za med dodaj {2 jedinice.}', detail: 'Voće je OK, ali žlica meda ima 17g UH. Jogurt bez šećera ne zahtijeva dodatni inzulin.' } }
+      { q: 'Što imaš pri ruci?', reply: 'Imam sok od jabuke.', ans: { main: 'Popij pola čaše soka odmah.', detail: 'To je oko 15g brzih UH. Provjeri za 15 min.' } }
     ] },
     { q: 'Planiram ići na trening, trebam li smanjiti inzulin?', ans: { main: 'Smanji cjelodnevni inzulin za {30%.}', detail: 'Vidim da ti šećer prosječno padne 2.8 nakon treninga. Smanji 30 min prije.' }, ctx: [
-      { q: 'Kakav trening planiraš?', reply: 'Dizanje utega, sat vremena.', ans: { main: 'Smanji cjelodnevni inzulin za {20%.}', detail: 'Utezi manje snizuju šećer od kardia. Tvoja povijest pokazuje pad od 1.5 nakon utega.' } },
-      { q: 'Koliko dugo planiraš?', reply: 'Sat i pol kardia.', ans: { main: 'Smanji cjelodnevni inzulin za {40%.}', detail: '90 min kardia značajno troši glukozu. Ponesi tablete glukoze i provjeri šećer svakih 30 min.' } }
-    ] },
-    { q: 'Trebam li nešto pojesti prije spavanja?', ans: { main: 'Da, pojedi lagani obrok.', detail: 'Šećer ti je 4.8 i lagano pada. Proteini + masti drže šećer stabilnim preko noći.' }, ctx: [
-      { q: 'Što imaš za pojesti?', reply: 'Kreker i kikiriki maslac.', ans: { main: 'Savršen izbor.', detail: 'Kreker daje brze UH da te podigne, kikiriki maslac usporava i drži stabilnim do jutra.' } }
+      { q: 'Kakav trening planiraš?', reply: 'Dizanje utega, sat vremena.', ans: { main: 'Smanji za {20%.}', detail: 'Utezi manje snizuju šećer od kardia.' } }
     ] },
     { q: 'Koliko inzulina za kebab i pomfrit?', ans: { main: 'Trebat će ti {14 jedinica.}', detail: 'Kebab tortilla ~50g UH, pomfrit ~40g. Masna hrana pa preporučam split dozu.' }, ctx: [
-      { q: 'Koliko pomfrita?', reply: 'Veliku porciju, oko 250g.', ans: { main: 'Za to treba {17 jedinica.}', detail: '250g pomfrita je ~65g UH. Plus kebab ukupno ~115g UH. Split doza — 10 sad, 7 za 45 min.' } }
-    ] },
-    { q: 'Što da radim, šećer mi naglo pada?', ans: { main: 'Pojedi 15g šećera odmah.', detail: 'Vidim pad od 2.1 u zadnjih 30 min. Brzo reagiraj — sok ili tablete glukoze.' }, ctx: [
-      { q: 'Imaš li glukagon pri ruci?', reply: 'Da, u torbi.', ans: { main: 'Drži ga blizu sebe.', detail: 'Za sada pojedi 20g brzih UH jer pad je brz. Ako se ne stabilizira za 15 min, koristi glukagon.' } }
-    ] },
-    { q: 'Je li bolje dati inzulin prije ili poslije jela?', ans: { main: '15 minuta prije jela.', detail: 'Tvoja povijest pokazuje da pre-bolus od 15 min daje najbolje rezultate.' }, ctx: [
-      { q: 'A kad mi je šećer nizak?', reply: 'Sad mi je 4.5.', ans: { main: 'Kod 4.5 daj inzulin s jelom.', detail: 'Ne čekaj 15 min jer bi mogao pasti prenisko. Pojedi i daj inzulin istovremeno.' } }
-    ] },
-    { q: 'Zašto mi šećer raste tijekom noći?', ans: { main: 'To je dawn fenomen.', detail: 'Vidim porast od prosječno 2.3 između 4-7h zadnji tjedan dana.' }, ctx: [
-      { q: 'Može li se to riješiti?', reply: 'Da, kako?', ans: { main: 'Povećaj cjelodnevni inzulin od 3h za {20%.}', detail: 'Tvoj porast počinje oko 4h. Postavi povećani cjelodnevni inzulin od 3:00 da preduhitri dawn fenomen.' } }
-    ] },
-    { q: 'Koliko ugljikohidrata ima u banani?', ans: { main: 'Srednja banana ima 27g UH.', detail: 'Prema tvojoj povijesti, banana ti podiže šećer za oko 3.0 bez inzulina.' }, ctx: [
-      { q: 'Trebam li inzulin za nju?', reply: 'Da, koliko?', ans: { main: 'Daj {2 jedinice} za bananu.', detail: 'S obzirom na tvoj omjer (1 jedinica = 12g UH), 2 jedinice su točno za 27g.' } }
-    ] },
-    { q: 'Mogu li piti sok od naranče?', ans: { main: 'Da, ali pazi na količinu.', detail: 'Šećer ti je trenutno 5.4 i stabilan. Čaša soka ima ~25g brzih UH.' }, ctx: [
-      { q: 'Koliko soka planiraš?', reply: 'Malu čašu, 150ml.', ans: { main: '150ml je sigurno bez inzulina.', detail: 'To je oko 15g UH. S obzirom da ti je šećer 5.4, podignut će ga na oko 7 — sasvim OK.' } },
-      { q: 'Želiš li ga uz obrok?', reply: 'Da, uz doručak.', ans: { main: 'Dodaj {2 jedinice} na dozu za doručak.', detail: 'Sok uz obrok brže diže šećer. Dodaj ga u izračun UH za doručak.' } }
-    ] },
-    { q: 'Pojela sam sladoled, koliko da si dam inzulina?', ans: { main: 'Za to daj {6 jedinica.}', detail: 'Dvije kuglice su oko 30g UH. Mast usporava apsorpciju pa daj split dozu.' }, ctx: [
-      { q: 'Koliko si točno pojela?', reply: 'Tri kuglice, oko 180g.', ans: { main: 'Za 180g treba {9 jedinica.}', detail: 'To je oko 45g UH. Daj 5 sad i 4 za 30 min jer mast usporava apsorpciju.' } },
-      { q: 'Kakav sladoled?', reply: 'Domaći, s puno čokolade.', ans: { main: 'Za čokoladni daj {7 jedinica.}', detail: 'Domaći čokoladni ima više masti i šećera. Split doza je obavezna za bolju kontrolu.' } }
+      { q: 'Koliko pomfrita?', reply: 'Veliku porciju.', ans: { main: 'Za to treba {17 jedinica.}', detail: 'Split doza — 10 sad, 7 za 45 min.' } }
     ] },
   ];
+
+  const speechDataEN = [
+    { q: 'How much insulin should I take? I had a medium pizza and apple juice.', ans: { main: '{12 units} is optimal.', detail: 'I see your sugar is 7.8 and stable. Last time with pizza you took 14 and went too low.' }, ctx: [
+      { q: 'Planning any activity?', reply: 'Going for a walk in half an hour.', ans: { main: '{10 units} is enough.', detail: 'Walking will help with absorption. Reducing dose since you\'ll burn some glucose.' } },
+      { q: 'Was the pizza greasy?', reply: 'Yes, lots of cheese and oil.', ans: { main: '{12 units} but split dose.', detail: 'Greasy pizza slows absorption. Take 7 now and 5 in 45 min to cover late rise.' } }
+    ] },
+    { q: 'My sugar is high, what should I do?', ans: { main: 'Take a correction of {3 units.}', detail: 'I see it\'s 13.4 and slowly rising. Last correction was 4 hours ago.' }, ctx: [
+      { q: 'Any symptoms?', reply: 'A slight headache.', ans: { main: 'Take {3 units} and drink water.', detail: 'Headache can be from high sugar. Drink 2-3 glasses of water in the next hour.' } }
+    ] },
+    { q: 'My sugar is low, what should I eat?', ans: { main: 'Eat 15g of fast carbs now.', detail: 'I see it\'s 3.8 and dropping. Juice, glucose tablets, or 3-4 candies — check in 15 min.' }, ctx: [
+      { q: 'What do you have nearby?', reply: 'I have apple juice.', ans: { main: 'Drink half a glass now.', detail: 'That\'s about 15g of fast carbs. Check again in 15 min.' } }
+    ] },
+    { q: 'I\'m planning to work out, should I reduce insulin?', ans: { main: 'Reduce basal insulin by {30%.}', detail: 'I see your sugar drops 2.8 on average after training. Reduce 30 min before.' }, ctx: [
+      { q: 'What kind of workout?', reply: 'Weight lifting, one hour.', ans: { main: 'Reduce by {20%.}', detail: 'Weights lower sugar less than cardio.' } }
+    ] },
+    { q: 'How much insulin for kebab and fries?', ans: { main: 'You\'ll need {14 units.}', detail: 'Kebab wrap ~50g carbs, fries ~40g. Fatty food so I recommend split dose.' }, ctx: [
+      { q: 'How many fries?', reply: 'A large portion.', ans: { main: 'For that you need {17 units.}', detail: 'Split dose — 10 now, 7 in 45 min.' } }
+    ] },
+  ];
+
+  function getSpeechData() {
+    const lang = localStorage.getItem('sweetie-lang') || 'en';
+    return lang === 'hr' ? speechDataHR : speechDataEN;
+  }
+
+  const speechData = getSpeechData();
   let lastQuestionIndex = -1;
   let currentCtx = [];
   let currentAnswer = null;
@@ -978,13 +951,14 @@ function initAssistantMic() {
   const micBtn = document.querySelector('.assistant-mic-btn');
 
   function getRandomQuestion() {
+    const data = getSpeechData();
     let index;
     do {
-      index = Math.floor(Math.random() * speechData.length);
-    } while (index === lastQuestionIndex);
+      index = Math.floor(Math.random() * data.length);
+    } while (index === lastQuestionIndex && data.length > 1);
     lastQuestionIndex = index;
-    currentCtx = speechData[index].ctx;
-    currentAnswer = speechData[index].ans;
+    currentCtx = data[index].ctx;
+    currentAnswer = data[index].ans;
     selectedCtxAnswer = null;
 
     // Update context menu buttons
@@ -999,7 +973,7 @@ function initAssistantMic() {
       }
     });
 
-    return speechData[index].q;
+    return data[index].q;
   }
 
   function startListening() {
