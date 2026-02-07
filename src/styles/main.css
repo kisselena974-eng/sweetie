@@ -286,7 +286,7 @@ body {
 /* Responsive - Mobile */
 @media (max-width: 600px) {
   .landing-page {
-    padding: 24px 20px 32px 20px;
+    padding: 24px 20px;
   }
 
   .landing-subtitle {
@@ -325,7 +325,7 @@ body {
 /* Very small screens */
 @media (max-width: 400px) {
   .landing-page {
-    padding: 16px 12px 28px 12px;
+    padding: 16px 12px;
   }
 
   .legend-list li {
