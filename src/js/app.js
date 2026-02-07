@@ -937,7 +937,6 @@ function initAssistantMic() {
     return lang === 'hr' ? speechDataHR : speechDataEN;
   }
 
-  const speechData = getSpeechData();
   let lastQuestionIndex = -1;
   let currentCtx = [];
   let currentAnswer = null;
