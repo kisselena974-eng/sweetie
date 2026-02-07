@@ -194,7 +194,7 @@ body {
   width: 100px;
   transform: rotate(-90deg);
   transform-origin: center center;
-  margin: 70px -35px;
+  margin: 70px -35px 0 -35px;
 }
 
 .slider-controls .glucose-value {
