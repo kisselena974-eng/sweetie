@@ -247,14 +247,24 @@ class MedInputController {
   }
 
   /**
-   * Get the label for honey units (Croatian grammar)
-   * 1 = "med", 2+ = "meda"
+   * Get the label for honey units
+   * Croatian: 1 = "med", 2+ = "meda"
+   * English: 1 = "honey", 2+ = "X honey"
    */
   getMedLabel(units) {
-    if (units === 1) {
-      return 'med';
+    const lang = localStorage.getItem('sweetie-lang') || 'en';
+
+    if (lang === 'hr') {
+      if (units === 1) {
+        return 'med';
+      }
+      return `${units} meda`;
+    } else {
+      if (units === 1) {
+        return 'honey';
+      }
+      return `${units} honey`;
     }
-    return `${units} meda`;
   }
 
   /**

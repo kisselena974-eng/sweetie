@@ -33,8 +33,8 @@ class MealInputController {
     this.currentAnswer = null;
     this.selectedOption = null;
 
-    // Meal data with AI responses
-    this.mealData = [
+    // Meal data with AI responses - Croatian
+    this.mealDataHR = [
       {
         speech: 'Pojela sam pizzu i popila sok.',
         options: ['Kolika pizza?', 'Kakav sok?'],
@@ -137,8 +137,112 @@ class MealInputController {
       }
     ];
 
-    // Favorite meals with direct answers (no options)
-    this.favoriteMeals = [
+    // Meal data with AI responses - English
+    this.mealDataEN = [
+      {
+        speech: 'I had pizza and juice.',
+        options: ['What size pizza?', 'What kind of juice?'],
+        optionReplies: ['Medium, about 300g.', 'Apple juice, 250ml.'],
+        answer: { main: 'You need {14 units.}', detail: 'Pizza ~70g carbs, juice ~25g carbs. Take 10 now, 4 in 45 min due to fat.' },
+        optionAnswers: [
+          { main: 'Medium pizza needs {12 units.}', detail: '300g pizza is about 70g carbs. I recommend a split dose due to cheese and dough.' },
+          { main: 'Juice adds {3 units.}', detail: '250ml apple juice has about 28g fast carbs. Take them now.' }
+        ]
+      },
+      {
+        speech: 'I have a sandwich and chips.',
+        options: ['What kind of sandwich?', 'How many chips?'],
+        optionReplies: ['Ham and cheese.', 'Small bag, 40g.'],
+        answer: { main: 'I recommend {8 units.}', detail: 'Sandwich ~35g carbs, chips ~20g carbs. Fat slows absorption.' },
+        optionAnswers: [
+          { main: 'Ham sandwich needs {5 units.}', detail: 'Two slices of bread ~30g carbs. Ham and cheese have minimal carbs.' },
+          { main: 'Chips add {3 units.}', detail: '40g chips have about 22g carbs plus fat that slows absorption.' }
+        ]
+      },
+      {
+        speech: 'I had pasta with sauce.',
+        options: ['How much pasta?', 'What sauce?'],
+        optionReplies: ['Full plate, about 250g.', 'Bolognese with meat.'],
+        answer: { main: 'Take {12 units.}', detail: 'Medium plate of pasta is about 60g carbs. Sauce adds a bit more.' },
+        optionAnswers: [
+          { main: '250g pasta needs {14 units.}', detail: 'That\'s about 70g carbs. Take insulin 10-15 min before eating.' },
+          { main: 'Bolognese doesn\'t change the dose much.', detail: 'Meat slows absorption. Consider a split dose - 8 now, 6 in 30 min.' }
+        ]
+      },
+      {
+        speech: 'I\'m eating pancakes with Nutella.',
+        options: ['How many pancakes?', 'How much Nutella?'],
+        optionReplies: ['Three pancakes.', 'Thick layer, a lot.'],
+        answer: { main: 'You\'ll need {10 units.}', detail: 'Pancakes + Nutella = fast sugars. Take insulin 15 min before.' },
+        optionAnswers: [
+          { main: 'For 3 pancakes take {8 units.}', detail: 'Each pancake about 15g carbs. Without Nutella that\'s 45g carbs.' },
+          { main: 'Lots of Nutella adds {4 units.}', detail: 'Thick layer is about 40g = 22g carbs. This combo raises sugar fast.' }
+        ]
+      },
+      {
+        speech: 'I had a burger and fries.',
+        options: ['What burger?', 'How many fries?'],
+        optionReplies: ['Big Mac.', 'Large portion.'],
+        answer: { main: 'You need {16 units.}', detail: 'Burger ~45g carbs, fries ~50g carbs. Split dose due to fat.' },
+        optionAnswers: [
+          { main: 'Big Mac needs {7 units.}', detail: 'Bun and sauces have about 45g carbs. Meat and cheese slow things down.' },
+          { main: 'Large fries add {10 units.}', detail: 'About 65g carbs. Split it - 6 now, 4 in 45 min.' }
+        ]
+      },
+      {
+        speech: 'I have cereal with milk.',
+        options: ['What cereal?', 'How much milk?'],
+        optionReplies: ['Corn flakes.', 'Full bowl, 200ml.'],
+        answer: { main: 'I recommend {6 units.}', detail: 'Cereal is fast carbs. Take insulin 15 min before.' },
+        optionAnswers: [
+          { main: 'Corn flakes need {5 units.}', detail: 'A 40g serving has about 35g carbs. High GI - raises sugar fast.' },
+          { main: 'Milk adds {1 unit.}', detail: '200ml milk has about 10g carbs. Proteins slow it down a bit.' }
+        ]
+      },
+      {
+        speech: 'I\'m eating salad with chicken.',
+        options: ['Any dressing?', 'Any bread with it?'],
+        optionReplies: ['Yes, french dressing.', 'Yes, two pieces.'],
+        answer: { main: 'Just {2 units} or nothing.', detail: 'Salad and chicken have minimal carbs. Depends on additions.' },
+        optionAnswers: [
+          { main: 'Dressing adds {1 unit.}', detail: 'French dressing has about 8g carbs per spoon. Not much.' },
+          { main: 'Bread adds {3 units.}', detail: 'Two pieces of bread are about 30g carbs. Take insulin for that.' }
+        ]
+      },
+      {
+        speech: 'I have a croissant and coffee.',
+        options: ['What croissant?', 'Coffee with what?'],
+        optionReplies: ['Chocolate filled.', 'With milk and sugar.'],
+        answer: { main: 'Take {5 units.}', detail: 'Croissant ~25g carbs. Coffee depends on additions.' },
+        optionAnswers: [
+          { main: 'Chocolate croissant needs {6 units.}', detail: 'Dough + chocolate = about 40g carbs. Take 15 min before.' },
+          { main: 'Coffee with milk and sugar adds {2 units.}', detail: 'Sugar + milk about 15g carbs. Without sugar just 0.5 units.' }
+        ]
+      },
+      {
+        speech: 'I had fish with vegetables.',
+        options: ['How was it prepared?', 'What vegetables?'],
+        optionReplies: ['Breaded fish.', 'Grilled vegetables.'],
+        answer: { main: 'You need {3 units.}', detail: 'Fish and vegetables have few carbs. Preparation can add some.' },
+        optionAnswers: [
+          { main: 'Breaded fish needs {5 units.}', detail: 'Breading adds about 25g carbs. Grilled would be 0-1 units.' },
+          { main: 'Grilled vegetables don\'t need insulin.', detail: 'Minimal carbs. If there\'s potato, add 2-3 units.' }
+        ]
+      },
+      {
+        speech: 'I\'m eating ice cream.',
+        options: ['How many scoops?', 'What flavor?'],
+        optionReplies: ['Three scoops.', 'Chocolate and vanilla.'],
+        answer: { main: 'For ice cream take {6 units.}', detail: 'Fat slows absorption. Consider a split dose.' },
+        optionAnswers: [
+          { main: 'Three scoops need {7 units.}', detail: 'About 45g carbs. Split dose - 4 now, 3 in 30 min.' },
+          { main: 'Chocolate has more carbs than vanilla.', detail: 'But the difference is small. Stay at 6-7 units.' }
+        ]
+      }
+    ];
+
+    // Favorite meals with direct answers - Croatian
+    this.favoriteMealsHR = [
       { name: 'Tost', answer: { main: 'Za tost treba {3 jedinice.}', detail: 'Dva komada tosta su oko 30g UH. Daj inzulin 10 min prije.' } },
       { name: 'Rižoto', answer: { main: 'Za rižoto daj {10 jedinica.}', detail: 'Srednja porcija rižota je oko 55g UH. Riža ima srednji GI.' } },
       { name: 'Pahuljice', answer: { main: 'Preporučam {5 jedinica.}', detail: 'Zobene pahuljice s mlijekom oko 40g UH. Daj 15 min prije.' } },
@@ -146,7 +250,30 @@ class MealInputController {
       { name: 'Salata', answer: { main: 'Bez inzulina ili {1 jedinica.}', detail: 'Salata ima minimalno UH. Ovisi o dresingu i dodacima.' } }
     ];
 
+    // Favorite meals with direct answers - English
+    this.favoriteMealsEN = [
+      { name: 'Toast', answer: { main: 'Toast needs {3 units.}', detail: 'Two pieces of toast are about 30g carbs. Take insulin 10 min before.' } },
+      { name: 'Risotto', answer: { main: 'Risotto needs {10 units.}', detail: 'Medium portion of risotto is about 55g carbs. Rice has medium GI.' } },
+      { name: 'Oatmeal', answer: { main: 'I recommend {5 units.}', detail: 'Oatmeal with milk about 40g carbs. Take 15 min before.' } },
+      { name: 'Eggs', answer: { main: 'Just {1 unit} or nothing.', detail: 'Eggs have minimal carbs. If there\'s bread, add 2-3 units.' } },
+      { name: 'Salad', answer: { main: 'No insulin or {1 unit.}', detail: 'Salad has minimal carbs. Depends on dressing and additions.' } }
+    ];
+
+    // Set active data based on language
+    this.mealData = this.getMealData();
+    this.favoriteMeals = this.getFavoriteMeals();
+
     this.init();
+  }
+
+  getMealData() {
+    const lang = localStorage.getItem('sweetie-lang') || 'en';
+    return lang === 'hr' ? this.mealDataHR : this.mealDataEN;
+  }
+
+  getFavoriteMeals() {
+    const lang = localStorage.getItem('sweetie-lang') || 'en';
+    return lang === 'hr' ? this.favoriteMealsHR : this.favoriteMealsEN;
   }
 
   init() {
@@ -209,6 +336,17 @@ class MealInputController {
 
   show() {
     if (!this.screen) return;
+
+    // Refresh data for current language
+    this.mealData = this.getMealData();
+    this.favoriteMeals = this.getFavoriteMeals();
+
+    // Update favorite button labels
+    this.favBtns.forEach((btn, index) => {
+      if (this.favoriteMeals[index]) {
+        btn.textContent = this.favoriteMeals[index].name;
+      }
+    });
 
     // Hide clock
     const fixedTime = document.querySelector('.fixed-time');

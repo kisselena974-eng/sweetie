@@ -31,8 +31,8 @@ class ActivityInputController {
     this.currentActivity = null;
     this.currentAnswer = null;
 
-    // Activity data with AI responses
-    this.activityData = [
+    // Activity data with AI responses - Croatian
+    this.activityDataHR = [
       {
         speech: 'Idem trčati pola sata.',
         answer: { main: 'Smanji inzulin za {30%.}', detail: '30 min trčanja troši oko 150 kcal. Ponesi glukozu za svaki slučaj.' }
@@ -55,14 +55,59 @@ class ActivityInputController {
       }
     ];
 
-    // Favorite activities with direct answers
-    this.favoriteActivities = [
+    // Activity data with AI responses - English
+    this.activityDataEN = [
+      {
+        speech: 'I\'m going for a 30-minute run.',
+        answer: { main: 'Reduce insulin by {30%.}', detail: '30 min running burns about 150 kcal. Bring glucose just in case.' }
+      },
+      {
+        speech: 'I\'m planning an hour of cycling.',
+        answer: { main: 'Reduce insulin by {40%.}', detail: 'Longer cardio significantly uses glucose. Check sugar every 30 min.' }
+      },
+      {
+        speech: 'I\'m going to the gym to lift weights.',
+        answer: { main: 'Reduce insulin by {20%.}', detail: 'Weights lower sugar less than cardio. Watch for delayed drop 2-3h after.' }
+      },
+      {
+        speech: 'I\'m planning a long hike.',
+        answer: { main: 'Reduce insulin by {35%.}', detail: 'Multi-hour walking uses a lot of glucose. Bring snacks and glucose.' }
+      },
+      {
+        speech: 'I have swimming practice.',
+        answer: { main: 'Reduce insulin by {35%.}', detail: 'Swimming is intense cardio. Check sugar before and after.' }
+      }
+    ];
+
+    // Favorite activities with direct answers - Croatian
+    this.favoriteActivitiesHR = [
       { name: 'Trčanje', answer: { main: 'Smanji inzulin za {30%.}', detail: '30 min trčanja prosječno snižava šećer za 2-3. Ponesi glukozu.' } },
       { name: 'Bicikl', answer: { main: 'Smanji inzulin za {35%.}', detail: 'Bicikliranje troši puno energije. Provjeri šećer svakih 30 min.' } },
       { name: 'Šetnja', answer: { main: 'Smanji inzulin za {15%.}', detail: 'Lagana šetnja blago snižava šećer. Za dužu šetnju ponesi užinu.' } }
     ];
 
+    // Favorite activities with direct answers - English
+    this.favoriteActivitiesEN = [
+      { name: 'Running', answer: { main: 'Reduce insulin by {30%.}', detail: '30 min running lowers sugar by 2-3 on average. Bring glucose.' } },
+      { name: 'Cycling', answer: { main: 'Reduce insulin by {35%.}', detail: 'Cycling uses a lot of energy. Check sugar every 30 min.' } },
+      { name: 'Walking', answer: { main: 'Reduce insulin by {15%.}', detail: 'Light walking slightly lowers sugar. For longer walks bring a snack.' } }
+    ];
+
+    // Set active data based on language
+    this.activityData = this.getActivityData();
+    this.favoriteActivities = this.getFavoriteActivities();
+
     this.init();
+  }
+
+  getActivityData() {
+    const lang = localStorage.getItem('sweetie-lang') || 'en';
+    return lang === 'hr' ? this.activityDataHR : this.activityDataEN;
+  }
+
+  getFavoriteActivities() {
+    const lang = localStorage.getItem('sweetie-lang') || 'en';
+    return lang === 'hr' ? this.favoriteActivitiesHR : this.favoriteActivitiesEN;
   }
 
   init() {
@@ -116,6 +161,17 @@ class ActivityInputController {
 
   show() {
     if (!this.screen) return;
+
+    // Refresh data for current language
+    this.activityData = this.getActivityData();
+    this.favoriteActivities = this.getFavoriteActivities();
+
+    // Update favorite button labels
+    this.favBtns.forEach((btn, index) => {
+      if (this.favoriteActivities[index]) {
+        btn.textContent = this.favoriteActivities[index].name;
+      }
+    });
 
     // Hide clock
     const fixedTime = document.querySelector('.fixed-time');

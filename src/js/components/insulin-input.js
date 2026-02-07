@@ -284,7 +284,10 @@ class InsulinInputController {
 
     const units = this.selectedUnits;
     const type = this.selectedType;
-    const typeLabel = type === 'brzi' ? 'brzog' : 'dnevnog';
+    const lang = localStorage.getItem('sweetie-lang') || 'en';
+    const typeLabel = lang === 'hr'
+      ? (type === 'brzi' ? 'brzog' : 'dnevnog')
+      : (type === 'brzi' ? 'fast' : 'daily');
 
     // Add to tracking screen
     if (window.trackingController) {
@@ -435,7 +438,8 @@ class InsulinInputController {
       }
 
       // Log the entry
-      console.log(`Insulin logged: ${units} jedinica ${typeLabel}`);
+      const logUnit = lang === 'hr' ? 'jedinica' : 'units';
+      console.log(`Insulin logged: ${units} ${logUnit} ${typeLabel}`);
 
       // Dispatch event
       document.dispatchEvent(new CustomEvent('insulinLogged', {
@@ -476,7 +480,11 @@ class InsulinInputController {
    * Create confirmation text overlay
    */
   createConfirmTextOverlay(units, type) {
-    const typeLabel = type === 'brzi' ? 'brzog' : 'dnevnog';
+    const lang = localStorage.getItem('sweetie-lang') || 'en';
+    const typeLabel = lang === 'hr'
+      ? (type === 'brzi' ? 'brzog' : 'dnevnog')
+      : (type === 'brzi' ? 'fast' : 'daily');
+    const unitLabel = lang === 'hr' ? 'jedinica' : 'units';
 
     const textSvg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     textSvg.setAttribute('viewBox', '0 0 252 252');
@@ -512,7 +520,7 @@ class InsulinInputController {
     textPath.setAttribute('href', '#confirmTextArc');
     textPath.setAttribute('startOffset', '50%');
     textPath.setAttribute('text-anchor', 'middle');
-    textPath.textContent = `${units} jedinica ${typeLabel}`;
+    textPath.textContent = `${units} ${unitLabel} ${typeLabel}`;
 
     text.appendChild(textPath);
     textSvg.appendChild(text);
@@ -523,9 +531,11 @@ class InsulinInputController {
   updateConfirmationText(units, typeLabel) {
     if (!this.confirmScreen) return;
 
+    const lang = localStorage.getItem('sweetie-lang') || 'en';
+    const unitLabel = lang === 'hr' ? 'jedinica' : 'units';
     const textPath = this.confirmScreen.querySelector('.confirm-text textPath');
     if (textPath) {
-      textPath.innerHTML = `<tspan class="confirm-amount">${units} jedinica</tspan> <tspan class="confirm-type">${typeLabel}</tspan>`;
+      textPath.innerHTML = `<tspan class="confirm-amount">${units} ${unitLabel}</tspan> <tspan class="confirm-type">${typeLabel}</tspan>`;
     }
   }
 

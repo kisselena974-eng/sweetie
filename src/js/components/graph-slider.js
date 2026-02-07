@@ -249,11 +249,11 @@ class GraphSlider {
         bgWidth = 36;
         bgHeight = 24;
         bgYOffset = 8;
-      } else if (fuzzyTime.line1 === 'now') {
-        bgWidth = 22;
+      } else if (fuzzyTime.line1 === 'now' || fuzzyTime.line1 === 'sada') {
+        bgWidth = 26;
         bgHeight = 14;
         bgYOffset = 10;
-      } else if (fuzzyTime.line1 === 'just now') {
+      } else if (fuzzyTime.line1 === 'just now' || fuzzyTime.line1 === 'upravo') {
         bgWidth = 40;
         bgHeight = 14;
         bgYOffset = 10;
@@ -604,22 +604,45 @@ class GraphSlider {
     const distanceFromNow = this.maxX - graphX;
     const minutesAgo = (distanceFromNow / 406) * 720; // 720 minutes = 12 hours
 
-    if (minutesAgo < 1) return { line1: 'now', line2: '' };
-    if (minutesAgo < 5) return { line1: 'just now', line2: '' };
-    if (minutesAgo < 30) return { line1: 'few min', line2: 'ago' };
-    if (minutesAgo < 60) return { line1: '30 min ago', line2: '' };
-    if (minutesAgo < 120) return { line1: '1 h ago', line2: '' };
-    if (minutesAgo < 180) return { line1: '2 h ago', line2: '' };
-    if (minutesAgo < 240) return { line1: '3 h ago', line2: '' };
-    if (minutesAgo < 300) return { line1: '4 h ago', line2: '' };
-    if (minutesAgo < 360) return { line1: '5 h ago', line2: '' };
-    if (minutesAgo < 420) return { line1: '6 h ago', line2: '' };
-    if (minutesAgo < 480) return { line1: '7 h ago', line2: '' };
-    if (minutesAgo < 540) return { line1: '8 h ago', line2: '' };
-    if (minutesAgo < 600) return { line1: '9 h ago', line2: '' };
-    if (minutesAgo < 660) return { line1: '10 h ago', line2: '' };
-    if (minutesAgo < 720) return { line1: '11 h ago', line2: '' };
-    return { line1: '12 h ago', line2: '' };
+    const lang = localStorage.getItem('sweetie-lang') || 'en';
+
+    if (lang === 'hr') {
+      // Croatian fuzzy time
+      if (minutesAgo < 1) return { line1: 'sada', line2: '' };
+      if (minutesAgo < 5) return { line1: 'upravo', line2: '' };
+      if (minutesAgo < 30) return { line1: 'par min', line2: 'prije' };
+      if (minutesAgo < 60) return { line1: 'prije 30 min', line2: '' };
+      if (minutesAgo < 120) return { line1: 'prije 1 h', line2: '' };
+      if (minutesAgo < 180) return { line1: 'prije 2 h', line2: '' };
+      if (minutesAgo < 240) return { line1: 'prije 3 h', line2: '' };
+      if (minutesAgo < 300) return { line1: 'prije 4 h', line2: '' };
+      if (minutesAgo < 360) return { line1: 'prije 5 h', line2: '' };
+      if (minutesAgo < 420) return { line1: 'prije 6 h', line2: '' };
+      if (minutesAgo < 480) return { line1: 'prije 7 h', line2: '' };
+      if (minutesAgo < 540) return { line1: 'prije 8 h', line2: '' };
+      if (minutesAgo < 600) return { line1: 'prije 9 h', line2: '' };
+      if (minutesAgo < 660) return { line1: 'prije 10 h', line2: '' };
+      if (minutesAgo < 720) return { line1: 'prije 11 h', line2: '' };
+      return { line1: 'prije 12 h', line2: '' };
+    } else {
+      // English fuzzy time
+      if (minutesAgo < 1) return { line1: 'now', line2: '' };
+      if (minutesAgo < 5) return { line1: 'just now', line2: '' };
+      if (minutesAgo < 30) return { line1: 'few min', line2: 'ago' };
+      if (minutesAgo < 60) return { line1: '30 min ago', line2: '' };
+      if (minutesAgo < 120) return { line1: '1 h ago', line2: '' };
+      if (minutesAgo < 180) return { line1: '2 h ago', line2: '' };
+      if (minutesAgo < 240) return { line1: '3 h ago', line2: '' };
+      if (minutesAgo < 300) return { line1: '4 h ago', line2: '' };
+      if (minutesAgo < 360) return { line1: '5 h ago', line2: '' };
+      if (minutesAgo < 420) return { line1: '6 h ago', line2: '' };
+      if (minutesAgo < 480) return { line1: '7 h ago', line2: '' };
+      if (minutesAgo < 540) return { line1: '8 h ago', line2: '' };
+      if (minutesAgo < 600) return { line1: '9 h ago', line2: '' };
+      if (minutesAgo < 660) return { line1: '10 h ago', line2: '' };
+      if (minutesAgo < 720) return { line1: '11 h ago', line2: '' };
+      return { line1: '12 h ago', line2: '' };
+    }
   }
 
   /**
