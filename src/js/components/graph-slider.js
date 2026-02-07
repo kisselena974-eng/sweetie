@@ -533,10 +533,10 @@ class GraphSlider {
     const WARNING_LOW_Y = 151;
     const DANGER_LOW_Y = 156;
 
-    if (y < DANGER_HIGH_Y) return 'danger-high';
-    if (y <= WARNING_HIGH_Y) return 'warning-high';
-    if (y < WARNING_LOW_Y) return 'safe';
-    if (y <= DANGER_LOW_Y) return 'warning-low';
+    if (y <= DANGER_HIGH_Y) return 'danger-high';
+    if (y < WARNING_HIGH_Y) return 'warning-high';
+    if (y <= WARNING_LOW_Y) return 'safe';
+    if (y < DANGER_LOW_Y) return 'warning-low';
     return 'danger-low';
   }
 
@@ -755,19 +755,19 @@ class GraphSlider {
   updateClipPath(x, y) {
     const currentSegment = this.getSegmentForX(x);
 
-    // Zone boundaries for clip
+    // Zone boundaries for clip (must match getColorForY boundaries)
     const DANGER_HIGH_Y = 96;
     const WARNING_HIGH_Y = 106;
     const WARNING_LOW_Y = 151;
     const DANGER_LOW_Y = 156;
 
     let clipY, clipHeight;
-    if (y < DANGER_HIGH_Y) {
-      clipY = 0; clipHeight = DANGER_HIGH_Y;
+    if (y <= DANGER_HIGH_Y) {
+      clipY = 0; clipHeight = DANGER_HIGH_Y + 1;
     } else if (y < WARNING_HIGH_Y) {
       clipY = DANGER_HIGH_Y; clipHeight = WARNING_HIGH_Y - DANGER_HIGH_Y;
-    } else if (y < WARNING_LOW_Y) {
-      clipY = WARNING_HIGH_Y; clipHeight = WARNING_LOW_Y - WARNING_HIGH_Y;
+    } else if (y <= WARNING_LOW_Y) {
+      clipY = WARNING_HIGH_Y; clipHeight = WARNING_LOW_Y - WARNING_HIGH_Y + 1;
     } else if (y < DANGER_LOW_Y) {
       clipY = WARNING_LOW_Y; clipHeight = DANGER_LOW_Y - WARNING_LOW_Y;
     } else {
@@ -801,19 +801,19 @@ class GraphSlider {
     // Still need to update clip-path based on position
     const currentSegment = this.getSegmentForX(x);
 
-    // Zone boundaries for clip
+    // Zone boundaries for clip (must match getColorForY boundaries)
     const DANGER_HIGH_Y = 96;
     const WARNING_HIGH_Y = 106;
     const WARNING_LOW_Y = 151;
     const DANGER_LOW_Y = 156;
 
     let clipY, clipHeight;
-    if (y < DANGER_HIGH_Y) {
-      clipY = 0; clipHeight = DANGER_HIGH_Y;
+    if (y <= DANGER_HIGH_Y) {
+      clipY = 0; clipHeight = DANGER_HIGH_Y + 1;
     } else if (y < WARNING_HIGH_Y) {
       clipY = DANGER_HIGH_Y; clipHeight = WARNING_HIGH_Y - DANGER_HIGH_Y;
-    } else if (y < WARNING_LOW_Y) {
-      clipY = WARNING_HIGH_Y; clipHeight = WARNING_LOW_Y - WARNING_HIGH_Y;
+    } else if (y <= WARNING_LOW_Y) {
+      clipY = WARNING_HIGH_Y; clipHeight = WARNING_LOW_Y - WARNING_HIGH_Y + 1;
     } else if (y < DANGER_LOW_Y) {
       clipY = WARNING_LOW_Y; clipHeight = DANGER_LOW_Y - WARNING_LOW_Y;
     } else {
@@ -844,21 +844,21 @@ class GraphSlider {
     // Get blended color based on Y position (matches blob's color logic)
     const segmentColor = this.getColorForY(y);
 
-    // Determine clip zone based on Y position
+    // Determine clip zone based on Y position (must match getColorForY boundaries)
     let clipY, clipHeight;
 
-    if (y < DANGER_HIGH_Y) {
-      // Danger high zone (glucose > 10)
+    if (y <= DANGER_HIGH_Y) {
+      // Danger high zone (glucose >= 10)
       clipY = 0;
-      clipHeight = DANGER_HIGH_Y;
+      clipHeight = DANGER_HIGH_Y + 1;
     } else if (y < WARNING_HIGH_Y) {
       // Warning high zone (glucose 9-10)
       clipY = DANGER_HIGH_Y;
       clipHeight = WARNING_HIGH_Y - DANGER_HIGH_Y;
-    } else if (y < WARNING_LOW_Y) {
+    } else if (y <= WARNING_LOW_Y) {
       // Safe zone (glucose 4.5-9)
       clipY = WARNING_HIGH_Y;
-      clipHeight = WARNING_LOW_Y - WARNING_HIGH_Y;
+      clipHeight = WARNING_LOW_Y - WARNING_HIGH_Y + 1;
     } else if (y < DANGER_LOW_Y) {
       // Warning low zone (glucose 4-4.5)
       clipY = WARNING_LOW_Y;
@@ -1153,10 +1153,19 @@ class GraphSlider {
    * Setup drag events for the slider
    */
   setupDragEvents() {
+    let dragOffsetX = 0;
+
     const handleStart = (e) => {
       e.preventDefault();
       this.isDragging = true;
       this.sliderDot.style.cursor = 'grabbing';
+
+      // Capture offset between finger and current dot position to prevent jump
+      const svgRect = this.svg.getBoundingClientRect();
+      const clientX = e.clientX || e.touches?.[0]?.clientX;
+      const svgX = ((clientX - svgRect.left) / svgRect.width) * 252;
+      const touchGraphX = svgX - this.panOffset;
+      dragOffsetX = touchGraphX - this.currentGraphX;
 
       // Stop any ongoing spring animation during drag
       if (this.dotSpring) {
@@ -1174,8 +1183,8 @@ class GraphSlider {
       // Convert screen coordinates to SVG viewport coordinates
       const svgX = ((clientX - svgRect.left) / svgRect.width) * 252;
 
-      // Convert viewport to graph coordinates (slider is in pan group)
-      const graphX = svgX - this.panOffset;
+      // Convert viewport to graph coordinates, subtract initial offset
+      const graphX = svgX - this.panOffset - dragOffsetX;
 
       // Immediate update during drag for responsive feel
       this.updateSliderPosition(graphX, true);

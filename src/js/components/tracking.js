@@ -541,7 +541,8 @@ class TrackingController {
     if (days <= 1) {
       // Show only sensor warning label and center connector
       if (this.sensorLabel) {
-        this.sensorLabel.textContent = 'senzor ističe za 1 dan';
+        const lang = localStorage.getItem('sweetie-lang') || 'en';
+        this.sensorLabel.textContent = lang === 'hr' ? 'senzor ističe za 1 dan' : 'sensor expires in 1 day';
       }
       if (this.brziLabel) this.brziLabel.style.opacity = '0';
       if (this.sporiLabel) this.sporiLabel.style.opacity = '0';
@@ -550,7 +551,8 @@ class TrackingController {
     } else {
       // Show all labels and connectors
       if (this.sensorLabel) {
-        this.sensorLabel.textContent = 'trajanje senzora';
+        const lang = localStorage.getItem('sweetie-lang') || 'en';
+        this.sensorLabel.textContent = lang === 'hr' ? 'trajanje senzora' : 'sensor duration';
       }
       if (this.brziLabel) this.brziLabel.style.opacity = '';
       if (this.sporiLabel) this.sporiLabel.style.opacity = '';

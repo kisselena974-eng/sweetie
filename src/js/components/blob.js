@@ -170,9 +170,7 @@ class GlucoseBlob {
     // Create the blob path (sharp edges, no blur)
     this.path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     this.path.setAttribute('fill', this.currentColor);
-    this.path.style.cssText = `
-      transition: fill var(--duration-medium, 210ms) var(--motion-effects, cubic-bezier(0.3, 0.0, 0.0, 1.0));
-    `;
+    this.path.style.cssText = ``;
     this.svg.appendChild(this.path);
 
     this.container.appendChild(this.svg);
@@ -415,8 +413,7 @@ class GlucoseBlob {
   }
 
   /**
-   * Calculate position based on trend direction
-   * The blob moves in the direction the arrow points
+   * Calculate position using free organic wandering
    * Supports manual dragging - continues from drag end position
    */
   updatePosition(time) {
@@ -435,90 +432,65 @@ class GlucoseBlob {
       return;
     }
 
-    const maxRadius = 0.18; // Smaller radius to stay away from UI elements
-
-    // Convert trend angle to radians (0° = up, clockwise)
-    // In screen coords: up = -Y, right = +X
-    const angleRad = (this.trendAngle - 90) * (Math.PI / 180);
-
-    // Direction vector from trend
-    let dirX = Math.cos(angleRad);
-    let dirY = Math.sin(angleRad);
+    const maxRadius = 0.18;
 
     // Use drag end position as base, or center if never dragged
     let baseX = this.dragEndPosX !== undefined ? this.dragEndPosX : centerX;
     let baseY = this.dragEndPosY !== undefined ? this.dragEndPosY : centerY;
 
-    // Handle smooth return from edge (like a little game!)
+    // Handle smooth return from edge
     const normalRadius = 0.35;
     if (this.edgeReturnEasing) {
       const elapsed = time - this.edgeReturnStart;
       const t = Math.min(1, elapsed / this.edgeReturnDuration);
-      // Smooth ease-out curve
       const easeT = 1 - Math.pow(1 - t, 3);
 
-      // Calculate clamped target base position (within normal radius)
       const edgeDx = this.edgeReturnStartX - centerX;
       const edgeDy = this.edgeReturnStartY - centerY;
       const edgeDist = Math.sqrt(edgeDx * edgeDx + edgeDy * edgeDy);
       const clampedBaseX = centerX + (edgeDx / edgeDist) * normalRadius;
       const clampedBaseY = centerY + (edgeDy / edgeDist) * normalRadius;
 
-      // Interpolate base position from edge toward clamped position
       baseX = this.edgeReturnStartX + (clampedBaseX - this.edgeReturnStartX) * easeT;
       baseY = this.edgeReturnStartY + (clampedBaseY - this.edgeReturnStartY) * easeT;
 
-      // Update stored drag end position so it continues smoothly after easing
       this.dragEndPosX = baseX;
       this.dragEndPosY = baseY;
 
-      // End easing when complete
       if (t >= 1) {
         this.edgeReturnEasing = false;
       }
     }
 
-    // Check if base position is far from center (e.g., after dragging to edge)
+    // Slowly drift base back toward center
     const baseDx = baseX - centerX;
     const baseDy = baseY - centerY;
     const baseDist = Math.sqrt(baseDx * baseDx + baseDy * baseDy);
-    const returnThreshold = 0.2; // Start reversing direction when beyond this
-
-    if (baseDist > returnThreshold) {
-      // Direction from center to base (outward from blob's position)
-      const outwardX = baseDx / baseDist;
-      const outwardY = baseDy / baseDist;
-
-      // Check if trend direction points outward (would push blob further from center)
-      const dotProduct = dirX * outwardX + dirY * outwardY;
-
-      if (dotProduct > 0) {
-        // Reverse direction to push toward center instead
-        dirX = -dirX;
-        dirY = -dirY;
+    if (baseDist > 0.01) {
+      const pullStrength = 0.0003;
+      baseX -= baseDx * pullStrength;
+      baseY -= baseDy * pullStrength;
+      if (this.dragEndPosX !== undefined) {
+        this.dragEndPosX = baseX;
+        this.dragEndPosY = baseY;
       }
     }
 
-    // Use adjusted time for oscillation (starts from 0 after unlocking/drag end)
-    const oscillationTime = time - this.oscillationPhaseOffset;
+    // Use adjusted time for movement
+    const t2 = (time - this.oscillationPhaseOffset) * this.options.movementSpeed;
 
-    // Oscillate along the trend direction using sine wave (slower)
-    const oscillation = Math.sin(oscillationTime * this.options.movementSpeed * 0.8) * maxRadius;
+    // Free 2D wandering using noise (different seeds for X and Y)
+    const noiseX = this.noise.noise2D(t2 * 0.7, 100) * maxRadius;
+    const noiseY = this.noise.noise2D(200, t2 * 0.7) * maxRadius;
 
-    // Add subtle perpendicular wobble for organic feel
-    const wobble = this.noise.noise2D(time * this.options.movementSpeed * 0.5, 0) * 0.05;
-    const perpX = -dirY * wobble;
-    const perpY = dirX * wobble;
-
-    // Calculate target position along trend direction from base position
-    let targetX = baseX + dirX * oscillation + perpX;
-    let targetY = baseY + dirY * oscillation + perpY;
+    let targetX = baseX + noiseX;
+    let targetY = baseY + noiseY;
 
     // Ensure target stays within circular watch bounds
     const dx = targetX - centerX;
     const dy = targetY - centerY;
     const dist = Math.sqrt(dx * dx + dy * dy);
-    const absoluteMaxRadius = 0.48; // Same as drag limit - no jump
+    const absoluteMaxRadius = 0.48;
 
     if (dist > absoluteMaxRadius) {
       targetX = centerX + (dx / dist) * absoluteMaxRadius;
@@ -529,13 +501,11 @@ class GlucoseBlob {
     if (this.centerLockEaseOut) {
       const elapsed = time - this.centerLockEaseStart;
       const t = Math.min(1, elapsed / this.centerLockEaseDuration);
-      // Smooth ease-out curve (cubic)
       const easeT = 1 - Math.pow(1 - t, 3);
 
       this.posX = centerX + (targetX - centerX) * easeT;
       this.posY = centerY + (targetY - centerY) * easeT;
 
-      // End ease out when complete
       if (t >= 1) {
         this.centerLockEaseOut = false;
       }

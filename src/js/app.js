@@ -951,10 +951,21 @@ function initAssistantMic() {
 
   function getRandomQuestion() {
     const data = getSpeechData();
+    const glucose = glucoseBlob ? glucoseBlob.glucoseValue : 6.5;
+
+    // Filter out questions that don't match current glucose state
+    // Index 1 = "sugar is high" question, Index 2 = "sugar is low" question
+    let validIndices = [];
+    for (let i = 0; i < data.length; i++) {
+      if (i === 1 && glucose <= 9.0) continue;  // skip "high" question when not high
+      if (i === 2 && glucose >= 4.5) continue;   // skip "low" question when not low
+      validIndices.push(i);
+    }
+
     let index;
     do {
-      index = Math.floor(Math.random() * data.length);
-    } while (index === lastQuestionIndex && data.length > 1);
+      index = validIndices[Math.floor(Math.random() * validIndices.length)];
+    } while (index === lastQuestionIndex && validIndices.length > 1);
     lastQuestionIndex = index;
     currentCtx = data[index].ctx;
     currentAnswer = data[index].ans;

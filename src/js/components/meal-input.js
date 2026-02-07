@@ -395,6 +395,7 @@ class MealInputController {
     this.options.classList.remove('open');
     this.answerEl.classList.remove('visible');
     if (this.favoritesOverlay) this.favoritesOverlay.classList.remove('open');
+    if (this.favoritesBtn) this.favoritesBtn.style.display = '';
   }
 
   toggleFavorites() {
@@ -449,6 +450,9 @@ class MealInputController {
   startListening() {
     if (this.isListening) return;
     this.isListening = true;
+
+    // Hide favorites button during listening
+    if (this.favoritesBtn) this.favoritesBtn.style.display = 'none';
 
     this.content.classList.add('listening');
     this.speechEl.textContent = '';
