@@ -362,8 +362,8 @@ body {
 
 .about-content {
   background: rgba(20, 20, 20, 0.5);
-  backdrop-filter: blur(0px);
-  -webkit-backdrop-filter: blur(0px);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 20px;
   padding: 40px;
@@ -371,15 +371,11 @@ body {
   width: 90%;
   position: relative;
   transform: scale(0.9) translateY(20px);
-  transition: transform 0.3s cubic-bezier(0.2, 0, 0, 1),
-              backdrop-filter 0.3s cubic-bezier(0.2, 0, 0, 1),
-              -webkit-backdrop-filter 0.3s cubic-bezier(0.2, 0, 0, 1);
+  transition: transform 0.3s cubic-bezier(0.2, 0, 0, 1);
 }
 
 .about-overlay.active .about-content {
   transform: scale(1) translateY(0);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
 }
 
 .about-close-btn {
