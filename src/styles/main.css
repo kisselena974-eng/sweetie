@@ -143,15 +143,14 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding-top: 40px;
-  padding-bottom: 20px;
+  padding-top: 60px;
 }
 
 /* Footer */
 .landing-footer {
   display: flex;
   justify-content: space-between;
-  align-items: flex-end;
+  align-items: flex-start;
 }
 
 /* Legend - subdued, informational */
