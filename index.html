@@ -108,10 +108,22 @@
 
         <!-- Context menu for adding context (meal, insulin, activity, med) -->
         <div class="context-menu">
-          <button class="context-btn" data-action="meal">Obrok</button>
-          <button class="context-btn" data-action="insulin">Inzulin</button>
-          <button class="context-btn" data-action="activity">Aktivnost</button>
-          <button class="context-btn" data-action="med">Med</button>
+          <button class="context-btn" data-action="meal">
+            <span data-lang="hr">Obrok</span>
+            <span data-lang="en" style="display: none;">Meal</span>
+          </button>
+          <button class="context-btn" data-action="insulin">
+            <span data-lang="hr">Inzulin</span>
+            <span data-lang="en" style="display: none;">Insulin</span>
+          </button>
+          <button class="context-btn" data-action="activity">
+            <span data-lang="hr">Aktivnost</span>
+            <span data-lang="en" style="display: none;">Activity</span>
+          </button>
+          <button class="context-btn" data-action="med">
+            <span data-lang="hr">Med</span>
+            <span data-lang="en" style="display: none;">Honey</span>
+          </button>
         </div>
 
         <!-- Glucose graph (shown when blob is clicked) -->
@@ -498,13 +510,15 @@
         <!-- Alert tooltips (shown when info mode is ON and alerts active) -->
         <div class="tracking-tooltips">
           <div class="tracking-tooltip tracking-tooltip-insulin">
-            <span>uzeti cjelodnevni inzulin</span>
+            <span data-lang="hr">uzeti cjelodnevni inzulin</span>
+            <span data-lang="en" style="display: none;">take daily insulin</span>
             <svg class="tracking-tooltip-line" viewBox="0 0 50 50">
               <line x1="25" y1="50" x2="45" y2="5" stroke-dasharray="2,2"/>
             </svg>
           </div>
           <div class="tracking-tooltip tracking-tooltip-sensor">
-            <span>senzor ističe za 1 dan</span>
+            <span data-lang="hr">senzor ističe za 1 dan</span>
+            <span data-lang="en" style="display: none;">sensor expires in 1 day</span>
             <svg class="tracking-tooltip-line" viewBox="0 0 10 40">
               <line x1="5" y1="40" x2="5" y2="5" stroke-dasharray="2,2"/>
             </svg>

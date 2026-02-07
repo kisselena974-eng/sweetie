@@ -1614,18 +1614,33 @@ let currentLang = 'en';
 
 function setLanguage(lang) {
   currentLang = lang;
-  
+
   // Update language button states
   document.querySelectorAll('.lang-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.lang === lang);
   });
-  
+
   // Show/hide text based on language
   document.querySelectorAll('[data-lang]').forEach(el => {
     if (el.classList.contains('lang-btn')) return; // Skip buttons
     el.style.display = el.dataset.lang === lang ? '' : 'none';
   });
-  
+
+  // Update tracking SVG labels
+  const trackingLabels = {
+    hr: { brzi: 'brzi', senzor: 'trajanje senzora', spori: 'dnevni' },
+    en: { brzi: 'fast', senzor: 'sensor duration', spori: 'daily' }
+  };
+  const labels = trackingLabels[lang] || trackingLabels.en;
+
+  const brziLabel = document.querySelector('.tracking-label-brzi textPath');
+  const senzorLabel = document.querySelector('.tracking-label-senzor textPath');
+  const sporiLabel = document.querySelector('.tracking-label-spori textPath');
+
+  if (brziLabel) brziLabel.textContent = labels.brzi;
+  if (senzorLabel) senzorLabel.textContent = labels.senzor;
+  if (sporiLabel) sporiLabel.textContent = labels.spori;
+
   // Store preference
   localStorage.setItem('sweetie-lang', lang);
 }
