@@ -150,8 +150,7 @@ body {
 .landing-footer {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  margin-top: -40px;
+  align-items: flex-end;
 }
 
 /* Legend - subdued, informational */
@@ -271,7 +270,7 @@ body {
   .landing-footer {
     flex-direction: row;
     justify-content: space-between;
-    align-items: flex-start;
+    align-items: flex-end;
   }
 
   .landing-legend {
@@ -310,7 +309,7 @@ body {
   .landing-footer {
     flex-direction: row;
     justify-content: space-between;
-    align-items: flex-start;
+    align-items: flex-end;
   }
 
   .landing-legend {
