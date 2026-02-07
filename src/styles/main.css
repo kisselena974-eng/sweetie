@@ -286,7 +286,7 @@ body {
 /* Responsive - Mobile */
 @media (max-width: 600px) {
   .landing-page {
-    padding: 24px 20px 32px 20px;
+    padding: 20px 20px 24px 20px;
   }
 
   .landing-subtitle {
@@ -320,12 +320,20 @@ body {
   .landing-slider {
     align-items: flex-end;
   }
+
+  .watch-container {
+    transform: translateY(10px);
+  }
 }
 
 /* Very small screens */
 @media (max-width: 400px) {
   .landing-page {
-    padding: 16px 12px 28px 12px;
+    padding: 16px 12px 24px 12px;
+  }
+
+  .watch-container {
+    transform: translateY(0);
   }
 
   .legend-list li {
