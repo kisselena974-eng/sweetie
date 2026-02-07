@@ -186,22 +186,24 @@ body {
 .slider-controls {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  align-items: flex-end;
   gap: 0;
 }
 
 .slider-controls #glucose-slider {
   width: 100px;
   transform: rotate(-90deg);
-  margin: 50px 0;
+  transform-origin: center center;
+  margin: 70px -35px;
 }
 
 .slider-controls .glucose-value {
   font-size: 12pt;
   font-weight: 500;
   color: #7ED321;
-  text-align: center;
+  text-align: right;
   line-height: 14pt;
+  margin-right: 15px;
 }
 
 .slider-controls .trend-arrow-btn {
@@ -215,6 +217,7 @@ body {
   align-items: center;
   justify-content: center;
   transition: background 0.2s ease, transform 0.2s ease;
+  margin-right: 15px;
 }
 
 .slider-controls .trend-arrow-btn:hover {
