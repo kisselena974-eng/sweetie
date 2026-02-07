@@ -173,8 +173,7 @@ body {
 .landing-slider {
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
-  gap: 8px;
+  align-items: center;
 }
 
 .slider-label {
@@ -187,23 +186,21 @@ body {
 .slider-controls {
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
+  align-items: center;
   gap: 8px;
 }
 
 .slider-controls #glucose-slider {
   width: 100px;
   transform: rotate(-90deg);
-  transform-origin: right center;
-  margin-right: 40px;
+  margin: 40px 0;
 }
 
 .slider-controls .glucose-value {
   font-size: 12pt;
   font-weight: 500;
   color: #7ED321;
-  min-width: 35px;
-  text-align: right;
+  text-align: center;
   line-height: 14pt;
 }
 
