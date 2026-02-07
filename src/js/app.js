@@ -1641,13 +1641,15 @@ function setLanguage(lang) {
   if (senzorLabel) senzorLabel.textContent = labels.senzor;
   if (sporiLabel) sporiLabel.textContent = labels.spori;
 
+  // Store preference (before graph slider update which reads it)
+  localStorage.setItem('sweetie-lang', lang);
+
   // Refresh graph slider fuzzy time if visible
   if (window.graphSlider) {
-    window.graphSlider.updateTimeLabel(window.graphSlider.currentGraphX);
+    const gx = window.graphSlider.currentGraphX;
+    const y = window.graphSlider.getYForX(gx);
+    window.graphSlider.updateTimeLabel(gx, y, gx);
   }
-
-  // Store preference
-  localStorage.setItem('sweetie-lang', lang);
 }
 
 // Initialize language switching
