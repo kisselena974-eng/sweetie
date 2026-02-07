@@ -166,6 +166,7 @@ body {
   font-weight: 400;
   color: #BEBCBA;
   line-height: 14pt;
+  white-space: nowrap;
 }
 
 /* Glucose Slider */
@@ -286,7 +287,6 @@ body {
   .landing-legend {
     align-items: flex-start;
     text-align: left;
-    max-width: 50%;
   }
 
   .landing-slider {
