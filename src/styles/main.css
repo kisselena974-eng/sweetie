@@ -349,14 +349,10 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  opacity: 0;
   visibility: hidden;
-  transition: opacity 0.3s cubic-bezier(0.2, 0, 0, 1),
-              visibility 0.3s cubic-bezier(0.2, 0, 0, 1);
 }
 
 .about-overlay.active {
-  opacity: 1;
   visibility: visible;
 }
 
@@ -371,13 +367,7 @@ body {
   max-height: 80vh;
   width: 90%;
   position: relative;
-  transform: scale(0.9) translateY(20px);
-  transition: transform 0.3s cubic-bezier(0.2, 0, 0, 1);
   overflow-y: auto;
-}
-
-.about-overlay.active .about-content {
-  transform: scale(1) translateY(0);
 }
 
 .about-close-btn {
