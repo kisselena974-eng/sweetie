@@ -271,7 +271,7 @@ body {
   .landing-footer {
     flex-direction: row;
     justify-content: space-between;
-    align-items: flex-end;
+    align-items: flex-start;
   }
 
   .landing-legend {
@@ -310,7 +310,7 @@ body {
   .landing-footer {
     flex-direction: row;
     justify-content: space-between;
-    align-items: flex-end;
+    align-items: flex-start;
   }
 
   .landing-legend {
