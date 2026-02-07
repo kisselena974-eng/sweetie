@@ -205,7 +205,6 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 0;
-  margin-right: -34px;
 }
 
 .slider-controls #glucose-slider {
