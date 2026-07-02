@@ -498,14 +498,10 @@ function updateGlucoseTextColor(color) {
     graphLine.style.stroke = color;
   }
   if (graphText) {
-    graphText.style.fill = color;
+    graphText.style.fill = '#000000';
   }
 
-  // Update debug trend arrow color too
-  const trendArrowPath = document.querySelector('.trend-arrow-btn path');
-  if (trendArrowPath) {
-    trendArrowPath.style.fill = color;
-  }
+  // Trend arrow color is fixed (#2F5079), not glucose-based
 }
 
 /**
@@ -1301,11 +1297,10 @@ function initDebugSlider() {
 
     // Update slider thumb and value display color (includes warning yellow)
     const color = glucoseBlob ? glucoseBlob.getColor() : getColorForGlucose(value);
-    slider.style.setProperty('--thumb-color', color);
     valueDisplay.style.color = color;
 
-    // Update thumb color via CSS variable
-    document.documentElement.style.setProperty('--slider-thumb-color', color);
+    // Slider thumb color is fixed (#2F5079)
+    document.documentElement.style.setProperty('--slider-thumb-color', '#2F5079');
   });
 
   // Generate new graph when slider is released (using current trend)
@@ -1399,7 +1394,7 @@ function randomizeInitialValues() {
   // Update debug slider colors
   const color = getColorForGlucose(parseFloat(randomGlucose));
   if (valueDisplay) valueDisplay.style.color = color;
-  document.documentElement.style.setProperty('--slider-thumb-color', color);
+  document.documentElement.style.setProperty('--slider-thumb-color', '#2F5079');
 
   // Update trend arrow button rotation
   const trendArrowBtn = document.querySelector('.trend-arrow-btn svg');
@@ -1549,7 +1544,7 @@ document.addEventListener('DOMContentLoaded', () => {
       // Debug slider
       const valueDisplay = document.querySelector('.glucose-value');
       if (valueDisplay) valueDisplay.style.color = color;
-      document.documentElement.style.setProperty('--slider-thumb-color', color);
+      document.documentElement.style.setProperty('--slider-thumb-color', '#2F5079');
 
       // Glucose text and arrow on watch face
       const glucoseText = document.querySelector('.nav-circle-base .nav-glucose');

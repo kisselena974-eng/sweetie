@@ -17,7 +17,7 @@
   --accent-color: #7ED321;          /* Current accent color (updated by JS based on glucose) */
 
   /* === COLORS - BASE === */
-  --color-background: #000000;      /* Main background - ALWAYS BLACK for OLED */
+  --color-background: #A6CAF5;      /* Main background */
   --color-surface: #1C1C1E;         /* Cards, elevated surfaces */
   --color-surface-container: #2C2C2E;
   --color-text-color: #E6E1E5;      /* Primary text (on-surface) */

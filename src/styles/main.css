@@ -5,13 +5,14 @@
 }
 
 html {
-  background: #000;
+  background: #A6CAF5;
 }
 
 body {
   background: var(--color-background);
   min-height: 100vh;
-  font-family: 'Roboto Flex', sans-serif;
+  font-family: 'Google Sans Flex', sans-serif;
+  zoom: 0.8;
   /* Prevent pull-to-refresh and overscroll on mobile */
   overscroll-behavior: none;
   -webkit-overflow-scrolling: touch;
@@ -19,6 +20,20 @@ body {
   position: fixed;
   width: 100%;
   height: 100%;
+}
+
+/* Typography sweep for the page content around the watch (NOT inside watch display). */
+.landing-header :is(h1, h2, h3, h4, h5, h6, p, span, a, li, button, label, small, strong, em, input, textarea, select, div),
+.landing-footer :is(h1, h2, h3, h4, h5, h6, p, span, a, li, button, label, small, strong, em, input, textarea, select, div),
+.about-overlay :is(h1, h2, h3, h4, h5, h6, p, span, a, li, button, label, small, strong, em, input, textarea, select, div) {
+  color: #2F5079 !important;
+  font-family: 'Google Sans Flex', sans-serif !important;
+}
+
+.landing-header,
+.landing-footer,
+.about-overlay {
+  color: #2F5079;
 }
 
 /* ===========================================
@@ -179,7 +194,7 @@ body {
 }
 
 .legend-list li {
-  font-size: 10pt;
+  font-size: 11pt;
   font-weight: 400;
   color: #777777;
   line-height: 14pt;
@@ -333,8 +348,8 @@ body {
   }
 
   .legend-list li {
-    font-size: 9pt;
-    line-height: 1.3;
+    font-size: 11pt;
+    line-height: 14pt;
   }
 }
 
@@ -351,8 +366,10 @@ body {
   background: transparent;
   z-index: 1000;
   display: flex;
-  justify-content: center;
+  justify-content: flex-end;
   align-items: center;
+  padding-right: 60px;
+  box-sizing: border-box;
   visibility: hidden;
 }
 
@@ -469,15 +486,15 @@ body {
 /* Watch hardware mockup (decorative frame) */
 .watch-mockup {
   position: absolute;
-  width: var(--mockup-width);
-  height: var(--mockup-height);
+  width: 445px;
+  height: auto;
   pointer-events: none;
   z-index: 0;
   filter: brightness(0.7);
   /* Center mockup on display */
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%) translate(var(--mockup-offset-x, 0px), var(--mockup-offset-y, 0px));
+  transform: translate(-50%, -50%) translate(calc(var(--mockup-offset-x, 0px) + 3px), calc(var(--mockup-offset-y, 0px) + 16px));
 }
 
 /* Glass glow overlay (Material Design radial highlights) */
@@ -526,7 +543,7 @@ body {
 .watch-display {
   width: var(--display-size);
   height: var(--display-size);
-  background: var(--color-background);
+  background: #000000;
   border-radius: 50%;
   overflow: hidden;
   position: relative;
@@ -548,7 +565,7 @@ body {
   flex-direction: column;
   align-items: center;
   color: var(--color-text-color);
-  background: var(--color-background);
+  background: #000000;
   /* Isolation for proper blend mode compositing */
   isolation: isolate;
 
@@ -797,7 +814,7 @@ body {
   justify-content: center;
   z-index: 10;
   /* Black outline creates visual margin from other elements */
-  box-shadow: 0 0 0 6px var(--color-background);
+  box-shadow: 0 0 0 6px #000000;
   /* No CSS transition - spring animation handles position and bg */
   -webkit-tap-highlight-color: transparent;
 }
@@ -846,7 +863,7 @@ body {
   border-radius: 20px;
   background: var(--color-surface-container);
   border: none;
-  color: var(--color-text-color);
+  color: #ffffff !important;
   font-family: 'Roboto Flex', sans-serif;
   font-size: 14px;
   font-weight: 500;
@@ -1032,9 +1049,35 @@ body {
   align-items: center;
   justify-content: center;
   z-index: 10;
-  box-shadow: 0 0 0 6px var(--color-background);
+  box-shadow: 0 0 0 6px #000000;
   transition: background-color var(--duration-short) var(--motion-effects);
   -webkit-tap-highlight-color: transparent;
+}
+
+/* Keep clock/watch SVG text and controls on their original palette */
+.nav-time,
+.nav-time-knockout,
+.fixed-time-text,
+.fixed-time-text-knockout,
+.tracking-label,
+.tracking-alert-text,
+.tracking-tooltip span {
+  color: inherit !important;
+}
+
+.nav-time,
+.nav-time-knockout,
+.fixed-time-text,
+.fixed-time-text-knockout,
+.tracking-label,
+.tracking-alert-text,
+.tracking-tooltip span,
+.nav-glucose,
+.nav-glucose-knockout,
+.fixed-glucose-text,
+.tracking-glucose-text,
+.assistant-glucose-text {
+  font-family: 'Roboto Flex', sans-serif !important;
 }
 
 .tracking-info-btn.active {
@@ -1243,7 +1286,7 @@ body {
   font-family: 'Roboto Flex', sans-serif;
   font-size: 13px;
   font-weight: 400;
-  color: #707070;
+  color: #ffffff;
   margin-top: 10px;
   letter-spacing: 0.3px;
   transition: opacity var(--duration-medium) var(--motion-effects);
@@ -1409,7 +1452,7 @@ body {
   height: 100%;
   pointer-events: none;
   z-index: 5;
-  background: var(--color-background);
+  background: #000000;
   opacity: 0;
   transition: opacity var(--duration-medium) var(--motion-effects);
   display: flex;
@@ -1507,7 +1550,7 @@ body {
   height: 100%;
   pointer-events: none;
   z-index: 5;
-  background: var(--color-background);
+  background: #000000;
   opacity: 0;
   transition: opacity var(--duration-medium) var(--motion-effects);
   display: flex;
@@ -1608,7 +1651,7 @@ body {
   height: 100%;
   pointer-events: none;
   z-index: 5;
-  background: var(--color-background);
+  background: #000000;
   opacity: 0;
   transition: opacity var(--duration-medium) var(--motion-effects);
 }
@@ -1797,7 +1840,7 @@ body {
   height: 100%;
   pointer-events: none;
   z-index: 5;
-  background: var(--color-background);
+  background: #000000;
   opacity: 0;
   transition: opacity var(--duration-medium) var(--motion-effects);
 }
@@ -1883,7 +1926,7 @@ body {
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: var(--slider-thumb-color, var(--color-accent-good));
+  background: var(--slider-thumb-color, #2F5079);
   cursor: pointer;
   border: none;
   transition: background-color var(--duration-medium) var(--motion-effects);
@@ -1893,7 +1936,7 @@ body {
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: var(--slider-thumb-color, var(--color-accent-good));
+  background: var(--slider-thumb-color, #2F5079);
   cursor: pointer;
   border: none;
   transition: background-color var(--duration-medium) var(--motion-effects);
@@ -2047,14 +2090,14 @@ body {
 
 /* Time label background (cuts the dashed line) */
 .graph-time-bg {
-  fill: var(--color-background);
+  fill: #000000;
 }
 
 /* Time label (can be multi-line) */
 .graph-now-text {
   font-family: 'Roboto Flex', sans-serif;
   font-size: 11px;
-  fill: var(--color-accent-good);
+  fill: #000000;
   text-anchor: middle;
   pointer-events: none;
   transition: fill var(--duration-medium) var(--motion-effects);
@@ -2231,7 +2274,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 0 0 6px var(--color-background);
+  box-shadow: 0 0 0 6px #000000;
   transition:
     transform var(--duration-short) var(--motion-spatial),
     background-color var(--duration-short) var(--motion-effects);
@@ -2302,7 +2345,7 @@ body {
   transform: none;
   opacity: 0;
   z-index: 20; /* Above context menu and home screen */
-  background: var(--color-background);
+  background: #000000;
   transition: opacity 0.15s ease-out;
 }
 
@@ -2320,7 +2363,7 @@ body {
   transform: none;
   opacity: 0;
   z-index: 20;
-  background: var(--color-background);
+  background: #000000;
   transition: opacity 0.15s ease-out;
 }
 

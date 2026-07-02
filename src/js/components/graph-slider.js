@@ -791,7 +791,7 @@ class GraphSlider {
     // Update slider elements with provided color
     this.sliderDot.style.fill = color;
     this.sliderLine.style.stroke = color;
-    this.timeLabel.style.fill = color;
+    this.timeLabel.style.fill = '#ffffff';
 
     // Update highlight color
     if (this.graphLineHighlight) {
@@ -875,7 +875,7 @@ class GraphSlider {
     // Update slider elements with zone color
     this.sliderDot.style.fill = segmentColor;
     this.sliderLine.style.stroke = segmentColor;
-    this.timeLabel.style.fill = segmentColor;
+    this.timeLabel.style.fill = '#ffffff';
 
     // Update highlight color
     if (this.graphLineHighlight) {
