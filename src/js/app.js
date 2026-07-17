@@ -501,7 +501,7 @@ function updateGlucoseTextColor(color) {
     graphText.style.fill = '#000000';
   }
 
-  // Trend arrow color is fixed (#2F5079), not glucose-based
+  // Trend arrow color is fixed (#938181), not glucose-based
 }
 
 /**
@@ -1299,8 +1299,8 @@ function initDebugSlider() {
     const color = glucoseBlob ? glucoseBlob.getColor() : getColorForGlucose(value);
     valueDisplay.style.color = color;
 
-    // Slider thumb color is fixed (#2F5079)
-    document.documentElement.style.setProperty('--slider-thumb-color', '#2F5079');
+    // Slider thumb color is fixed (#938181)
+    document.documentElement.style.setProperty('--slider-thumb-color', '#938181');
   });
 
   // Generate new graph when slider is released (using current trend)
@@ -1394,7 +1394,7 @@ function randomizeInitialValues() {
   // Update debug slider colors
   const color = getColorForGlucose(parseFloat(randomGlucose));
   if (valueDisplay) valueDisplay.style.color = color;
-  document.documentElement.style.setProperty('--slider-thumb-color', '#2F5079');
+  document.documentElement.style.setProperty('--slider-thumb-color', '#938181');
 
   // Update trend arrow button rotation
   const trendArrowBtn = document.querySelector('.trend-arrow-btn svg');
@@ -1544,7 +1544,7 @@ document.addEventListener('DOMContentLoaded', () => {
       // Debug slider
       const valueDisplay = document.querySelector('.glucose-value');
       if (valueDisplay) valueDisplay.style.color = color;
-      document.documentElement.style.setProperty('--slider-thumb-color', '#2F5079');
+      document.documentElement.style.setProperty('--slider-thumb-color', '#938181');
 
       // Glucose text and arrow on watch face
       const glucoseText = document.querySelector('.nav-circle-base .nav-glucose');

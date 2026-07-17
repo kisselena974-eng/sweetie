@@ -1926,7 +1926,7 @@ body {
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: var(--slider-thumb-color, #2F5079);
+  background: var(--slider-thumb-color, #938181);
   cursor: pointer;
   border: none;
   transition: background-color var(--duration-medium) var(--motion-effects);
@@ -1936,7 +1936,7 @@ body {
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: var(--slider-thumb-color, #2F5079);
+  background: var(--slider-thumb-color, #938181);
   cursor: pointer;
   border: none;
   transition: background-color var(--duration-medium) var(--motion-effects);
