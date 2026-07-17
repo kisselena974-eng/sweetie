@@ -5,7 +5,7 @@
 }
 
 html {
-  background: #A6CAF5;
+  background: #F6F0F0;
 }
 
 body {
@@ -26,14 +26,14 @@ body {
 .landing-header :is(h1, h2, h3, h4, h5, h6, p, span, a, li, button, label, small, strong, em, input, textarea, select, div),
 .landing-footer :is(h1, h2, h3, h4, h5, h6, p, span, a, li, button, label, small, strong, em, input, textarea, select, div),
 .about-overlay :is(h1, h2, h3, h4, h5, h6, p, span, a, li, button, label, small, strong, em, input, textarea, select, div) {
-  color: #2F5079 !important;
+  color: #938181 !important;
   font-family: 'Google Sans Flex', sans-serif !important;
 }
 
 .landing-header,
 .landing-footer,
 .about-overlay {
-  color: #2F5079;
+  color: #938181;
 }
 
 /* ===========================================
